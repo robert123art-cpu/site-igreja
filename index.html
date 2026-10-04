@@ -67,7 +67,7 @@ async function requireAdmin(){
 }
 async function loadServerEntries(){
  try{
-  const sb=await requireAdmin();
+  const sb=await getSupabase();
   const [a,e,b]=await Promise.all([
    sb.from('announcements').select('id,title,content,published_at').order('published_at',{ascending:false}),
    sb.from('events').select('id,title,description,event_date,location').order('event_date',{ascending:true}),
