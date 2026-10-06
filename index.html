@@ -6,265 +6,58 @@
 <title>日本クリスチャンコングレゲーション</title>
 <style>
 :root{--a:#244b5a;--g:#f7f7f5;--b:#fff;--m:#666}
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;background:var(--g);color:#222;line-height:1.6}
-header{background:#fff;border-bottom:1px solid #e5e5e5;position:sticky;top:0}.nav{max-width:1050px;margin:auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:800;color:var(--a)}.brand small{display:block;font-size:11px;color:var(--m);font-weight:500}
-button{border:1px solid #ddd;background:#fff;border-radius:20px;padding:7px 11px;margin-left:4px}button.active{background:var(--a);color:#fff}
-main{max-width:1050px;margin:auto}.hero{text-align:center;padding:58px 18px 44px;background:linear-gradient(#fff,var(--g))}.hero h1{font-size:clamp(30px,8vw,50px);margin:0;color:var(--a)}.hero .jp{font-size:clamp(22px,5vw,34px);margin:8px 0 16px}.hero p{max-width:650px;margin:0 auto 24px;color:var(--m)}.btn{display:inline-block;background:var(--a);color:#fff;padding:12px 20px;border-radius:9px;text-decoration:none;font-weight:700}
-.section{padding:28px 18px}.section h2{color:var(--a);font-size:25px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:var(--b);border:1px solid #e5e5e5;border-radius:14px;padding:20px;box-shadow:0 3px 12px #00000008}.card h3{margin:0 0 8px;color:var(--a)}.card p{margin:0;color:var(--m)}.notice{border-left:4px solid #d7a84b}footer{margin-top:30px;background:var(--a);color:#fff;text-align:center;padding:28px 18px}footer p{margin:4px 0}
-@media(max-width:720px){.grid{grid-template-columns:1fr}.brand{max-width:72%}}
-html{scroll-behavior:smooth}.card-link{display:block;text-decoration:none;color:inherit;cursor:pointer}.card-link:active{transform:scale(.99)}.page-panel{display:none}.page-panel.active{display:block}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.back{border:0;background:var(--a);color:#fff;border-radius:9px;padding:9px 14px;font-weight:700;cursor:pointer}.editbar{position:fixed;right:18px;bottom:18px;z-index:20;display:flex;gap:8px;align-items:center;background:#fff;padding:10px;border:1px solid #ddd;border-radius:12px;box-shadow:0 5px 20px #0002}.editbar button{margin:0;border-radius:9px;cursor:pointer;font-weight:700}.edit-on{background:#d7a84b!important;color:#111!important}.editable.editing{outline:2px dashed #d7a84b;outline-offset:3px;background:#fffdf5}.save-msg{font-size:12px;color:#555}
-.item-box{background:#fff;border:1px solid #ddd;border-radius:14px;padding:18px;margin-top:14px}.admin-title{display:flex;justify-content:space-between;align-items:center;gap:10px}.admin-title h2{margin:0;color:var(--a)}.admin-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.admin-form input,.admin-form textarea,.admin-form select{width:100%;padding:11px;border:1px solid #ccd5db;border-radius:8px;font:inherit}.admin-form textarea{min-height:90px;resize:vertical}.admin-form .full{grid-column:1/-1}.add-btn{background:var(--a);color:#fff;border:0;border-radius:9px;padding:11px 16px;font-weight:700;cursor:pointer}.entry{border:1px solid #e1e1e1;border-radius:10px;padding:12px;margin-top:10px;background:#fafafa}.entry h3{margin:0;color:var(--a)}.entry p{margin:5px 0;color:#555;white-space:pre-wrap}.entry small{color:#888}.delete-btn{float:right;border:0;background:#b94a48;color:#fff;border-radius:7px;padding:5px 9px;cursor:pointer}.empty{color:#777;font-style:italic}@media(max-width:720px){.admin-form{grid-template-columns:1fr}}
-
-.auth-box{max-width:520px;margin:18px auto 0;background:#fff;border:1px solid #ddd;border-radius:14px;padding:20px;box-shadow:0 3px 12px #00000008}.auth-box h3{margin:0 0 6px;color:var(--a)}.auth-form{display:grid;gap:10px}.auth-form input{width:100%;padding:11px;border:1px solid #ccd5db;border-radius:8px;font:inherit}.auth-actions{display:flex;gap:8px;flex-wrap:wrap}.auth-actions button{margin:0;border-radius:9px;cursor:pointer;font-weight:700}.auth-primary{background:var(--a);color:#fff;border:0!important}.auth-msg{font-size:13px;color:#555;min-height:20px}.hidden{display:none!important}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;background:var(--g);color:#222;line-height:1.6}
+header{background:#fff;border-bottom:1px solid #e5e5e5;position:sticky;top:0;z-index:50}.nav{max-width:1050px;margin:auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:800;color:var(--a)}.brand small{display:block;font-size:11px;color:var(--m);font-weight:500}
+button{border:1px solid #ddd;background:#fff;border-radius:9px;padding:9px 12px;font:inherit;cursor:pointer}button:active{transform:scale(.98)}button.active{background:var(--a);color:#fff}.lang-buttons button{border-radius:20px;margin-left:4px}
+main{max-width:1050px;margin:auto}.hero{text-align:center;padding:58px 18px 44px;background:linear-gradient(#fff,var(--g))}.hero h1{font-size:clamp(30px,8vw,50px);margin:0;color:var(--a)}.hero .jp{font-size:clamp(22px,5vw,34px);margin:8px 0 16px}.hero p{max-width:650px;margin:0 auto 24px;color:var(--m)}.btn{display:inline-block;background:var(--a);color:#fff;padding:12px 20px;border-radius:9px;text-decoration:none;font-weight:700;border:0}
+.section{padding:28px 18px}.section h2{color:var(--a);font-size:25px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:var(--b);border:1px solid #e5e5e5;border-radius:14px;padding:20px;box-shadow:0 3px 12px #00000008}.card h3{margin:0 0 8px;color:var(--a)}.card p{margin:0;color:var(--m)}.notice{border-left:4px solid #d7a84b}.card-link{text-align:left;width:100%}.page-panel{display:none}.page-panel.active{display:block}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.back{background:var(--a);color:#fff;border:0;font-weight:700}footer{margin-top:30px;background:var(--a);color:#fff;text-align:center;padding:28px 18px}footer p{margin:4px 0}
+.auth-box,.item-box{max-width:650px;margin:18px auto 0;background:#fff;border:1px solid #ddd;border-radius:14px;padding:20px;box-shadow:0 3px 12px #00000008}.auth-box h3{margin:0 0 6px;color:var(--a)}.auth-form{display:grid;gap:10px}.auth-form input,.admin-form input,.admin-form textarea,.admin-form select{width:100%;padding:11px;border:1px solid #ccd5db;border-radius:8px;font:inherit}.auth-actions{display:flex;gap:8px;flex-wrap:wrap}.auth-actions button{margin:0;font-weight:700}.auth-primary,.add-btn{background:var(--a);color:#fff;border:0}.auth-msg{font-size:13px;color:#555;min-height:20px;margin-top:10px}.hidden{display:none!important}.admin-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.admin-form textarea{min-height:100px;resize:vertical}.full{grid-column:1/-1}.entry{border:1px solid #e1e1e1;border-radius:10px;padding:12px;margin-top:10px;background:#fafafa}.entry h3{margin:0;color:var(--a)}.entry p{margin:5px 0;color:#555;white-space:pre-wrap}.entry small{color:#888}.delete-btn{float:right;border:0;background:#b94a48;color:#fff;border-radius:7px;padding:5px 9px}.empty{color:#777;font-style:italic}.editbar{position:fixed;right:18px;bottom:18px;z-index:40;display:flex;gap:8px;align-items:center;background:#fff;padding:10px;border:1px solid #ddd;border-radius:12px;box-shadow:0 5px 20px #0002}.editbar button{margin:0;font-weight:700}.editing{outline:2px dashed #d7a84b;outline-offset:3px;background:#fffdf5}.save-msg{font-size:12px;color:#555}.local-note{display:none;background:#fff3cd;color:#664d03;border-bottom:1px solid #ffecb5;padding:9px;text-align:center;font-size:13px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.admin-form{grid-template-columns:1fr}.full{grid-column:auto}.brand{max-width:70%}.editbar{left:12px;right:12px;justify-content:center;flex-wrap:wrap}}
 </style>
 </head>
 <body>
-<div id="localNotice" style="display:none;position:sticky;top:0;z-index:9999;background:#fff3cd;color:#664d03;border-bottom:1px solid #ffecb5;padding:10px 14px;text-align:center;font-size:13px">
-  Visualização local: os botões de login precisam do site publicado em um endereço HTTPS para funcionar corretamente com o servidor.
-</div>
-<header><div class="nav"><div class="brand">日本クリスチャンコングレゲーション<small data-pt="Comunidade cristã" data-ja="キリスト教会">Comunidade cristã</small></div><div><button type="button" id="pt" class="active" onclick="lang('pt')">PT</button><button type="button" id="ja" onclick="lang('ja')">日本語</button></div></div></header>
+<div id="localNotice" class="local-note">Modo local detectado. Para login e publicação, abra o endereço HTTPS do site no GitHub Pages.</div>
+<header><div class="nav"><div class="brand">日本クリスチャンコングレゲーション<small data-pt="Comunidade cristã" data-ja="キリスト教会">Comunidade cristã</small></div><div class="lang-buttons"><button type="button" id="pt" class="active">PT</button><button type="button" id="ja">日本語</button></div></div></header>
 <main>
-<section class="hero"><h1 class="editable" data-edit="hero-title" data-pt="Bem-vindo!" data-ja="ようこそ！">Bem-vindo!</h1><div class="jp editable" data-edit="church-name">日本クリスチャンコングレゲーション</div><p class="editable" data-edit="hero-text" data-pt="Um espaço para compartilhar informações importantes, cultos, eventos, estudos bíblicos e notícias da nossa comunidade." data-ja="礼拝、行事、聖書の学び、教会からのお知らせなど、大切な情報をお届けします。">Um espaço para compartilhar informações importantes, cultos, eventos, estudos bíblicos e notícias da nossa comunidade.</p><button type="button" class="btn" onclick="openPanel('avisos')" data-pt="Ver avisos" data-ja="お知らせを見る">Ver avisos</button></section>
+<section class="hero"><h1 class="editable" data-edit="hero-title" data-pt="Bem-vindo!" data-ja="ようこそ！">Bem-vindo!</h1><div class="jp editable" data-edit="church-name">日本クリスチャンコングレゲーション</div><p class="editable" data-edit="hero-text" data-pt="Um espaço para compartilhar informações importantes, cultos, eventos, estudos bíblicos e notícias da nossa comunidade." data-ja="礼拝、行事、聖書の学び、教会からのお知らせなど、大切な情報をお届けします。">Um espaço para compartilhar informações importantes, cultos, eventos, estudos bíblicos e notícias da nossa comunidade.</p><button type="button" class="btn" id="noticeBtn" data-pt="Ver avisos" data-ja="お知らせを見る">Ver avisos</button></section>
 <section class="section" id="avisos"><h2 data-pt="Avisos importantes" data-ja="重要なお知らせ">Avisos importantes</h2><div class="card notice"><h3 class="editable" data-edit="notice-title" data-pt="Bem-vindos ao nosso novo site" data-ja="新しいウェブサイトへようこそ">Bem-vindos ao nosso novo site</h3><p class="editable" data-edit="notice-text" data-pt="Aqui serão publicados os comunicados importantes da igreja." data-ja="教会からの大切なお知らせをここに掲載します。">Aqui serão publicados os comunicados importantes da igreja.</p></div></section>
-<section class="section"><h2 data-pt="Informações" data-ja="情報">Informações</h2><div class="grid"><button type="button" class="card card-link" onclick="openPanel('agenda')"><h3 data-pt="Cultos e agenda" data-ja="礼拝・予定">Cultos e agenda</h3><p data-pt="Horários dos cultos, reuniões e eventos." data-ja="礼拝、集会、行事などの予定を確認できます。">Horários dos cultos, reuniões e eventos.</p></button><button type="button" class="card card-link" onclick="openPanel('estudos')"><h3 data-pt="Estudos bíblicos" data-ja="聖書の学び">Estudos bíblicos</h3><p data-pt="Estudos e mensagens publicados pela igreja." data-ja="聖書の学びやメッセージをご覧いただけます。">Estudos e mensagens publicados pela igreja.</p></button><button type="button" class="card card-link" onclick="openPanel('comunicacao')"><h3 data-pt="Comunicação" data-ja="教会からの連絡">Comunicação</h3><p class="editable" data-edit="communication-text" data-pt="Informações importantes para os membros." data-ja="教会員の皆様への大切な情報をお届けします。">Informações importantes para os membros.</p></button></div></section>
-<section class="section page-panel" id="panel-avisos"><div class="card"><div class="panel-head"><h2 data-pt="Avisos importantes" data-ja="重要なお知らせ">Avisos importantes</h2><button type="button" class="back" onclick="closePanels()" data-pt="Voltar" data-ja="戻る">Voltar</button></div><div class="card notice"><h3 class="editable" data-edit="notice-title" data-pt="Bem-vindos ao nosso novo site" data-ja="新しいウェブサイトへようこそ">Bem-vindos ao nosso novo site</h3><p class="editable" data-edit="notice-text" data-pt="Aqui serão publicados os comunicados importantes da igreja." data-ja="教会からの大切なお知らせをここに掲載します。">Aqui serão publicados os comunicados importantes da igreja.</p></div></div></section>
-<section class="section page-panel" id="panel-agenda"><div class="card"><div class="panel-head"><h2 data-pt="Cultos e agenda" data-ja="礼拝・予定">Cultos e agenda</h2><button type="button" class="back" onclick="closePanels()" data-pt="Voltar" data-ja="戻る">Voltar</button></div><p class="editable" data-edit="agenda-text" data-pt="Os horários dos cultos, reuniões e eventos serão publicados aqui." data-ja="礼拝、集会、行事などの予定をここに掲載します。">Os horários dos cultos, reuniões e eventos serão publicados aqui.</p></div></section>
-<section class="section page-panel" id="panel-estudos"><div class="card"><div class="panel-head"><h2 data-pt="Estudos bíblicos" data-ja="聖書の学び">Estudos bíblicos</h2><button type="button" class="back" onclick="closePanels()" data-pt="Voltar" data-ja="戻る">Voltar</button></div><p class="editable" data-edit="study-text" data-pt="Os estudos e mensagens da igreja serão publicados aqui." data-ja="聖書の学びやメッセージをここに掲載します。">Os estudos e mensagens da igreja serão publicados aqui.</p></div></section>
-<section class="section page-panel" id="panel-comunicacao"><div class="card"><div class="panel-head"><h2 data-pt="Comunicação" data-ja="教会からの連絡">Comunicação</h2><button type="button" class="back" onclick="closePanels()" data-pt="Voltar" data-ja="戻る">Voltar</button></div><p class="editable" data-edit="communication-text" data-pt="Informações importantes para os membros." data-ja="教会員の皆様への大切な情報をここに掲載します。">Informações importantes para os membros.</p></div></section><section class="section" id="login-section"><div class="auth-box"><h3>🔐 Acesso do administrador</h3><p>Entre com o e-mail administrativo para editar e publicar conteúdos.</p><div id="loggedOut"><div class="auth-form"><input id="authEmail" type="email" value="adm.centralcontabil@hotmail.com" readonly><input id="authPassword" type="password" placeholder="Senha" autocomplete="current-password"><input id="authPasswordConfirm" type="password" placeholder="Confirmar senha" autocomplete="new-password"><div class="auth-actions"><button type="button" class="auth-primary" onclick="signInAdmin()">Entrar</button><button type="button" onclick="signUpAdmin()">Criar acesso</button><button type="button" onclick="resendConfirmation()">Reenviar confirmação</button><button type="button" onclick="resetAdminPassword()">Esqueci a senha</button></div></div></div><div id="loggedIn" class="hidden"><p><strong>Administrador conectado:</strong> <span id="userEmail"></span></p><div class="auth-actions"><button type="button" class="auth-primary" onclick="signOutAdmin()">Sair</button></div></div><div id="authMsg" class="auth-msg"></div></div></section>
-<section class="section hidden" id="painel-cadastro"><div class="item-box"><div class="admin-title"><h2>📝 Cadastro de conteúdo</h2><span class="tag">Salvo neste navegador</span></div><p>Use esta caixa para adicionar novos conteúdos ao site.</p><div class="admin-form"><select id="entryType"><option value="avisos">📢 Aviso</option><option value="agenda">📅 Agenda / Evento</option><option value="estudos">📖 Estudo bíblico</option><option value="comunicacao">☎️ Comunicação</option></select><input id="entryDate" type="date"><input id="entryTitle" class="full" placeholder="Título"><textarea id="entryText" class="full" placeholder="Digite o conteúdo aqui..."></textarea><button type="button" class="add-btn full" onclick="addEntry()">➕ Adicionar conteúdo</button></div><div id="entryList"></div></div></section></main><div class="editbar hidden" id="editbar"><button type="button" id="editBtn" onclick="toggleEdit()">✏️ Editar conteúdo</button><button type="button" id="saveBtn" onclick="saveEdits()" style="display:none;background:var(--a);color:#fff">💾 Salvar</button><button type="button" id="cancelBtn" onclick="cancelEdits()" style="display:none">Cancelar</button><span id="saveMsg" class="save-msg"></span></div><footer><strong>日本クリスチャンコングレゲーション</strong><p data-pt="Site informativo da igreja" data-ja="教会情報サイト">Site informativo da igreja</p></footer>
+<section class="section"><h2 data-pt="Informações" data-ja="情報">Informações</h2><div class="grid"><button type="button" class="card card-link" data-panel="agenda"><h3 data-pt="Cultos e agenda" data-ja="礼拝・予定">Cultos e agenda</h3><p data-pt="Horários dos cultos, reuniões e eventos." data-ja="礼拝、集会、行事などの予定を確認できます。">Horários dos cultos, reuniões e eventos.</p></button><button type="button" class="card card-link" data-panel="estudos"><h3 data-pt="Estudos bíblicos" data-ja="聖書の学び">Estudos bíblicos</h3><p data-pt="Estudos e mensagens publicados pela igreja." data-ja="聖書の学びやメッセージをご覧いただけます。">Estudos e mensagens publicados pela igreja.</p></button><button type="button" class="card card-link" data-panel="comunicacao"><h3 data-pt="Comunicação" data-ja="教会からの連絡">Comunicação</h3><p class="editable" data-edit="communication-text" data-pt="Informações importantes para os membros." data-ja="教会員の皆様への大切な情報をお届けします。">Informações importantes para os membros.</p></button></div></section>
+<section class="section page-panel" id="panel-agenda"><div class="card"><div class="panel-head"><h2 data-pt="Cultos e agenda" data-ja="礼拝・予定">Cultos e agenda</h2><button type="button" class="back">Voltar</button></div><p class="editable" data-edit="agenda-text" data-pt="Os horários dos cultos, reuniões e eventos serão publicados aqui." data-ja="礼拝、集会、行事などの予定をここに掲載します。">Os horários dos cultos, reuniões e eventos serão publicados aqui.</p></div></section>
+<section class="section page-panel" id="panel-estudos"><div class="card"><div class="panel-head"><h2 data-pt="Estudos bíblicos" data-ja="聖書の学び">Estudos bíblicos</h2><button type="button" class="back">Voltar</button></div><p class="editable" data-edit="study-text" data-pt="Os estudos e mensagens da igreja serão publicados aqui." data-ja="聖書の学びやメッセージをここに掲載します。">Os estudos e mensagens da igreja serão publicados aqui.</p></div></section>
+<section class="section page-panel" id="panel-comunicacao"><div class="card"><div class="panel-head"><h2 data-pt="Comunicação" data-ja="教会からの連絡">Comunicação</h2><button type="button" class="back">Voltar</button></div><p class="editable" data-edit="communication-text" data-pt="Informações importantes para os membros." data-ja="教会員の皆様への大切な情報をここに掲載します。">Informações importantes para os membros.</p></div></section>
+<section class="section" id="login-section"><div class="auth-box"><h3>🔐 Acesso do administrador</h3><p data-pt="Entre com o e-mail administrativo para editar e publicar conteúdos." data-ja="管理者用メールアドレスでログインして、内容を編集・公開できます。">Entre com o e-mail administrativo para editar e publicar conteúdos.</p><div id="loggedOut"><div class="auth-form"><input id="authEmail" type="email" value="adm.centralcontabil@hotmail.com" readonly><input id="authPassword" type="password" placeholder="Senha" autocomplete="current-password"><input id="authPasswordConfirm" type="password" placeholder="Confirmar senha" autocomplete="new-password"><div class="auth-actions"><button type="button" class="auth-primary" id="signInBtn">Entrar</button><button type="button" id="signUpBtn">Criar acesso</button><button type="button" id="resendBtn">Reenviar confirmação</button><button type="button" id="resetBtn">Esqueci a senha</button></div></div></div><div id="loggedIn" class="hidden"><p><strong>Administrador conectado:</strong> <span id="userEmail"></span></p><div class="auth-actions"><button type="button" class="auth-primary" id="signOutBtn">Sair</button></div></div><div id="authMsg" class="auth-msg"></div></div></section>
+<section class="section hidden" id="painel-cadastro"><div class="item-box"><h2>📝 Cadastro de conteúdo</h2><p>Use esta caixa para adicionar novos conteúdos ao site.</p><div class="admin-form"><select id="entryType"><option value="avisos">📢 Aviso</option><option value="agenda">📅 Agenda / Evento</option><option value="estudos">📖 Estudo bíblico</option><option value="comunicacao">☎️ Comunicação</option></select><input id="entryDate" type="date"><input id="entryTitle" class="full" placeholder="Título"><textarea id="entryText" class="full" placeholder="Digite o conteúdo aqui..."></textarea><button type="button" class="add-btn full" id="addEntryBtn">➕ Adicionar conteúdo</button></div><div id="entryList"></div></div></section>
+</main>
+<div class="editbar hidden" id="editbar"><button type="button" id="editBtn">✏️ Editar conteúdo</button><button type="button" id="saveBtn" class="auth-primary hidden">💾 Salvar</button><button type="button" id="cancelBtn" class="hidden">Cancelar</button><span id="saveMsg" class="save-msg"></span></div>
+<footer><strong>日本クリスチャンコングレゲーション</strong><p data-pt="Site informativo da igreja" data-ja="教会情報サイト">Site informativo da igreja</p></footer>
 <script>
-/* Sistema de acesso: o site continua funcionando mesmo se a autenticação externa não carregar. */
 const SUPABASE_URL='https://uoapmjwdwtpltnxvmniy.supabase.co';
 const SUPABASE_KEY='sb_publishable_10fUBHTtp6sev9kXjMIDJg_CFBkeT8D';
 const ADMIN_EMAIL='adm.centralcontabil@hotmail.com';
-let supabaseClient=null;
-function setAuthMsg(msg,ok=false){const el=document.getElementById('authMsg');if(!el)return;el.textContent=msg;el.style.color=ok?'#246b45':'#555';}
-function setAdminUI(user){
- const isAdmin=!!user&&(user.email||'').toLowerCase()===ADMIN_EMAIL;
- document.getElementById('loggedOut').classList.toggle('hidden',!!user);
- document.getElementById('loggedIn').classList.toggle('hidden',!user);
- document.getElementById('editbar').classList.toggle('hidden',!isAdmin);
- document.getElementById('painel-cadastro').classList.toggle('hidden',!isAdmin);
- document.getElementById('userEmail').textContent=user?.email||'';
- if(user&&isAdmin){setAuthMsg('Acesso de administrador liberado ✓',true); window.dispatchEvent(new Event('church-admin-ready'));}
- else if(user)setAuthMsg('Usuário conectado, mas sem permissão de administrador.');
-}
-function getSupabase(){
- if(supabaseClient)return supabaseClient;
- if(window.supabase&&typeof window.supabase.createClient==='function'){
-   supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);return supabaseClient;
- }
- return null;
-}
-async function requireAdmin(){
- const sb=getSupabase();
- if(!sb) throw new Error('Servidor de autenticação indisponível.');
- const {data:{session}}=await sb.auth.getSession();
- if(!session?.user) throw new Error('Faça login como administrador.');
- const {data:profile,error}=await sb.from('member_profiles').select('role').eq('id',session.user.id).single();
- if(error || profile?.role!=='admin') throw new Error('Sua conta não possui permissão de administrador.');
- return sb;
-}
-async function loadServerEntries(){
- try{
-  const sb=await getSupabase();
-  const [a,e,b]=await Promise.all([
-   sb.from('announcements').select('id,title,content,published_at').order('published_at',{ascending:false}),
-   sb.from('events').select('id,title,description,event_date,location').order('event_date',{ascending:true}),
-   sb.from('bible_studies').select('id,title,content,created_at').order('created_at',{ascending:false})
-  ]);
-  if(a.error||e.error||b.error) throw (a.error||e.error||b.error);
-  const rows=[
-   ...a.data.map(x=>({id:'a-'+x.id,type:'avisos',title:x.title,text:x.content,date:x.published_at,serverId:x.id,table:'announcements'})),
-   ...e.data.map(x=>({id:'e-'+x.id,type:'agenda',title:x.title,text:x.description||'',date:x.event_date,serverId:x.id,table:'events'})),
-   ...b.data.map(x=>({id:'b-'+x.id,type:'estudos',title:x.title,text:x.content,date:x.created_at,serverId:x.id,table:'bible_studies'}))
-  ];
-  window.serverEntries=rows; renderEntries(rows); return rows;
- }catch(err){
-  window.serverEntries=null; renderEntries(entries()); return null;
- }
-}
-window.signInAdmin=async function(){
- const sb=getSupabase();
- if(!sb){setAuthMsg('O serviço de acesso ainda está carregando. Verifique sua conexão com a internet e tente novamente.');return;}
- const password=document.getElementById('authPassword').value;
- if(!password){setAuthMsg('Digite sua senha.');return;}
- setAuthMsg('Entrando...');
- const {data,error}=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password});
- if(error){if(/email not confirmed/i.test(error.message)){setAuthMsg('O e-mail ainda não foi confirmado. Use “Reenviar confirmação” e verifique Spam/Lixo eletrônico.');}else{setAuthMsg('Não foi possível entrar: '+error.message);}return;}
- document.getElementById('authPassword').value='';setAdminUI(data.user);
-};
-window.signUpAdmin=async function(){
-  const sb=getSupabase();
-  if(!sb){setAuthMsg('O serviço de acesso ainda está carregando. Verifique sua conexão com a internet e tente novamente.');return;}
-  const password=document.getElementById('authPassword').value,confirm=document.getElementById('authPasswordConfirm').value;
-  if(!password||password.length<6){setAuthMsg('Crie uma senha com pelo menos 6 caracteres.');return;}
-  if(password!==confirm){setAuthMsg('As duas senhas não são iguais.');return;}
-  setAuthMsg('Criando o acesso...');
-  const {data,error}=await sb.auth.signUp({
-    email:ADMIN_EMAIL,
-    password,
-    options:{emailRedirectTo:window.location.href}
-  });
-  if(error){
-    if(/already registered|user already registered|already exists/i.test(error.message)){
-      setAuthMsg('Este e-mail já possui uma conta. Use “Entrar” ou “Reenviar confirmação”.');
-    }else{
-      setAuthMsg('Não foi possível criar o acesso: '+error.message);
-    }
-    return;
-  }
-  if(data.session){
-    setAdminUI(data.user);
-    setAuthMsg('Acesso criado e conectado ✓',true);
-  }else{
-    setAuthMsg('Acesso criado. Agora confirme o e-mail. Se não chegar, verifique Spam/Lixo eletrônico e use “Reenviar confirmação”.',true);
-  }
-};
-
-window.resendConfirmation=async function(){
-  const sb=getSupabase();
-  if(!sb){setAuthMsg('O serviço de acesso ainda está carregando.');return;}
-  setAuthMsg('Enviando novamente o e-mail de confirmação...');
-  const {error}=await sb.auth.resend({
-    type:'signup',
-    email:ADMIN_EMAIL,
-    options:{emailRedirectTo:window.location.href}
-  });
-  if(error){
-    setAuthMsg('Não foi possível reenviar: '+error.message);
-    return;
-  }
-  setAuthMsg('Solicitação enviada. Verifique também Spam/Lixo eletrônico.',true);
-};
-
-window.resetAdminPassword=async function(){
-  const sb=getSupabase();
-  if(!sb){setAuthMsg('O serviço de acesso ainda está carregando.');return;}
-  setAuthMsg('Enviando instruções para redefinir a senha...');
-  const {error}=await sb.auth.resetPasswordForEmail(ADMIN_EMAIL,{
-    redirectTo:window.location.href
-  });
-  if(error){
-    setAuthMsg('Não foi possível enviar: '+error.message);
-    return;
-  }
-  setAuthMsg('Se o endereço estiver cadastrado, as instruções foram enviadas. Verifique também Spam/Lixo eletrônico.',true);
-};
-window.signOutAdmin=async function(){const sb=getSupabase();if(sb)await sb.auth.signOut();setAdminUI(null);setAuthMsg('Você saiu do sistema.');};
-function initAuth(){
- const sb=getSupabase();
- if(!sb){setAdminUI(null);setAuthMsg('Navegação disponível. Para usar o acesso administrativo, é necessária conexão com a internet.');return;}
- sb.auth.getSession().then(({data})=>setAdminUI(data.session?.user||null)).catch(()=>setAdminUI(null));
- sb.auth.onAuthStateChange((_event,session)=>setAdminUI(session?.user||null));
-}
-/* Carrega a biblioteca sem usar type=module, compatível com HTML aberto localmente. */
-(function loadAuthLibrary(){
- const sc=document.createElement('script');
- sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
- sc.onload=initAuth;sc.onerror=()=>{setAdminUI(null);setAuthMsg('O login precisa de internet para conectar ao servidor. Os demais botões continuam funcionando.');};
- document.head.appendChild(sc);
-})();
+let currentLang='pt', session=null, editing=false, original={};
+const $=id=>document.getElementById(id);
+function msg(t){$('authMsg').textContent=t||''}
+function isPublished(){return location.protocol==='https:'&&location.hostname.endsWith('github.io')}
+function lang(x){currentLang=x==='ja'?'ja':'pt';document.documentElement.lang=currentLang==='ja'?'ja':'pt-BR';document.querySelectorAll('[data-pt][data-ja]').forEach(e=>{if(!e.classList.contains('editing'))e.textContent=e.dataset[currentLang]});$('pt').classList.toggle('active',currentLang==='pt');$('ja').classList.toggle('active',currentLang==='ja');localStorage.setItem('igreja_lang',currentLang)}
+function openPanel(name){document.querySelectorAll('.page-panel').forEach(p=>p.classList.remove('active'));const p=$('panel-'+name);if(p){p.classList.add('active');p.scrollIntoView({behavior:'smooth',block:'start'})}}
+function closePanels(){document.querySelectorAll('.page-panel').forEach(p=>p.classList.remove('active'));$('avisos').scrollIntoView({behavior:'smooth',block:'start'})}
+function supa(path,options={}){const headers=Object.assign({'apikey':SUPABASE_KEY,'Content-Type':'application/json'},options.headers||{});if(session?.access_token)headers.Authorization='Bearer '+session.access_token;return fetch(SUPABASE_URL+'/auth/v1/'+path,{...options,headers})}
+async function signInAdmin(){const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!password)return msg('Digite a senha.');msg('Entrando...');try{const r=await supa('token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});const d=await r.json();if(!r.ok)throw new Error(d.error_description||d.msg||d.message||'Não foi possível entrar.');if(d.user?.email?.toLowerCase()!==ADMIN_EMAIL.toLowerCase())throw new Error('Este e-mail não tem permissão de administrador.');session=d;localStorage.setItem('igreja_session',JSON.stringify(d));setAdminUI(d.user);msg('Login realizado com sucesso.')}catch(e){msg(/confirmed/i.test(e.message)?'O e-mail ainda não foi confirmado. Use “Reenviar confirmação”.':e.message)}}
+async function signUpAdmin(){const password=$('authPassword').value,confirm=$('authPasswordConfirm').value;if(password.length<6)return msg('A senha deve ter pelo menos 6 caracteres.');if(password!==confirm)return msg('As senhas não coincidem.');msg('Criando acesso...');try{const r=await supa('signup',{method:'POST',body:JSON.stringify({email:ADMIN_EMAIL,password})});const d=await r.json();if(!r.ok)throw new Error(d.msg||d.message||'Não foi possível criar o acesso.');msg(d.confirmation_sent_at||d.user?.confirmation_sent_at?'Acesso criado. Verifique o e-mail de confirmação.':'Acesso criado.')}catch(e){msg(e.message)}}
+async function resendConfirmation(){msg('Enviando confirmação...');try{const r=await supa('resend',{method:'POST',body:JSON.stringify({type:'signup',email:ADMIN_EMAIL})});const d=await r.json();if(!r.ok)throw new Error(d.msg||d.message||'Não foi possível reenviar.');msg('Confirmação reenviada. Verifique também Spam/Lixo eletrônico.')}catch(e){msg(e.message)}}
+async function resetAdminPassword(){msg('Enviando recuperação de senha...');try{const r=await supa('recover',{method:'POST',body:JSON.stringify({email:ADMIN_EMAIL})});const d=await r.json();if(!r.ok)throw new Error(d.msg||d.message||'Não foi possível enviar.');msg('E-mail de recuperação enviado.')}catch(e){msg(e.message)}}
+function signOutAdmin(){session=null;localStorage.removeItem('igreja_session');setAdminUI(null);msg('Você saiu do acesso administrativo.')}
+function setAdminUI(user){$('loggedOut').classList.toggle('hidden',!!user);$('loggedIn').classList.toggle('hidden',!user);$('painel-cadastro').classList.toggle('hidden',!user);$('editbar').classList.toggle('hidden',!user);$('userEmail').textContent=user?.email||'';if(user)renderEntries()}
+function loadSession(){try{const raw=localStorage.getItem('igreja_session');if(raw){const d=JSON.parse(raw);if(d?.access_token)setAdminUI(d.user||{email:ADMIN_EMAIL}),session=d}}catch(e){localStorage.removeItem('igreja_session')}}
+function renderEntries(){const list=JSON.parse(localStorage.getItem('igreja_entries')||'[]');$('entryList').innerHTML=list.length?list.map((e,i)=>`<div class="entry"><button class="delete-btn" data-del="${i}">Excluir</button><h3>${escapeHtml(e.title)}</h3><small>${escapeHtml(e.type)}${e.date?' • '+escapeHtml(e.date):''}</small><p>${escapeHtml(e.text)}</p></div>`).join(''):'<p class="empty">Nenhum conteúdo cadastrado.</p>';document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const a=JSON.parse(localStorage.getItem('igreja_entries')||'[]');a.splice(Number(b.dataset.del),1);localStorage.setItem('igreja_entries',JSON.stringify(a));renderEntries()})}
+function addEntry(){const title=$('entryTitle').value.trim(),text=$('entryText').value.trim();if(!title||!text)return alert('Preencha o título e o conteúdo.');const a=JSON.parse(localStorage.getItem('igreja_entries')||'[]');a.unshift({type:$('entryType').value,date:$('entryDate').value,title,text});localStorage.setItem('igreja_entries',JSON.stringify(a));$('entryTitle').value='';$('entryText').value='';renderEntries()}
+function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function toggleEdit(){if(!session)return;editing=true;original={};document.querySelectorAll('.editable[data-edit]').forEach(e=>{original[e.dataset.edit]=e.innerHTML;e.contentEditable='true';e.classList.add('editing')});$('editBtn').classList.add('hidden');$('saveBtn').classList.remove('hidden');$('cancelBtn').classList.remove('hidden');$('saveMsg').textContent='Agora você pode digitar diretamente no site.'}
+function saveEdits(){document.querySelectorAll('.editable[data-edit]').forEach(e=>{localStorage.setItem('igreja_'+currentLang+'_'+e.dataset.edit,e.innerHTML);e.contentEditable='false';e.classList.remove('editing')});editing=false;$('editBtn').classList.remove('hidden');$('saveBtn').classList.add('hidden');$('cancelBtn').classList.add('hidden');$('saveMsg').textContent='Alterações salvas neste navegador.'}
+function cancelEdits(){document.querySelectorAll('.editable[data-edit]').forEach(e=>{if(original[e.dataset.edit]!==undefined)e.innerHTML=original[e.dataset.edit];e.contentEditable='false';e.classList.remove('editing')});editing=false;$('editBtn').classList.remove('hidden');$('saveBtn').classList.add('hidden');$('cancelBtn').classList.add('hidden');$('saveMsg').textContent='Edição cancelada.';lang(currentLang)}
+function restoreEdits(){document.querySelectorAll('.editable[data-edit]').forEach(e=>{const v=localStorage.getItem('igreja_'+currentLang+'_'+e.dataset.edit);if(v)e.innerHTML=v})}
+$('pt').onclick=()=>lang('pt');$('ja').onclick=()=>lang('ja');$('noticeBtn').onclick=()=>openPanel('agenda');document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>openPanel(b.dataset.panel));document.querySelectorAll('.back').forEach(b=>b.onclick=closePanels);$('signInBtn').onclick=signInAdmin;$('signUpBtn').onclick=signUpAdmin;$('resendBtn').onclick=resendConfirmation;$('resetBtn').onclick=resetAdminPassword;$('signOutBtn').onclick=signOutAdmin;$('addEntryBtn').onclick=addEntry;$('editBtn').onclick=toggleEdit;$('saveBtn').onclick=saveEdits;$('cancelBtn').onclick=cancelEdits;
+window.addEventListener('DOMContentLoaded',()=>{if(!isPublished())$('localNotice').style.display='block';const saved=localStorage.getItem('igreja_lang');lang(saved||'pt');restoreEdits();loadSession()});
 </script>
-<script>
-let editing=false;
-let original={};
-function currentLanguage(){return document.documentElement.lang==='ja'?'ja':'pt';}
-function lang(x){
-  const language=x==='ja'?'ja':'pt';
-  document.documentElement.lang=language==='ja'?'ja':'pt-BR';
-  document.querySelectorAll('[data-pt][data-ja]').forEach(e=>{
-    if(!e.classList.contains('editing')){
-      const value=e.getAttribute('data-'+language);
-      if(value!==null)e.textContent=value;
-    }
-  });
-  document.getElementById('pt').classList.toggle('active',language==='pt');
-  document.getElementById('ja').classList.toggle('active',language==='ja');
-  loadEdits();
-}
-function openPanel(name){
-  const panel=document.getElementById('panel-'+name); if(!panel)return;
-  document.querySelectorAll('.page-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('main > .section:not(.page-panel)').forEach(s=>s.style.display='none');
-  document.querySelector('.hero').style.display='none';
-  panel.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'});
-  loadEdits();
-}
-function closePanels(){
-  document.querySelectorAll('.page-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('main > .section:not(.page-panel)').forEach(s=>s.style.display='');
-  document.querySelector('.hero').style.display=''; window.scrollTo({top:0,behavior:'smooth'});
-  loadEdits();
-}
-function toggleEdit(){
-  editing=true;
-  original={};
-  document.querySelectorAll('.editable[data-edit]').forEach(e=>{original[e.dataset.edit]=e.innerHTML;e.contentEditable='true';e.classList.add('editing');});
-  document.getElementById('editBtn').style.display='none';document.getElementById('saveBtn').style.display='inline-block';document.getElementById('cancelBtn').style.display='inline-block';document.getElementById('saveMsg').textContent='Digite nos textos destacados.';
-}
-function saveEdits(){
-  const lang=currentLanguage();
-  document.querySelectorAll('.editable[data-edit]').forEach(e=>{
-    localStorage.setItem('igreja_'+lang+'_'+e.dataset.edit,e.innerHTML);
-    e.contentEditable='false';e.classList.remove('editing');
-    const attr='data-'+lang; if(e.hasAttribute(attr)) e.setAttribute(attr,e.textContent);
-  });
-  editing=false;document.getElementById('editBtn').style.display='inline-block';document.getElementById('saveBtn').style.display='none';document.getElementById('cancelBtn').style.display='none';document.getElementById('saveMsg').textContent='Salvo neste navegador ✓';
-}
-function cancelEdits(){
-  document.querySelectorAll('.editable[data-edit]').forEach(e=>{if(original[e.dataset.edit]!==undefined)e.innerHTML=original[e.dataset.edit];e.contentEditable='false';e.classList.remove('editing');});
-  editing=false;document.getElementById('editBtn').style.display='inline-block';document.getElementById('saveBtn').style.display='none';document.getElementById('cancelBtn').style.display='none';document.getElementById('saveMsg').textContent='';
-}
-function loadEdits(){
-  if(editing)return;
-  const lang=currentLanguage();
-  document.querySelectorAll('.editable[data-edit]').forEach(e=>{
-    const saved=localStorage.getItem('igreja_'+lang+'_'+e.dataset.edit);
-    if(saved!==null)e.innerHTML=saved;
-  });
-}
-function entries(){try{return JSON.parse(localStorage.getItem('igreja_entries')||'[]')}catch(e){return []}}
-async function addEntry(){
-  const type=document.getElementById('entryType').value,title=document.getElementById('entryTitle').value.trim(),text=document.getElementById('entryText').value.trim(),date=document.getElementById('entryDate').value;
-  if(!title||!text){alert('Digite o título e o conteúdo antes de adicionar.');return;}
-  try{
-    const sb=await requireAdmin(); let result;
-    if(type==='avisos') result=await sb.from('announcements').insert({title,content:text,published:true,published_at:date?new Date(date+'T00:00:00').toISOString():new Date().toISOString()}).select().single();
-    else if(type==='agenda') result=await sb.from('events').insert({title,description:text,event_date:date?new Date(date+'T00:00:00').toISOString():new Date().toISOString()}).select().single();
-    else if(type==='estudos') result=await sb.from('bible_studies').insert({title,content:text,published:true}).select().single();
-    else { alert('A categoria Comunicação ainda será ligada ao banco do servidor na próxima etapa.'); return; }
-    if(result.error) throw result.error;
-    document.getElementById('entryTitle').value='';document.getElementById('entryText').value='';document.getElementById('entryDate').value='';
-    await loadServerEntries();
-  }catch(err){
-    alert('Não foi possível salvar no servidor: '+(err.message||err));
-  }
-}
-async function deleteEntry(id){
-  if(!confirm('Excluir este conteúdo do servidor?'))return;
-  try{
-    const sb=await requireAdmin(); const item=(window.serverEntries||[]).find(x=>String(x.id)===String(id));
-    if(!item) throw new Error('Conteúdo não encontrado.');
-    const {error}=await sb.from(item.table).delete().eq('id',item.serverId); if(error)throw error;
-    await loadServerEntries();
-  }catch(err){alert('Não foi possível excluir: '+(err.message||err));}
-}
-function renderEntries(data=entries()){
-  const list=document.getElementById('entryList'); if(!list)return;
-  if(!data.length){list.innerHTML='<p class="empty">Nenhum conteúdo cadastrado no servidor ainda.</p>';return;}
-  const names={avisos:'📢 Aviso',agenda:'📅 Agenda',estudos:'📖 Estudo bíblico',comunicacao:'☎️ Comunicação'};
-  list.innerHTML=data.map(x=>`<div class="entry"><button type="button" class="delete-btn" onclick="deleteEntry('${String(x.id).replace(/'/g,"\\'")}')">Excluir</button><small>${names[x.type]||x.type}${x.date?' · '+new Date(x.date).toLocaleDateString('pt-BR'):''}</small><h3>${escapeHtml(x.title)}</h3><p>${escapeHtml(x.text)}</p></div>`).join('');
-}
-function escapeHtml(v){return v.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-window.addEventListener('DOMContentLoaded',()=>{
-  loadEdits();renderEntries();
-  try{
-    if(location.protocol==='file:'){
-      const n=document.getElementById('localNotice'); if(n)n.style.display='block';
-    }
-  }catch(e){}
-});
-window.addEventListener('church-admin-ready',()=>{loadServerEntries();});
-</script>
-</body></html>
+</body>
+</html>
