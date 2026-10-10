@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Criar conta | Programa da Igreja</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#0b2a45;--blue:#1d6fa5;--light:#eef6fb;--line:#cbd8e2;--text:#173042;--danger:#b52b2b;--ok:#1f7a3b}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:var(--text);background:#f4f7fa}
+header{background:linear-gradient(110deg,#08243d,#175b87);color:#fff;padding:20px 24px;text-align:center}header h1{margin:0;font-size:22px}header p{margin:6px 0 0;font-size:13px}
+.card{max-width:460px;margin:45px auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:0 5px 18px #0000000d}
+.field{display:flex;flex-direction:column;gap:6px;margin-top:14px}.field label{font-weight:700;font-size:14px}.field label span{display:block;font-weight:400;color:#637786;margin-top:2px}.field input{width:100%;padding:12px;border:1px solid #bccbd6;border-radius:8px;font-size:16px}
+button{font:inherit}.primary{background:var(--blue);color:#fff;border:0;padding:12px 16px;border-radius:8px;font-weight:700;cursor:pointer;width:100%}.secondary{display:block;text-align:center;margin-top:12px;color:var(--blue);text-decoration:none}
+.msg{padding:12px;border-radius:8px;margin-top:15px;display:none;line-height:1.45}.ok{background:#e9f7ed;color:#1c6330}.err{background:#fdecec;color:#8d2222}.muted{color:#687b88;font-size:13px;line-height:1.5}
+</style>
+</head>
+<body>
+<header><h1>日本 クリスチャンコングレゲーション</h1><p>CONGREGAÇÃO CRISTÃ NO JAPÃO — Programa da Igreja / 教会管理</p></header>
+<main class="card">
+<h2>Criar conta / アカウント作成</h2>
+<p class="muted">Crie seu acesso para entrar no Programa da Igreja. Use um e-mail ao qual você tenha acesso.</p>
+<div class="field"><label>E-mail <span>メール</span></label><input id="email" type="email" autocomplete="email" required></div>
+<div class="field"><label>Senha <span>パスワード</span></label><input id="password" type="password" autocomplete="new-password" minlength="6" required></div>
+<div class="field"><label>Confirmar senha <span>パスワード確認</span></label><input id="password2" type="password" autocomplete="new-password" minlength="6" required></div>
+<div style="margin-top:18px"><button id="signup" class="primary">Criar conta / アカウント作成</button></div>
+<div id="msg" class="msg"></div>
+<a class="secondary" href="programa.html">Voltar ao login / ログインに戻る</a>
+</main>
+<script>
+const SUPABASE_URL='https://uoapmjwdwtpltnxvmniy.supabase.co';
+const SUPABASE_KEY='sb_publishable_10fUBHTtp6sev9kXjMIDJg_CFBkeT8D';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+function show(text,ok=false){const el=$('msg');el.textContent=text;el.className='msg '+(ok?'ok':'err');el.style.display='block'}
+async function signup(){
+ const email=$('email').value.trim();const p=$('password').value;const p2=$('password2').value;
+ if(!email||!p||!p2){show('Preencha todos os campos / すべて入力してください');return}
+ if(p.length<6){show('A senha deve ter pelo menos 6 caracteres / パスワードは6文字以上です');return}
+ if(p!==p2){show('As senhas não coincidem / パスワードが一致しません');return}
+ const {data,error}=await db.auth.signUp({email,password:p,options:{emailRedirectTo:window.location.origin+'/site-igreja/programa.html'}});
+ if(error){show(error.message);return}
+ if(data.session){show('Conta criada. Você já pode entrar no programa. / アカウントを作成しました。プログラムにログインできます。',true);setTimeout(()=>location.href='programa.html',900)}
+ else{show('Conta criada. Verifique seu e-mail para confirmar o cadastro e depois entre no programa. / アカウントを作成しました。メールを確認して登録を完了し、ログインしてください。',true)}
+}
+$('signup').onclick=signup;
+</script>
+</body>
+</html>
