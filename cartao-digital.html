@@ -3,61 +3,43 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Cartão Digital — Japan Christian Congregation</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;background:#eef3f8;color:#142235}
+html,body{margin:0;padding:0;width:100%;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;background:#eef3f8;color:#142235}
+body{overflow-x:hidden}
 .wrap{width:100%;max-width:760px;margin:0 auto;padding:14px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
 .toolbar button{background:#063d78;color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:700;font-size:16px;cursor:pointer}
-
-/* CARTÃO: estrutura rígida, sem elementos sobrepostos */
-.business-card{position:relative;width:100%;aspect-ratio:1.586/1;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px #0002;display:flex;flex-direction:column}
-.card-top{height:44%;flex:0 0 44%;background:#063d78;color:#fff;padding:3.5% 4%;display:flex;align-items:center;gap:4%;overflow:hidden}
-.photo-wrap{width:29%;height:100%;flex:0 0 29%;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0}
-.photo{display:block;width:100%;height:100%;object-fit:cover;border:4px solid #c99a32;border-radius:9px;background:#dbe3eb;min-width:0;min-height:0}
-.card-head{width:67%;flex:0 0 67%;min-width:0;overflow:hidden}
-.org{font-size:clamp(12px,2.55vw,22px);line-height:1.13;font-weight:800;overflow-wrap:anywhere;word-break:break-word}
-.sub{font-size:clamp(7px,1.25vw,12px);line-height:1.2;margin-top:6px;overflow-wrap:anywhere}
-
-.card-body{height:56%;flex:0 0 56%;padding:3.5% 4%;display:flex;align-items:center;gap:4%;min-width:0;overflow:hidden}
-.identity{width:72%;flex:0 0 72%;min-width:0;overflow:hidden}
-.name{font-size:clamp(15px,3.2vw,27px);line-height:1.08;font-weight:800;overflow-wrap:anywhere;word-break:break-word}
-.en{color:#063d78;font-size:clamp(12px,2.55vw,21px);line-height:1.1;font-weight:800;margin-top:5px;overflow-wrap:anywhere}
-.title{color:#063d78;font-size:clamp(10px,1.85vw,15px);line-height:1.1;font-weight:800;margin-top:7px;overflow-wrap:anywhere;word-break:break-word}
-.pt-title{font-size:clamp(9px,1.7vw,14px);line-height:1.1;margin-top:3px;overflow-wrap:anywhere}
-.contacts{font-size:clamp(7px,1.35vw,11px);line-height:1.28;margin-top:8px;overflow-wrap:anywhere;word-break:break-word}
-.qrbox{width:24%;flex:0 0 24%;max-width:125px;background:#fff;border:2px solid #c99a32;padding:4px;border-radius:5px;align-self:center;min-width:0;overflow:hidden}
-.qrbox img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:contain}
-.qrbox small{display:block;background:#063d78;color:#fff;text-align:center;font-size:clamp(6px,1.05vw,9px);line-height:1.1;padding:3px 1px;white-space:normal;overflow-wrap:anywhere}
-
+.business-card{width:100%;aspect-ratio:1.586/1;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 30px #0002;display:grid;grid-template-rows:46% 54%;position:relative}
+.card-top{min-height:0;overflow:hidden;background:#063d78;color:#fff;display:grid;grid-template-columns:30% minmax(0,70%);align-items:center;padding:4% 4%;gap:3%}
+.photo{display:block;width:100%;height:88%;min-width:0;min-height:0;max-width:100%;object-fit:cover;object-position:center;border:4px solid #c99a32;border-radius:9px;background:#dbe3eb;align-self:center}
+.card-head{min-width:0;min-height:0;overflow:hidden}
+.org{font-size:clamp(13px,2.8vw,22px);line-height:1.14;font-weight:800;overflow-wrap:anywhere;word-break:break-word}
+.sub{font-size:clamp(7px,1.35vw,12px);line-height:1.2;margin-top:6px;letter-spacing:.15px;overflow-wrap:anywhere}
+.card-body{min-width:0;min-height:0;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 19%;gap:3%;padding:4% 4%;align-items:center}
+.identity{min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.name{font-size:clamp(15px,3.4vw,25px);line-height:1.08;font-weight:800;overflow-wrap:anywhere;word-break:break-word}
+.en{color:#063d78;font-size:clamp(13px,2.7vw,20px);line-height:1.1;font-weight:800;margin-top:4px}
+.title{color:#063d78;font-size:clamp(10px,2vw,15px);line-height:1.1;font-weight:800;margin-top:7px;overflow-wrap:anywhere;word-break:break-word}
+.pt-title{font-size:clamp(9px,1.75vw,14px);line-height:1.1;margin-top:3px;overflow-wrap:anywhere}
+.contacts{font-size:clamp(7px,1.4vw,11px);line-height:1.28;margin-top:7px;overflow-wrap:anywhere;word-break:break-word}
+.qrbox{width:100%;max-width:88px;min-width:0;justify-self:end;align-self:center;background:#fff;border:2px solid #c99a32;padding:4px;border-radius:6px;overflow:hidden}
+.qrbox img{display:block;width:100%;height:auto;min-width:0;min-height:0}
+.qrbox small{display:block;background:#063d78;color:#fff;text-align:center;font-size:clamp(6px,1.15vw,9px);line-height:1.1;padding:3px 1px;white-space:normal}
 .panel{background:#fff;border-radius:18px;padding:18px;margin-top:18px}
-.panel input,.panel textarea{width:100%;padding:11px;margin:5px 0 10px;border:1px solid #ccd5df;border-radius:9px;font:inherit}
+.panel input,.panel textarea{width:100%;box-sizing:border-box;padding:11px;margin:5px 0 10px;border:1px solid #ccd5df;border-radius:9px;font:inherit}
 .panel button{background:#063d78;color:#fff;border:0;border-radius:10px;padding:11px 14px;font-weight:700}
-
 @media(max-width:520px){
- .wrap{padding:10px}
+ .wrap{padding:12px}
  .business-card{border-radius:14px}
- .card-top{padding:3% 3%;gap:3%}
- .photo-wrap{width:30%;flex-basis:30%}
- .card-head{width:67%;flex-basis:67%}
- .photo{border-width:3px}
- .card-body{padding:3% 3%;gap:3%}
- .identity{width:72%;flex-basis:72%}
- .qrbox{width:25%;flex-basis:25%;max-width:none;padding:3px}
-}
-@media(max-width:380px){
- .org{font-size:12px}
- .sub{font-size:7px}
- .name{font-size:14px}
- .en{font-size:12px}
- .title{font-size:9px}
- .pt-title{font-size:8px}
- .contacts{font-size:7px}
+ .card-top{grid-template-columns:29% minmax(0,71%);padding:4% 3.5%;gap:3%}
+ .photo{height:84%;border-width:3px}
+ .card-body{grid-template-columns:minmax(0,1fr) 18%;padding:4% 3.5%;gap:3%}
+ .qrbox{max-width:76px;padding:3px}
 }
 @media print{
  body{background:#fff}
@@ -74,16 +56,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;b
   <input id="photoFile" type="file" accept="image/*" hidden>
   <button type="button" onclick="window.print()">🖨️ Imprimir / PDF</button>
  </div>
-
- <div class="business-card" aria-label="Cartão de visita digital">
+ <div class="business-card">
   <div class="card-top">
-   <div class="photo-wrap"><img id="photo" class="photo" alt="Fotografia"></div>
+   <img id="photo" class="photo" alt="Fotografia">
    <div class="card-head">
     <div class="org">宗教法人 日本クリスチャンコングレゲーション</div>
     <div class="sub">JAPAN CHRISTIAN CONGREGATION · RELIGIOUS CORPORATION</div>
    </div>
   </div>
-
   <div class="card-body">
    <div class="identity">
     <div class="name">アトス ロベルト 藤社</div>
@@ -98,7 +78,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;b
    </div>
   </div>
  </div>
-
  <div class="panel">
   <h2>Cartão digital</h2>
   <label>Organização<input id="org" value="宗教法人 日本クリスチャンコングレゲーション"></label>
