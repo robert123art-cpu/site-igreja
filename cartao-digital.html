@@ -3,40 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Cartão Digital — Japan Christian Congregation</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;background:#eef3f8;color:#142235}
-.wrap{width:100%;max-width:760px;margin:auto;padding:16px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;background:#eef3f8;color:#142235}
+.wrap{width:100%;max-width:760px;margin:0 auto;padding:14px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
 .toolbar button{background:#063d78;color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:700;font-size:16px;cursor:pointer}
-.business-card{width:100%;aspect-ratio:1.586/1;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 30px #0002;display:grid;grid-template-rows:43% 57%;position:relative}
-.card-top{background:#063d78;color:#fff;display:grid;grid-template-columns:30% 70%;align-items:center;padding:3% 4%;gap:3%}
-.photo{width:100%;height:100%;max-height:100%;object-fit:cover;border:4px solid #c99a32;border-radius:9px;background:#dbe3eb;min-width:0}
-.card-head{min-width:0;overflow:hidden}
-.org{font-size:clamp(12px,2.7vw,22px);line-height:1.16;font-weight:800;overflow-wrap:anywhere}
-.sub{font-size:clamp(7px,1.35vw,12px);line-height:1.25;margin-top:5px;letter-spacing:.2px}
-.card-body{display:grid;grid-template-columns:minmax(0,1fr) 20%;gap:3%;padding:3% 4%;align-items:center;min-width:0}
-.identity{min-width:0;overflow:hidden}
-.name{font-size:clamp(15px,3.6vw,27px);line-height:1.12;font-weight:800;overflow-wrap:anywhere}
-.en{color:#063d78;font-size:clamp(13px,2.8vw,21px);line-height:1.15;font-weight:800;margin-top:3px}
-.title{color:#063d78;font-size:clamp(10px,2vw,15px);line-height:1.15;font-weight:800;margin-top:6px;overflow-wrap:anywhere}
-.pt-title{font-size:clamp(9px,1.8vw,14px);line-height:1.15;margin-top:2px}
-.contacts{font-size:clamp(7px,1.45vw,11px);line-height:1.35;margin-top:7px;overflow-wrap:anywhere}
-.qrbox{width:100%;max-width:100px;justify-self:end;align-self:center;background:#fff;border:2px solid #c99a32;padding:4px;border-radius:4px}
-.qrbox img{display:block;width:100%;height:auto}
-.qrbox small{display:block;background:#063d78;color:#fff;text-align:center;font-size:clamp(6px,1.2vw,9px);line-height:1.15;padding:3px 1px;white-space:normal}
+
+/* CARTÃO: estrutura rígida, sem elementos sobrepostos */
+.business-card{position:relative;width:100%;aspect-ratio:1.586/1;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px #0002;display:flex;flex-direction:column}
+.card-top{height:44%;flex:0 0 44%;background:#063d78;color:#fff;padding:3.5% 4%;display:flex;align-items:center;gap:4%;overflow:hidden}
+.photo-wrap{width:29%;height:100%;flex:0 0 29%;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0}
+.photo{display:block;width:100%;height:100%;object-fit:cover;border:4px solid #c99a32;border-radius:9px;background:#dbe3eb;min-width:0;min-height:0}
+.card-head{width:67%;flex:0 0 67%;min-width:0;overflow:hidden}
+.org{font-size:clamp(12px,2.55vw,22px);line-height:1.13;font-weight:800;overflow-wrap:anywhere;word-break:break-word}
+.sub{font-size:clamp(7px,1.25vw,12px);line-height:1.2;margin-top:6px;overflow-wrap:anywhere}
+
+.card-body{height:56%;flex:0 0 56%;padding:3.5% 4%;display:flex;align-items:center;gap:4%;min-width:0;overflow:hidden}
+.identity{width:72%;flex:0 0 72%;min-width:0;overflow:hidden}
+.name{font-size:clamp(15px,3.2vw,27px);line-height:1.08;font-weight:800;overflow-wrap:anywhere;word-break:break-word}
+.en{color:#063d78;font-size:clamp(12px,2.55vw,21px);line-height:1.1;font-weight:800;margin-top:5px;overflow-wrap:anywhere}
+.title{color:#063d78;font-size:clamp(10px,1.85vw,15px);line-height:1.1;font-weight:800;margin-top:7px;overflow-wrap:anywhere;word-break:break-word}
+.pt-title{font-size:clamp(9px,1.7vw,14px);line-height:1.1;margin-top:3px;overflow-wrap:anywhere}
+.contacts{font-size:clamp(7px,1.35vw,11px);line-height:1.28;margin-top:8px;overflow-wrap:anywhere;word-break:break-word}
+.qrbox{width:24%;flex:0 0 24%;max-width:125px;background:#fff;border:2px solid #c99a32;padding:4px;border-radius:5px;align-self:center;min-width:0;overflow:hidden}
+.qrbox img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:contain}
+.qrbox small{display:block;background:#063d78;color:#fff;text-align:center;font-size:clamp(6px,1.05vw,9px);line-height:1.1;padding:3px 1px;white-space:normal;overflow-wrap:anywhere}
+
 .panel{background:#fff;border-radius:18px;padding:18px;margin-top:18px}
-.panel input,.panel textarea{width:100%;box-sizing:border-box;padding:11px;margin:5px 0 10px;border:1px solid #ccd5df;border-radius:9px;font:inherit}
+.panel input,.panel textarea{width:100%;padding:11px;margin:5px 0 10px;border:1px solid #ccd5df;border-radius:9px;font:inherit}
 .panel button{background:#063d78;color:#fff;border:0;border-radius:10px;padding:11px 14px;font-weight:700}
+
 @media(max-width:520px){
- .wrap{padding:12px}
+ .wrap{padding:10px}
  .business-card{border-radius:14px}
- .card-top{padding:3% 3.5%;gap:2.5%}
+ .card-top{padding:3% 3%;gap:3%}
+ .photo-wrap{width:30%;flex-basis:30%}
+ .card-head{width:67%;flex-basis:67%}
  .photo{border-width:3px}
- .card-body{padding:3% 3.5%;gap:2.5%}
- .qrbox{max-width:76px;padding:3px}
+ .card-body{padding:3% 3%;gap:3%}
+ .identity{width:72%;flex-basis:72%}
+ .qrbox{width:25%;flex-basis:25%;max-width:none;padding:3px}
+}
+@media(max-width:380px){
+ .org{font-size:12px}
+ .sub{font-size:7px}
+ .name{font-size:14px}
+ .en{font-size:12px}
+ .title{font-size:9px}
+ .pt-title{font-size:8px}
+ .contacts{font-size:7px}
 }
 @media print{
  body{background:#fff}
@@ -54,14 +75,15 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,san
   <button type="button" onclick="window.print()">🖨️ Imprimir / PDF</button>
  </div>
 
- <div class="business-card">
+ <div class="business-card" aria-label="Cartão de visita digital">
   <div class="card-top">
-   <img id="photo" class="photo" alt="Fotografia">
+   <div class="photo-wrap"><img id="photo" class="photo" alt="Fotografia"></div>
    <div class="card-head">
     <div class="org">宗教法人 日本クリスチャンコングレゲーション</div>
     <div class="sub">JAPAN CHRISTIAN CONGREGATION · RELIGIOUS CORPORATION</div>
    </div>
   </div>
+
   <div class="card-body">
    <div class="identity">
     <div class="name">アトス ロベルト 藤社</div>
@@ -89,7 +111,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,san
 const $=id=>document.getElementById(id);
 const fallback="data:image/svg+xml;charset=UTF-8,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='600' height='800'><rect width='100%' height='100%' fill='#dbe3eb'/><text x='50%' y='48%' text-anchor='middle' font-family='Arial' font-size='34' fill='#5b6b7d'>FOTOGRAFIA</text></svg>");
 try{$('photo').src=localStorage.getItem('cartaoFoto')||fallback}catch(e){$('photo').src=fallback}
-$('photoBtn').addEventListener('click',()=>{$('photoFile').click()});
+$('photoBtn').addEventListener('click',()=>$('photoFile').click());
 $('photoFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')){alert('Selecione uma fotografia válida.');return}const r=new FileReader();r.onload=()=>{$('photo').src=r.result;try{localStorage.setItem('cartaoFoto',r.result)}catch(err){alert('A foto foi carregada, mas não pôde ser salva neste dispositivo.')}};r.onerror=()=>alert('Não foi possível carregar a fotografia.');r.readAsDataURL(f)});
 $('saveBtn').addEventListener('click',()=>{try{localStorage.setItem('cartaoOrg',$('org').value);localStorage.setItem('cartaoNome',$('name').value);localStorage.setItem('cartaoCargo',$('title').value);alert('Dados salvos.')}catch(e){alert('Não foi possível salvar os dados.')}});
 </script>
