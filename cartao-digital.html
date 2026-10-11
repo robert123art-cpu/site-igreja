@@ -11,16 +11,18 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;width:100%;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;background:#eef3f8;color:#142235}
 body{overflow-x:hidden}.wrap{width:100%;max-width:900px;margin:0 auto;padding:16px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.photoPicker{position:relative;display:inline-flex}.photoPicker button,.toolbar>button{background:#063d78;color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:700;font-size:16px;cursor:pointer}.photoPicker input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.photoPicker{position:relative;display:inline-flex}.photoPicker button,.toolbar>button,.linkBtn{background:#063d78;color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:700;font-size:16px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.photoPicker input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .business-card{width:100%;max-width:856px;margin:0 auto;aspect-ratio:856/540;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 30px #0002;display:flex;flex-direction:column;position:relative}
-.card-top{height:48%;min-height:0;background:#063d78;color:#fff;display:flex;align-items:center;padding:4% 4%;gap:4%;overflow:hidden}
+.card-top{flex:0 0 48%;height:48%;min-height:0;background:#063d78;color:#fff;display:flex;align-items:center;padding:4% 4%;gap:4%;overflow:hidden;position:relative;z-index:1}
 .photo-frame{height:88%;width:auto;aspect-ratio:3/4;flex:0 0 auto;border:4px solid #c99a32;border-radius:10px;background:#dbe3eb;overflow:hidden}
 .photo{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
 .card-head{min-width:0;flex:1;overflow:hidden}.org{font-size:clamp(16px,3vw,27px);line-height:1.16;font-weight:800;overflow-wrap:anywhere;word-break:break-word}.sub{font-size:clamp(8px,1.35vw,12px);line-height:1.25;margin-top:7px;letter-spacing:.1px;overflow-wrap:anywhere}
-.card-body{height:52%;min-height:0;display:flex;align-items:center;gap:4%;padding:4%;overflow:hidden;background:#fff}.identity{min-width:0;flex:1;overflow:hidden}.name{font-size:clamp(18px,3.6vw,30px);line-height:1.08;font-weight:800;overflow-wrap:anywhere;word-break:break-word}.en{color:#063d78;font-size:clamp(14px,2.8vw,21px);line-height:1.1;font-weight:800;margin-top:5px}.title{color:#063d78;font-size:clamp(11px,2vw,16px);line-height:1.12;font-weight:800;margin-top:8px;overflow-wrap:anywhere;word-break:break-word}.pt-title{font-size:clamp(10px,1.8vw,14px);line-height:1.12;margin-top:3px;overflow-wrap:anywhere}.contacts{font-size:clamp(8px,1.45vw,12px);line-height:1.3;margin-top:8px;overflow-wrap:anywhere;word-break:break-word}
+.card-body{flex:0 0 52%;height:52%;min-height:0;display:flex;align-items:center;gap:4%;padding:4%;overflow:hidden;background:#fff;position:relative;z-index:2}
+.identity{min-width:0;flex:1;overflow:hidden}.name{font-size:clamp(18px,3.6vw,30px);line-height:1.08;font-weight:800;overflow-wrap:anywhere;word-break:break-word}.en{color:#063d78;font-size:clamp(14px,2.8vw,21px);line-height:1.1;font-weight:800;margin-top:5px}.title{color:#063d78;font-size:clamp(11px,2vw,16px);line-height:1.12;font-weight:800;margin-top:8px;overflow-wrap:anywhere;word-break:break-word}.pt-title{font-size:clamp(10px,1.8vw,14px);line-height:1.12;margin-top:3px;overflow-wrap:anywhere}.contacts{font-size:clamp(8px,1.45vw,12px);line-height:1.3;margin-top:8px;overflow-wrap:anywhere;word-break:break-word}
 .qrbox{flex:0 0 18%;max-width:120px;min-width:74px;background:#fff;border:2px solid #c99a32;padding:5px;border-radius:8px;overflow:hidden}.qrbox img{display:block;width:100%;height:auto}.qrbox small{display:block;background:#063d78;color:#fff;text-align:center;font-size:clamp(7px,1.1vw,10px);line-height:1.15;padding:4px 2px;white-space:normal}
+.card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.card-actions .linkBtn{font-size:14px;padding:10px 13px}
 .panel{background:#fff;border-radius:18px;padding:18px;margin-top:18px}.panel h2{margin-top:0}.panel input,.panel textarea{width:100%;padding:11px;margin:5px 0 10px;border:1px solid #ccd5df;border-radius:9px;font:inherit}.panel button{background:#063d78;color:#fff;border:0;border-radius:10px;padding:11px 14px;font-weight:700}
-@media(max-width:520px){.wrap{padding:12px}.business-card{border-radius:14px}.card-top{padding:4% 4%;gap:4%}.photo-frame{height:82%;border-width:3px}.org{font-size:clamp(13px,4.1vw,20px)}.sub{font-size:clamp(7px,1.8vw,10px);margin-top:5px}.card-body{padding:4%;gap:3%}.name{font-size:clamp(14px,4.4vw,23px)}.en{font-size:clamp(11px,3.4vw,17px)}.title{font-size:clamp(9px,2.7vw,13px)}.pt-title{font-size:clamp(8px,2.4vw,12px)}.contacts{font-size:clamp(7px,2.05vw,10px)}.qrbox{flex-basis:19%;min-width:58px;padding:3px}}
+@media(max-width:520px){.wrap{padding:12px}.business-card{border-radius:14px}.card-top{padding:4% 4%;gap:4%}.photo-frame{height:82%;border-width:3px}.org{font-size:clamp(13px,4.1vw,20px)}.sub{font-size:clamp(7px,1.8vw,10px);margin-top:5px}.card-body{padding:4%;gap:3%}.name{font-size:clamp(14px,4.4vw,23px)}.en{font-size:clamp(11px,3.4vw,17px)}.title{font-size:clamp(9px,2.7vw,13px)}.pt-title{font-size:clamp(8px,2.4vw,12px)}.contacts{font-size:clamp(7px,2.05vw,10px)}.qrbox{flex-basis:19%;min-width:58px;padding:3px}.card-actions .linkBtn{font-size:12px;padding:9px 11px}}
 @media print{
  @page{size:85.6mm 54mm;margin:0}
  html,body{width:85.6mm;height:54mm;margin:0;padding:0;background:#fff;overflow:hidden}
@@ -28,10 +30,10 @@ body{overflow-x:hidden}.wrap{width:100%;max-width:900px;margin:0 auto;padding:16
  .wrap{position:absolute;left:0;top:0;width:85.6mm;height:54mm;margin:0;padding:0;max-width:none}
  .business-card,.business-card *{visibility:visible!important}
  .business-card{position:absolute;left:0;top:0;width:85.6mm;height:54mm;max-width:none;aspect-ratio:auto;margin:0;border-radius:0;box-shadow:none;overflow:hidden;display:flex}
- .card-top{height:48%;padding:4% 4%;gap:4%}
+ .card-top{flex:0 0 48%;height:48%;padding:4% 4%;gap:4%}
  .photo-frame{height:88%;border-width:1.2mm;border-radius:1.5mm}
- .card-body{height:52%;padding:4%;gap:4%}
- .org{font-size:4.1mm}.sub{font-size:1.9mm;margin-top:1.2mm}.name{font-size:4.3mm}.en{font-size:3.1mm;margin-top:1mm}.title{font-size:2.35mm;margin-top:1.4mm}.pt-title{font-size:2.05mm;margin-top:.5mm}.contacts{font-size:1.75mm;margin-top:1.2mm}.qrbox{flex-basis:18%;max-width:12mm;min-width:0;padding:.6mm;border-width:.35mm;border-radius:1mm}.qrbox small{font-size:1.35mm;padding:.5mm .2mm}
+ .card-body{flex:0 0 52%;height:52%;padding:4%;gap:4%}
+ .org{font-size:4.1mm}.sub{font-size:1.9mm;margin-top:1.2mm}.name{font-size:4.3mm}.en{font-size:3.1mm;margin-top:1mm}.title{font-size:2.35mm;margin-top:1.4mm}.pt-title{font-size:2.05mm;margin-top:.5mm}.contacts{font-size:1.75mm;margin-top:1.2mm}.qrbox{flex-basis:18%;max-width:12mm;min-width:0;padding:.6mm;border-width:.35mm;border-radius:1mm}.qrbox small{font-size:1.35mm;padding:.5mm .2mm}.card-actions{display:none}
 }
 </style>
 </head>
@@ -45,9 +47,10 @@ body{overflow-x:hidden}.wrap{width:100%;max-width:900px;margin:0 auto;padding:16
   </div>
   <div class="card-body">
     <div class="identity"><div class="name" id="cardName">藤社 アトス ロベルト</div><div class="en">Roberto Tosha</div><div class="title" id="cardTitle">管理代表役員（会長）</div><div class="pt-title">Presidente da Administração</div><div class="contacts">☎ 0566 93 1383<br>✉ CCj.secretariacentral@outlook.com<br>〒446-0046<br>愛知県 安城市 赤松町西下40-8</div></div>
-    <div class="qrbox"><img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Frobert123art-cpu.github.io%2Fsite-igreja%2F" alt="QR Code"><small>公式サイト / PRESENÇA</small></div>
+    <div class="qrbox"><img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Frobert123art-cpu.github.io%2Fsite-igreja%2Fpresenca.html" alt="QR Code"><small>公式サイト / PRESENÇA</small></div>
   </div>
 </div>
+<div class="card-actions"><a class="linkBtn" href="presenca.html">📋 Lista de presença / 出席名簿</a><a class="linkBtn" href="index.html">🏠 Site da igreja / 教会サイト</a></div>
 <div class="panel"><h2>Cartão digital</h2><label>Organização<input id="org" value="宗教法人 日本クリスチャンコングレゲーション"></label><label>Nome<input id="name" value="藤社 アトス ロベルト"></label><label>Cargo<input id="title" value="管理代表役員（会長）"></label><button type="button" id="saveBtn">💾 Salvar dados</button></div>
 </div>
 <script>
