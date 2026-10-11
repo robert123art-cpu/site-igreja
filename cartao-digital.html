@@ -39,7 +39,7 @@ body{overflow-x:hidden}.wrap{width:100%;max-width:900px;margin:0 auto;padding:16
 </head>
 <body>
 <div class="wrap">
-<div class="toolbar"><div class="photoPicker"><button type="button">📷 Trocar fotografia</button><input id="photoFile" type="file" accept="image/*" aria-label="Selecionar fotografia"></div><button type="button" onclick="window.print()">🖨️ Imprimir / PDF</button></div>
+<div class="toolbar"><div class="photoPicker"><button type="button">📷 Trocar fotografia</button><input id="photoFile" type="file" accept="image/*" aria-label="Selecionar fotografia"></div><button type="button" id="printBtn">🖨️ Imprimir / PDF</button></div>
 <div class="business-card">
   <div class="card-top">
     <div class="photo-frame"><img id="photo" class="photo" alt="Fotografia"></div>
@@ -59,6 +59,16 @@ const defaults={org:'宗教法人 日本クリスチャンコングレゲーシ�
 const fallback="data:image/svg+xml;charset=UTF-8,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='600' height='800'><rect width='100%' height='100%' fill='#dbe3eb'/><text x='50%' y='48%' text-anchor='middle' font-family='Arial' font-size='34' fill='#5b6b7d'>FOTOGRAFIA</text></svg>");
 function setPhoto(src){$('photo').src=src}
 function applyData(){ $('cardOrg').textContent=$('org').value; $('cardName').textContent=$('name').value; $('cardTitle').textContent=$('title').value }
+function printCard(){
+  try{
+    window.focus();
+    if(typeof window.print==='function'){
+      setTimeout(function(){window.print()},60);
+    }else{
+      alert('A função de impressão não está disponível neste navegador.');
+    }
+  }catch(e){alert('Não foi possível abrir a impressão. Tente pelo menu Compartilhar do Safari.');}
+}
 try{
  setPhoto(localStorage.getItem('cartaoFoto')||fallback);
  $('org').value=localStorage.getItem('cartaoOrg')||defaults.org;
@@ -68,5 +78,7 @@ try{
 }catch(e){setPhoto(fallback)}
 $('photoFile').addEventListener('change',function(e){const f=e.target.files&&e.target.files[0];if(!f)return;if(!f.type||!f.type.startsWith('image/')){alert('Selecione uma fotografia válida.');e.target.value='';return}const r=new FileReader();r.onload=function(){setPhoto(r.result);try{localStorage.setItem('cartaoFoto',r.result)}catch(err){}};r.onerror=function(){alert('Não foi possível carregar a fotografia.');};r.readAsDataURL(f)});
 $('saveBtn').addEventListener('click',function(){try{localStorage.setItem('cartaoOrg',$('org').value);localStorage.setItem('cartaoNome',$('name').value);localStorage.setItem('cartaoCargo',$('title').value);applyData();alert('Dados salvos e cartão atualizado.')}catch(e){alert('Não foi possível salvar os dados.')}});
+$('printBtn').addEventListener('click',printCard);
+$('printBtn').addEventListener('touchend',function(e){e.preventDefault();printCard()},{passive:false});
 </script>
 </body></html>
