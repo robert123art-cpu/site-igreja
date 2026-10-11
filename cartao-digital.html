@@ -41,10 +41,10 @@ body{overflow-x:hidden}.wrap{width:100%;max-width:900px;margin:0 auto;padding:16
 <div class="business-card">
   <div class="card-top">
     <div class="photo-frame"><img id="photo" class="photo" alt="Fotografia"></div>
-    <div class="card-head"><div class="org">宗教法人 日本クリスチャンコングレゲーション</div><div class="sub">JAPAN CHRISTIAN CONGREGATION · RELIGIOUS CORPORATION</div></div>
+    <div class="card-head"><div class="org" id="cardOrg">宗教法人 日本クリスチャンコングレゲーション</div><div class="sub">JAPAN CHRISTIAN CONGREGATION · RELIGIOUS CORPORATION</div></div>
   </div>
   <div class="card-body">
-    <div class="identity"><div class="name">藤社 アトス ロベルト</div><div class="en">Roberto Tosha</div><div class="title">管理代表役員（会長）</div><div class="pt-title">Presidente da Administração</div><div class="contacts">☎ 0566 93 1383<br>✉ CCj.secretariacentral@outlook.com<br>〒446-0046<br>愛知県 安城市 赤松町西下40-8</div></div>
+    <div class="identity"><div class="name" id="cardName">藤社 アトス ロベルト</div><div class="en">Roberto Tosha</div><div class="title" id="cardTitle">管理代表役員（会長）</div><div class="pt-title">Presidente da Administração</div><div class="contacts">☎ 0566 93 1383<br>✉ CCj.secretariacentral@outlook.com<br>〒446-0046<br>愛知県 安城市 赤松町西下40-8</div></div>
     <div class="qrbox"><img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Frobert123art-cpu.github.io%2Fsite-igreja%2F" alt="QR Code"><small>公式サイト / PRESENÇA</small></div>
   </div>
 </div>
@@ -52,10 +52,18 @@ body{overflow-x:hidden}.wrap{width:100%;max-width:900px;margin:0 auto;padding:16
 </div>
 <script>
 const $=id=>document.getElementById(id);
+const defaults={org:'宗教法人 日本クリスチャンコングレゲーション',name:'藤社 アトス ロベルト',title:'管理代表役員（会長）'};
 const fallback="data:image/svg+xml;charset=UTF-8,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='600' height='800'><rect width='100%' height='100%' fill='#dbe3eb'/><text x='50%' y='48%' text-anchor='middle' font-family='Arial' font-size='34' fill='#5b6b7d'>FOTOGRAFIA</text></svg>");
 function setPhoto(src){$('photo').src=src}
-try{setPhoto(localStorage.getItem('cartaoFoto')||fallback)}catch(e){setPhoto(fallback)}
+function applyData(){ $('cardOrg').textContent=$('org').value; $('cardName').textContent=$('name').value; $('cardTitle').textContent=$('title').value }
+try{
+ setPhoto(localStorage.getItem('cartaoFoto')||fallback);
+ $('org').value=localStorage.getItem('cartaoOrg')||defaults.org;
+ $('name').value=localStorage.getItem('cartaoNome')||defaults.name;
+ $('title').value=localStorage.getItem('cartaoCargo')||defaults.title;
+ applyData();
+}catch(e){setPhoto(fallback)}
 $('photoFile').addEventListener('change',function(e){const f=e.target.files&&e.target.files[0];if(!f)return;if(!f.type||!f.type.startsWith('image/')){alert('Selecione uma fotografia válida.');e.target.value='';return}const r=new FileReader();r.onload=function(){setPhoto(r.result);try{localStorage.setItem('cartaoFoto',r.result)}catch(err){}};r.onerror=function(){alert('Não foi possível carregar a fotografia.');};r.readAsDataURL(f)});
-$('saveBtn').addEventListener('click',function(){try{localStorage.setItem('cartaoOrg',$('org').value);localStorage.setItem('cartaoNome',$('name').value);localStorage.setItem('cartaoCargo',$('title').value);alert('Dados salvos.')}catch(e){alert('Não foi possível salvar os dados.')}});
+$('saveBtn').addEventListener('click',function(){try{localStorage.setItem('cartaoOrg',$('org').value);localStorage.setItem('cartaoNome',$('name').value);localStorage.setItem('cartaoCargo',$('title').value);applyData();alert('Dados salvos e cartão atualizado.')}catch(e){alert('Não foi possível salvar os dados.')}});
 </script>
 </body></html>
