@@ -82,7 +82,7 @@
 #admin .signature-controls{margin-top:7px}
 #admin .clear-signature{min-height:40px;padding:8px 12px;font-size:13px}
 #admin .clear-signature .ja,#admin .clear-signature .pt{display:block}
-#admin .signature-line{height:1px;margin-top:13px;border-top:1px solid #87969b}
+#admin .signature-line{height:1px;margin-top:13px;border-top:1px solid #87969b;position:relative}#admin .inkan{position:absolute;right:0;top:-13px;display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;border:1.5px solid #b6322e;border-radius:50%;background:#fff;color:#b6322e;font-size:13px;font-weight:700;line-height:1;print-color-adjust:exact;-webkit-print-color-adjust:exact}
 #admin .signature-image-print{display:none}
 #admin .report-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
 #admin .meeting-pickers{flex:1 0 100%}
@@ -207,7 +207,7 @@
 <p class="signature-instructions bilingual"><span class="ja">タッチまたはマウスで署名してください</span><span class="pt">Desenhe aqui com o dedo ou mouse</span></p>
 <canvas id="presidentSignatureCanvas" class="signature-pad" width="900" height="250" aria-label="Assinatura virtual do presidente"></canvas>
 <div class="signature-controls no-print"><button type="button" class="btn clear-signature" data-clear-signature="president"><span class="ja">署名を消去</span><span class="pt">Limpar assinatura</span></button></div>
-<div class="signature-line"></div>
+<div class="signature-line"><span class="inkan" aria-label="Selo 印">印</span></div>
 </div>
 <div class="signature-card">
 <label class="meta-label" for="reportSecretarySignature"><span class="ja">書記の署名</span><span class="pt">Assinatura do secretário</span></label>
@@ -215,7 +215,7 @@
 <p class="signature-instructions bilingual"><span class="ja">タッチまたはマウスで署名してください</span><span class="pt">Desenhe aqui com o dedo ou mouse</span></p>
 <canvas id="secretarySignatureCanvas" class="signature-pad" width="900" height="250" aria-label="Assinatura virtual do secretário"></canvas>
 <div class="signature-controls no-print"><button type="button" class="btn clear-signature" data-clear-signature="secretary"><span class="ja">署名を消去</span><span class="pt">Limpar assinatura</span></button></div>
-<div class="signature-line"></div>
+<div class="signature-line"><span class="inkan" aria-label="Selo 印">印</span></div>
 </div>
 <div class="signature-card">
 <label class="meta-label" for="reportElderSignature"><span class="ja">長老の署名</span><span class="pt">Assinatura do ancião</span></label>
@@ -223,7 +223,7 @@
 <p class="signature-instructions bilingual"><span class="ja">タッチまたはマウスで署名してください</span><span class="pt">Desenhe aqui com o dedo ou mouse</span></p>
 <canvas id="elderSignatureCanvas" class="signature-pad" width="900" height="250" aria-label="Assinatura virtual do ancião"></canvas>
 <div class="signature-controls no-print"><button type="button" class="btn clear-signature" data-clear-signature="elder"><span class="ja">署名を消去</span><span class="pt">Limpar assinatura</span></button></div>
-<div class="signature-line"></div>
+<div class="signature-line"><span class="inkan" aria-label="Selo 印">印</span></div>
 </div>
 </div></section>
 <div class="report-actions no-print">
