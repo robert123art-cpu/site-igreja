@@ -84,13 +84,24 @@
 #admin .clear-signature .ja,#admin .clear-signature .pt{display:block}
 #admin .signature-line{height:1px;margin-top:13px;border-top:1px solid #87969b;position:relative}#admin .inkan{position:absolute;right:0;top:-13px;display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;border:1.5px solid #b6322e;border-radius:50%;background:#fff;color:#b6322e;font-size:13px;font-weight:700;line-height:1;print-color-adjust:exact;-webkit-print-color-adjust:exact}
 #admin .signature-image-print{display:none}
+#admin .new-meeting-tools{margin:12px 0 18px}
+#admin .new-meeting-toggle .ja,#admin .new-meeting-toggle .pt{display:block}
+#admin .new-meeting-toggle{min-height:44px;border-color:#b9cbd1;color:var(--blue)}
+#admin .new-meeting-panel{margin-top:10px;padding:16px;background:#f7f9fa;border:1px solid #d6e1e5;border-radius:12px}
+#admin .new-meeting-panel h3{margin:0 0 6px;font-size:17px}
+#admin .new-meeting-help{margin:6px 0 14px;color:#56676e;font-size:13px}
+#admin .new-meeting-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#admin .new-meeting-grid>div{min-width:0}
+#admin .new-meeting-grid input{width:100%;padding:10px;border:1px solid #c7d3d8;border-radius:8px;font:inherit;background:white}
+#admin .new-meeting-buttons{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+#admin .new-meeting-buttons .btn .ja,#admin .new-meeting-buttons .btn .pt{display:block}
 #admin .report-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
 #admin .meeting-pickers{flex:1 0 100%}
 #admin .report-actions>.btn{flex:1 1 145px}
 #admin .report-actions .btn{border-radius:10px;transition:transform .12s,box-shadow .12s}
 #admin .report-actions .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(25,65,76,.12)}
 @media screen and (max-width:900px){
-  #admin .meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #admin .meta,#admin .new-meeting-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media screen and (max-width:720px){
   #admin>.card{padding:14px}
@@ -130,7 +141,7 @@
   #admin .signatures-title{font-size:11px;margin:10px 0 6px}
   #admin .signatures{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:18px;margin-top:0}
   #admin .signature-card{padding:6px 8px;border:0;border-radius:0;background:#fff}
-  #admin .signature-instructions,#admin .signature-pad,#admin .signature-controls,#admin .signature-name-input{display:none!important}
+  #admin .signature-instructions,#admin .signature-pad,#admin .signature-controls,#admin .signature-name-input,#admin .new-meeting-tools{display:none!important}
   #admin .signature-name-row{min-height:35px;border-bottom:1px solid #555}
   #admin .signature-name-row .print-value:not(.hidden){display:block!important;font-size:8px}
   #admin .signature-image-print:not(.hidden){display:block!important;max-width:100%;height:38px;object-fit:contain;object-position:left bottom}
@@ -168,6 +179,23 @@
 <div><div class="meta-label"><span class="ja">所属</span><span class="pt">Localidade</span></div><span class="meta-static" id="rLocality"></span></div>
 <div><div class="meta-label"><span class="ja">担当期間</span><span class="pt">Competência</span></div><span class="meta-static" id="rCompetence"></span></div>
 </div>
+<div class="new-meeting-tools no-print">
+<button type="button" id="toggleNewMeeting" class="btn new-meeting-toggle"><span class="ja">新しい会議を追加</span><span class="pt">Nova reunião</span></button>
+<div id="newMeetingPanel" class="new-meeting-panel hidden">
+<h3 class="bilingual"><span class="ja">新しい会議</span><span class="pt">Cadastrar nova reunião</span></h3>
+<p class="new-meeting-help bilingual"><span class="ja">イベントと日時を入力して保存してください。</span><span class="pt">Informe o evento e os horários. Depois de salvar, ele aparecerá no seletor público.</span></p>
+<div class="new-meeting-grid">
+<div><label class="meta-label" for="newMeetingType"><span class="ja">イベント</span><span class="pt">Evento / tipo de reunião</span></label><input id="newMeetingType" type="text" required placeholder="Ex.: Reunião de serviço"></div>
+<div><label class="meta-label" for="newMeetingDate"><span class="ja">日付</span><span class="pt">Data</span></label><input id="newMeetingDate" type="date" required></div>
+<div><label class="meta-label" for="newMeetingGateTime"><span class="ja">受付開始時間</span><span class="pt">Horário da portaria</span></label><input id="newMeetingGateTime" type="time"></div>
+<div><label class="meta-label" for="newMeetingStartTime"><span class="ja">会議開始時間</span><span class="pt">Horário de início</span></label><input id="newMeetingStartTime" type="time"></div>
+<div><label class="meta-label" for="newMeetingAdministration"><span class="ja">管理</span><span class="pt">Administração</span></label><input id="newMeetingAdministration" type="text"></div>
+<div><label class="meta-label" for="newMeetingLocality"><span class="ja">所属</span><span class="pt">Localidade</span></label><input id="newMeetingLocality" type="text"></div>
+<div><label class="meta-label" for="newMeetingCompetence"><span class="ja">担当期間</span><span class="pt">Competência</span></label><input id="newMeetingCompetence" type="text"></div>
+</div>
+<div class="new-meeting-buttons"><button type="button" id="createMeeting" class="btn primary"><span class="ja">保存</span><span class="pt">Salvar reunião</span></button><button type="button" id="cancelNewMeeting" class="btn"><span class="ja">キャンセル</span><span class="pt">Cancelar</span></button></div>
+<div id="newMeetingMsg" class="msg"></div>
+</div></div>
 <div id="adminMsg" class="msg no-print"></div>
 <div class="table-wrap"><table class="report"><thead><tr>
 <th><span class="bilingual"><span class="ja">氏名</span><span class="pt">Nome</span></span></th>
@@ -260,7 +288,10 @@ function showReset(){$("publicRegister").classList.add('hidden');$("successBox")
 function handleRecoveryRedirect(){const hash=window.location.hash.replace(/^#/,'');if(!hash)return;const p=new URLSearchParams(hash),type=p.get('type'),token=p.get('access_token');if(type==='recovery'&&token){session={access_token:token,token_type:p.get('token_type')||'bearer',refresh_token:p.get('refresh_token')||null};showReset();msg('resetMsg','O link de recuperação foi validado. Crie agora uma nova senha.','ok');return}const error=p.get('error_code')||p.get('error');if(error){const desc=p.get('error_description');msg('loginMsg',desc?decodeURIComponent(desc.replace(/\+/g,' ')):'O link de recuperação expirou ou é inválido.','err');history.replaceState(null,'',PRODUCTION_URL)}}
 async function saveNewPassword(){const a=$("newPassword").value,b=$("confirmPassword").value;if(!a||a.length<6){msg('resetMsg','A nova senha deve ter pelo menos 6 caracteres.','err');return}if(a!==b){msg('resetMsg','As senhas não são iguais.','err');return}if(!session?.access_token){msg('resetMsg','O link de recuperação não está mais válido. Solicite uma nova recuperação.','err');return}msg('resetMsg','Salvando nova senha...');const r=await fetch(SUPABASE_URL+'/auth/v1/user',{method:'PUT',headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',Authorization:'Bearer '+session.access_token},body:JSON.stringify({password:a})});const d=await r.json().catch(()=>({}));if(!r.ok){msg('resetMsg',d.msg||d.message||d.error_description||'Não foi possível alterar a senha. Solicite uma nova recuperação.','err');return}msg('resetMsg','Senha alterada com sucesso! Agora você pode entrar com a nova senha.','ok');$("newPassword").value='';$("confirmPassword").value='';session=null;history.replaceState(null,'',PRODUCTION_URL+'?v=8');setTimeout(()=>{$("resetBox").classList.add('hidden');$("recoveryBox").classList.remove('hidden');$("recoveryEmail").value=$("email").value.trim()||'CCj.secretariacentral@outlook.com';msg('loginMsg','Senha alterada. Entre usando a nova senha.','ok');window.scrollTo({top:document.querySelector('.adminBox').offsetTop,behavior:'smooth'})},1200)}
 function populateMeetingPickers(selectedId){const placeholder='<option value="">Selecionar / 選択</option>';const eventOptions=meetings.map(m=>'<option value="'+m.id+'">'+esc(m.meeting_type||'')+'</option>').join('');const dateTimeOptions=meetings.map(m=>'<option value="'+m.id+'">'+esc(formatReportDate(m.meeting_date)||'Sem data')+' — '+esc(hm(m.meeting_start_time)||'Sem horário')+'</option>').join('');const selected=meetings.some(m=>String(m.id)===String(selectedId))?String(selectedId):(meetings[0]?String(meetings[0].id):'');$("adminMeeting").innerHTML=placeholder+eventOptions;$("adminMeetingDateTime").innerHTML=placeholder+dateTimeOptions;$("adminMeeting").value=selected;$("adminMeetingDateTime").value=selected}
-async function loadAdmin(){msg('adminMsg','Carregando / 読み込み中...');const r=await api('meetings?select=id,meeting_date,meeting_type,meeting_start_time,gate_open_time,administration,locality,competence,president_signature,secretary_signature,elder_signature&order=meeting_date.desc');if(!r.ok){msg('adminMsg','Não foi possível carregar as reuniões / 会議を読み込めませんでした。','err');return}meetings=await r.json();const current=String($("adminMeeting").value||$("adminMeetingDateTime").value||'');populateMeetingPickers(current);await render()}
+async function loadAdmin(preferredId=''){msg('adminMsg','Carregando / 読み込み中...');const r=await api('meetings?select=id,meeting_date,meeting_type,meeting_start_time,gate_open_time,administration,locality,competence,president_signature,secretary_signature,elder_signature&order=meeting_date.desc');if(!r.ok){msg('adminMsg','Não foi possível carregar as reuniões / 会議を読み込めませんでした。','err');return}meetings=await r.json();const current=String(preferredId||$("adminMeeting").value||$("adminMeetingDateTime").value||'');populateMeetingPickers(current);await render()}
+function toggleNewMeeting(){const panel=$('newMeetingPanel');const open=panel.classList.contains('hidden');panel.classList.toggle('hidden',!open);msg('newMeetingMsg','');if(open)$('newMeetingType').focus()}
+function cancelNewMeeting(){ $('newMeetingPanel').classList.add('hidden');msg('newMeetingMsg','');$('newMeetingType').value='';$('newMeetingDate').value='';$('newMeetingGateTime').value='';$('newMeetingStartTime').value='';$('newMeetingAdministration').value='';$('newMeetingLocality').value='';$('newMeetingCompetence').value=''}
+async function createMeeting(){const payload={meeting_type:$('newMeetingType').value.trim(),meeting_date:$('newMeetingDate').value,gate_open_time:$('newMeetingGateTime').value||null,meeting_start_time:$('newMeetingStartTime').value||null,administration:$('newMeetingAdministration').value.trim()||null,locality:$('newMeetingLocality').value.trim()||null,competence:$('newMeetingCompetence').value.trim()||null};if(!payload.meeting_type||!payload.meeting_date){msg('newMeetingMsg','Informe o evento e a data.','err');return}const button=$('createMeeting');button.disabled=true;msg('newMeetingMsg','Salvando reunião...');try{const r=await api('meetings',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(payload)});const data=await r.json().catch(()=>[]);if(!r.ok)throw new Error(data.message||data.details||data.hint||'Não foi possível criar a reunião.');const created=Array.isArray(data)?data[0]:data;if(!created?.id)throw new Error('A reunião foi enviada, mas não foi possível confirmar o novo registro. Atualize a lista.');$('newMeetingPanel').classList.add('hidden');await loadAdmin(String(created.id));msg('adminMsg','Nova reunião salva. Agora ela pode ser selecionada no menu público.','ok')}catch(error){msg('newMeetingMsg',error.message||'Não foi possível criar a reunião.','err')}finally{button.disabled=false}}
 function formatReportDate(value){if(!value)return'';const parts=String(value).slice(0,10).split('-');return parts.length===3?parts[2]+'/'+parts[1]+'/'+parts[0]:String(value)}
 function signatureCanvas(def){return $(def.canvas)}
 function signatureDisplay(def,value){const image=value&&value.startsWith('data:image/png;base64,');$(def.print).textContent=image?'':(value||'');$(def.print).classList.toggle('hidden',image);const img=$(def.image);if(image){img.src=value;img.classList.remove('hidden')}else{img.removeAttribute('src');img.classList.add('hidden')}}
@@ -275,6 +306,6 @@ async function saveReport(){const id=$("adminMeeting").value;if(!id){msg('adminM
 async function clearReport(){ $("adminMeeting").value='';$("adminMeetingDateTime").value='';await render();msg('adminMsg','Campos limpos. Os registros salvos foram mantidos / 入力欄をクリアしました。保存済みの記録は保持されています。','ok')}
 function backToHome(){window.location.href='index.html'}
 function selectReportMeeting(sourceId){const id=$(sourceId).value;$("adminMeeting").value=id;$("adminMeetingDateTime").value=id;return render()}
-$("meeting").onchange=showMeeting;$("present").onclick=()=>register('present');$("absent").onclick=()=>register('absent');$("newRegister").onclick=newRegister;$("login").onclick=login;$("togglePassword").onclick=()=>toggleField('password','togglePassword');$("forgotPassword").onclick=()=>{$("recoveryBox").classList.toggle('hidden');if(!$('recoveryBox').classList.contains('hidden'))$('recoveryEmail').value=$('email').value.trim()||'CCj.secretariacentral@outlook.com'};$("sendRecovery").onclick=recoverPassword;$("toggleNewPassword").onclick=()=>toggleField('newPassword','toggleNewPassword');$("toggleConfirmPassword").onclick=()=>toggleField('confirmPassword','toggleConfirmPassword');$("saveNewPassword").onclick=saveNewPassword;$("adminMeeting").onchange=()=>selectReportMeeting('adminMeeting');$("adminMeetingDateTime").onchange=()=>selectReportMeeting('adminMeetingDateTime');$("saveReport").onclick=saveReport;$("clearReport").onclick=clearReport;$("backHome").onclick=backToHome;$("refresh").onclick=render;$("print").onclick=printReport;$("logout").onclick=()=>location.reload();initSignaturePads();loadMeetings();handleRecoveryRedirect();
+$("meeting").onchange=showMeeting;$("present").onclick=()=>register('present');$("absent").onclick=()=>register('absent');$("newRegister").onclick=newRegister;$("login").onclick=login;$("togglePassword").onclick=()=>toggleField('password','togglePassword');$("forgotPassword").onclick=()=>{$("recoveryBox").classList.toggle('hidden');if(!$('recoveryBox').classList.contains('hidden'))$('recoveryEmail').value=$('email').value.trim()||'CCj.secretariacentral@outlook.com'};$("sendRecovery").onclick=recoverPassword;$("toggleNewPassword").onclick=()=>toggleField('newPassword','toggleNewPassword');$("toggleConfirmPassword").onclick=()=>toggleField('confirmPassword','toggleConfirmPassword');$("saveNewPassword").onclick=saveNewPassword;$("adminMeeting").onchange=()=>selectReportMeeting('adminMeeting');$("adminMeetingDateTime").onchange=()=>selectReportMeeting('adminMeetingDateTime');$("saveReport").onclick=saveReport;$("toggleNewMeeting").onclick=toggleNewMeeting;$("createMeeting").onclick=createMeeting;$("cancelNewMeeting").onclick=cancelNewMeeting;$("clearReport").onclick=clearReport;$("backHome").onclick=backToHome;$("refresh").onclick=render;$("print").onclick=printReport;$("logout").onclick=()=>location.reload();initSignaturePads();loadMeetings();handleRecoveryRedirect();
 </script>
 </body></html>
