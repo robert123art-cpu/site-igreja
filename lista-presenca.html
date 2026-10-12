@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lista de Presença / 出席簿</title>
+<style>
+:root{--a:#244b5a;--g:#f5f7f8;--b:#d9e0e4;--m:#66727a}*{box-sizing:border-box}body{margin:0;background:var(--g);color:#222;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;line-height:1.45}header{background:#fff;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:10}.top{max-width:1100px;margin:auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;color:var(--a)}.brand small{display:block;color:var(--m);font-weight:500}.langs button,button{font:inherit;border:1px solid var(--b);background:#fff;border-radius:9px;padding:9px 12px;cursor:pointer}.langs button{border-radius:20px;margin-left:4px}.active,.primary{background:var(--a)!important;color:#fff!important;border-color:var(--a)!important}main{max-width:1100px;margin:auto;padding:20px 14px 50px}h1,h2{color:var(--a);margin-top:0}.card{background:#fff;border:1px solid var(--b);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 2px 10px #00000008}.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field label{display:block;font-size:13px;color:var(--m);margin-bottom:4px}.field input,.field select{width:100%;padding:11px;border:1px solid #cbd5da;border-radius:8px;font:inherit}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.table-wrap{overflow:auto;border:1px solid var(--b);border-radius:10px}.table{width:100%;border-collapse:collapse;min-width:850px}.table th,.table td{border-bottom:1px solid var(--b);padding:9px;text-align:left;vertical-align:middle}.table th{background:#f0f3f5;color:var(--a);font-size:13px}.table input,.table select{width:100%;padding:8px;border:1px solid #ccd5db;border-radius:7px;font:inherit}.center{text-align:center!important}.totals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.total{border:1px solid var(--b);border-radius:10px;padding:12px;background:#fafbfb}.total strong{display:block;font-size:22px;color:var(--a)}.msg{min-height:22px;color:var(--m);margin-top:8px}.back{margin-bottom:14px}.signature{min-height:80px}.hint{color:var(--m);font-size:13px}.remove{background:#fff0f0;color:#a33;border-color:#e8b7b7}.no-print{}.hidden{display:none!important}@media(max-width:700px){.form{grid-template-columns:1fr}.totals{grid-template-columns:1fr}.top{align-items:flex-start}.brand{font-size:14px}}@media print{header,.no-print{display:none!important}body{background:#fff}main{max-width:none;padding:0}.card{box-shadow:none;border:1px solid #999}.table th{background:#eee!important}.table{min-width:0;font-size:10px}.table input,.table select{border:0;padding:0;background:transparent}.signature{min-height:60px}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="brand">日本クリスチャンコングレゲーション<small>Lista de Presença / 出席簿</small></div><div class="langs"><button id="pt" class="active" type="button">PT</button><button id="ja" type="button">日本語</button></div></div></header>
+<main>
+<div class="no-print"><button class="back" id="back" type="button">← Voltar / 戻る</button></div>
+<section class="card">
+<h1 id="title">Lista de Presença / 出席簿</h1>
+<div class="form">
+<div class="field"><label id="meetingTypeL">Tipo de reunião / 会議の種類</label><select id="meetingType"><option>Reunião / 集会</option><option>Culto / 礼拝</option><option>Assembleia / 総会</option><option>Reunião de diretoria / 役員会</option><option>Outro / その他</option></select></div>
+<div class="field"><label id="dateL">Data / 日付</label><input id="date" type="date"></div>
+<div class="field"><label id="gateL">Horário de início da portaria / 受付開始時間</label><input id="gate" type="time"></div>
+<div class="field"><label id="startL">Horário de início da reunião / 会議開始時間</label><input id="start" type="time"></div>
+</div>
+<div class="actions no-print"><button id="save" class="primary" type="button">💾 Salvar / 保存</button><button id="print" type="button">🖨️ Imprimir / 印刷</button><button id="clear" type="button">Limpar / クリア</button></div>
+<div id="msg" class="msg"></div>
+</section>
+<section class="card">
+<h2 id="peopleTitle">Participantes / 出席者</h2>
+<div class="actions no-print"><button id="add" class="primary" type="button">＋ Adicionar participante / 出席者を追加</button></div>
+<div class="table-wrap"><table class="table"><thead><tr><th>#</th><th>Nome / 氏名</th><th>Cargo / 役職</th><th>Presença / 出席</th><th>Frequência / 出席回数</th><th>Ausência / 欠席</th><th class="no-print">Ação / 操作</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="totals"><div class="total"><span>Presenças / 出席</span><strong id="presentTotal">0</strong></div><div class="total"><span>Ausências / 欠席</span><strong id="absentTotal">0</strong></div><div class="total"><span>Total / 合計</span><strong id="totalTotal">0</strong></div></div>
+</section>
+<section class="card">
+<h2 id="signTitle">Assinatura do presidente / 会長署名</h2>
+<div class="form"><div class="field"><label>Nome / 氏名</label><input id="president" placeholder="Nome do presidente / 会長名"></div><div class="field"><label>Data / 日付</label><input id="signDate" type="date"></div></div>
+<div class="signature"></div>
+<p class="hint">Assinatura: ______________________________________________</p>
+</section>
+</main>
+<script>
+let lang='pt';
+const $=id=>document.getElementById(id);
+const today=new Date().toISOString().slice(0,10);$('date').value=today;$('signDate').value=today;
+let people=[];
+const PT={back:'← Voltar',msg:'Lista salva neste dispositivo.',empty:'Nenhum participante cadastrado.',remove:'Excluir',saved:'Lista salva com sucesso neste dispositivo.',cleared:'Lista limpa.'};
+const JA={back:'← 戻る',msg:'この端末に保存されています。',empty:'出席者が登録されていません。',remove:'削除',saved:'この端末に保存しました。',cleared:'リストをクリアしました。'};
+function render(){const body=$('rows');body.innerHTML='';if(!people.length){body.innerHTML='<tr><td colspan="7" class="center">'+(lang==='ja'?JA.empty:PT.empty)+'</td></tr>'}people.forEach((p,i)=>{const tr=document.createElement('tr');tr.innerHTML='<td class="center">'+(i+1)+'</td><td><input data-i="'+i+'" data-k="name" value="'+esc(p.name)+'"></td><td><input data-i="'+i+'" data-k="role" value="'+esc(p.role)+'"></td><td><select data-i="'+i+'" data-k="status"><option value="present" '+(p.status==='present'?'selected':'')+'>✓ Presente / 出席</option><option value="absent" '+(p.status==='absent'?'selected':'')+'>✕ Ausente / 欠席</option></select></td><td class="center">'+(p.status==='present'?1:0)+'</td><td class="center">'+(p.status==='absent'?1:0)+'</td><td class="no-print"><button class="remove" data-remove="'+i+'">'+(lang==='ja'?JA.remove:PT.remove)+'</button></td>';body.appendChild(tr)});body.querySelectorAll('[data-i]').forEach(el=>el.addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;people[i][k]=e.target.value;updateTotals()}));body.querySelectorAll('[data-i]').forEach(el=>el.addEventListener('change',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;people[i][k]=e.target.value;render()}));body.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{people.splice(+b.dataset.remove,1);render()});updateTotals()}
+function updateTotals(){const p=people.filter(x=>x.status==='present').length,a=people.filter(x=>x.status==='absent').length;$('presentTotal').textContent=p;$('absentTotal').textContent=a;$('totalTotal').textContent=p+a}
+function esc(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function addPerson(){people.push({name:'',role:'',status:'present'});render();setTimeout(()=>document.querySelector('#rows tr:last-child input')?.focus(),50)}
+function save(){const data={meetingType:$('meetingType').value,date:$('date').value,gate:$('gate').value,start:$('start').value,president:$('president').value,signDate:$('signDate').value,people};localStorage.setItem('igreja_lista_presenca',JSON.stringify(data));$('msg').textContent=lang==='ja'?JA.saved:PT.saved}
+function load(){try{const d=JSON.parse(localStorage.getItem('igreja_lista_presenca')||'null');if(!d)return;['meetingType','date','gate','start','president','signDate'].forEach(k=>{if(d[k]!=null)$(k).value=d[k]});people=Array.isArray(d.people)?d.people:[]}catch(e){}render()}
+function setLang(next){lang=next;$('pt').classList.toggle('active',lang==='pt');$('ja').classList.toggle('active',lang==='ja');$('back').textContent=lang==='ja'?JA.back:PT.back;render()}
+$('add').onclick=addPerson;$('save').onclick=save;$('print').onclick=()=>window.print();$('clear').onclick=()=>{if(confirm(lang==='ja'?'リストをクリアしますか？':'Deseja limpar a lista?')){people=[];['gate','start','president'].forEach(id=>$(id).value='');render();$('msg').textContent=lang==='ja'?JA.cleared:PT.cleared}};$('pt').onclick=()=>setLang('pt');$('ja').onclick=()=>setLang('ja');$('back').onclick=()=>{if(history.length>1)history.back();else location.href='index.html'};load();
+</script>
+</body>
+</html>
