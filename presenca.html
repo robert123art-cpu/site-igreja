@@ -49,6 +49,95 @@
   .report-title .pt{font-size:12px}
   .stats{grid-template-columns:repeat(5,1fr)}
 }
+
+/* Layout do relatório e assinaturas virtuais */
+:root{--blue:#204b59;--gold:#c99a2e;--line:#d4dee2;--bg:#f1f5f6}
+@media screen and (min-width:761px){main:has(>#admin:not(.hidden)){max-width:1560px;width:100%}}
+@media screen and (min-width:761px) and (max-width:900px){main:has(>#admin:not(.hidden)){padding:12px}}
+#admin>.card{padding:clamp(16px,2vw,28px);border:1px solid #dce5e8;border-radius:18px;box-shadow:0 8px 26px rgba(21,55,66,.09)}
+#admin .report-title{margin-bottom:18px}
+#admin .meta{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:18px}
+#admin .meta>div{padding:12px;border:1px solid #e0e7ea;border-radius:11px;background:#f9fbfc}
+#admin .meta input{border-color:#c7d3d8;border-radius:8px;padding:10px}
+#admin .table-wrap{max-height:68vh;overflow:auto;border:1px solid #d1dce0;border-radius:12px;background:white}
+#admin .report{min-width:1220px;border-collapse:separate;border-spacing:0}
+#admin .report th{position:sticky;top:0;z-index:2;background:#e6eef1;color:#1d3b46;border-color:#c4d1d6;padding:10px 7px}
+#admin .report td{border-color:#d9e1e4;padding:9px 7px}
+#admin .report tbody tr:nth-child(even){background:#f7fafb}
+#admin .stats{gap:10px;margin-top:18px}
+#admin .stat{border:1px solid #dce5e8;border-radius:12px;padding:12px 8px;background:#f9fbfc}
+#admin .stat strong{font-size:22px}
+#admin h3.bilingual{color:var(--blue);margin:22px 0 10px}
+#admin .cargo-stats{border-collapse:collapse;margin-top:10px}
+#admin .cargo-stats th{background:#e6eef1;color:#1d3b46}
+#admin .cargo-stats th,#admin .cargo-stats td{border:1px solid #d1dce0;padding:9px}
+#admin .signatures-section{margin-top:24px;padding-top:5px}
+#admin .signatures-title{text-align:left;font-size:18px;margin-bottom:14px}
+#admin .signatures{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:0}
+#admin .signature-card{min-width:0;padding:14px;border:1px solid #dce5e8;border-radius:12px;background:#fbfcfd}
+#admin .signature-name-row{display:flex;align-items:flex-end;min-height:42px;border-bottom:1px solid #87969b}
+#admin .signature-name-input{width:100%;min-width:0;border:0!important;border-radius:0!important;padding:8px 3px!important;font:inherit;background:transparent}
+#admin .signature-instructions{margin:11px 0 6px;color:#596a70;font-size:12px}
+#admin .signature-pad{display:block;width:100%;height:auto;aspect-ratio:18/5;border:1px dashed #a9b9bf;border-radius:8px;background:#fff;touch-action:none;cursor:crosshair}
+#admin .signature-controls{margin-top:7px}
+#admin .clear-signature{min-height:40px;padding:8px 12px;font-size:13px}
+#admin .clear-signature .ja,#admin .clear-signature .pt{display:block}
+#admin .signature-line{height:1px;margin-top:13px;border-top:1px solid #87969b}
+#admin .signature-image-print{display:none}
+#admin .report-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+#admin .meeting-pickers{flex:1 0 100%}
+#admin .report-actions>.btn{flex:1 1 145px}
+#admin .report-actions .btn{border-radius:10px;transition:transform .12s,box-shadow .12s}
+#admin .report-actions .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(25,65,76,.12)}
+@media screen and (max-width:900px){
+  #admin .meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media screen and (max-width:720px){
+  #admin>.card{padding:14px}
+  #admin .table-wrap{max-height:none;overflow:visible;border:0;background:transparent}
+  #admin .report,#admin .report tbody{display:block;width:100%;min-width:0}
+  #admin .report thead{display:none}
+  #admin .report tbody{display:grid;gap:12px}
+  #admin .report tr{display:grid;grid-template-columns:minmax(0,1fr);overflow:hidden;border:1px solid #d7e1e5;border-radius:12px;background:#fff;box-shadow:0 3px 10px rgba(21,55,66,.05)}
+  #admin .report td{display:grid;grid-template-columns:minmax(116px,40%) minmax(0,1fr);gap:8px;align-items:start;border:0;border-bottom:1px solid #edf1f2;padding:9px 10px;text-align:left}
+  #admin .report td::before{content:attr(data-label);white-space:pre-line;color:#40565e;font-size:11px;font-weight:700;line-height:1.3}
+  #admin .report td:first-child{display:block;background:#f2f7f8;font-weight:700}
+  #admin .report td:first-child::before{display:block;margin-bottom:4px}
+  #admin .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #admin .signatures{grid-template-columns:1fr}
+  #admin .cargo-stats{display:block;overflow-x:auto;white-space:nowrap}
+  #admin .report-actions{grid-template-columns:1fr 1fr}
+}
+@media screen and (max-width:420px){
+  #admin .meta{grid-template-columns:1fr}
+  #admin .stats{grid-template-columns:1fr 1fr}
+  #admin .report td{grid-template-columns:minmax(100px,38%) minmax(0,1fr);gap:6px;padding:8px}
+}
+@media print{
+  main{width:auto!important;max-width:none!important;padding:0!important}
+  #admin:not(.hidden){width:auto!important;max-width:none!important;margin:0}
+  #admin>.card{padding:0;border:0;border-radius:0;box-shadow:none}
+  #admin .meta{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  #admin .table-wrap{max-height:none;overflow:visible;border:0}
+  #admin .report{display:table!important;width:100%;min-width:0!important;border-collapse:collapse}
+  #admin .report thead{display:table-header-group!important}
+  #admin .report tbody{display:table-row-group!important}
+  #admin .report tr{display:table-row!important;border:0;box-shadow:none}
+  #admin .report th{position:static;background:#e9edef}
+  #admin .report td{display:table-cell!important;border:1px solid #777}
+  #admin .report td::before{display:none!important;content:none!important}
+  #admin .signatures-section{margin-top:12px}
+  #admin .signatures-title{font-size:11px;margin:10px 0 6px}
+  #admin .signatures{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:18px;margin-top:0}
+  #admin .signature-card{padding:6px 8px;border:0;border-radius:0;background:#fff}
+  #admin .signature-instructions,#admin .signature-pad,#admin .signature-controls,#admin .signature-name-input{display:none!important}
+  #admin .signature-name-row{min-height:35px;border-bottom:1px solid #555}
+  #admin .signature-name-row .print-value:not(.hidden){display:block!important;font-size:8px}
+  #admin .signature-image-print:not(.hidden){display:block!important;max-width:100%;height:38px;object-fit:contain;object-position:left bottom}
+  #admin .signature-image-print.hidden{display:none!important}
+  #admin .signature-line{margin-top:8px}
+  #admin .cargo-stats{display:table!important;overflow:visible;white-space:normal}
+}
 </style>
 </head>
 <body>
@@ -75,7 +164,7 @@
 <div><label class="meta-label" for="reportDate"><span class="ja">日付</span><span class="pt">Data</span></label><input id="reportDate" type="date"><span class="print-value" id="reportDatePrint"></span></div>
 <div><label class="meta-label" for="reportGateTime"><span class="ja">受付開始時間</span><span class="pt">Horário de início da portaria</span></label><input id="reportGateTime" type="time"><span class="print-value" id="reportGateTimePrint"></span></div>
 <div><label class="meta-label" for="reportStartTime"><span class="ja">会議開始時間</span><span class="pt">Horário de início da reunião</span></label><input id="reportStartTime" type="time"><span class="print-value" id="reportStartTimePrint"></span></div>
-<div><label class="meta-label" for="reportPresidentSignature"><span class="ja">会長の署名</span><span class="pt">Assinatura do presidente</span></label><input id="reportPresidentSignature" type="text"><span class="print-value" id="reportPresidentSignaturePrint"></span></div>
+
 <div><div class="meta-label"><span class="ja">所属</span><span class="pt">Localidade</span></div><span class="meta-static" id="rLocality"></span></div>
 <div><div class="meta-label"><span class="ja">担当期間</span><span class="pt">Competência</span></div><span class="meta-static" id="rCompetence"></span></div>
 </div>
@@ -109,6 +198,34 @@
 <th><span class="bilingual"><span class="ja">正当な欠席</span><span class="pt">Ausências justificadas</span></span></th>
 <th><span class="bilingual"><span class="ja">合計</span><span class="pt">Total</span></span></th>
 </tr></thead><tbody id="cargoRows"></tbody></table>
+<section class="signatures-section" aria-labelledby="signaturesTitle">
+<h3 class="bilingual signatures-title" id="signaturesTitle"><span class="ja">署名欄</span><span class="pt">Assinaturas</span></h3>
+<div class="signatures">
+<div class="signature-card">
+<label class="meta-label" for="reportPresidentSignature"><span class="ja">会長の署名</span><span class="pt">Assinatura do presidente</span></label>
+<div class="signature-name-row"><input id="reportPresidentSignature" class="signature-name-input" type="text" autocomplete="off" placeholder="Nome escrito (opcional)"><span class="print-value" id="reportPresidentSignaturePrint"></span><img id="reportPresidentSignatureImage" class="signature-image-print hidden" alt="Assinatura virtual do presidente"></div>
+<p class="signature-instructions bilingual"><span class="ja">タッチまたはマウスで署名してください</span><span class="pt">Desenhe aqui com o dedo ou mouse</span></p>
+<canvas id="presidentSignatureCanvas" class="signature-pad" width="900" height="250" aria-label="Assinatura virtual do presidente"></canvas>
+<div class="signature-controls no-print"><button type="button" class="btn clear-signature" data-clear-signature="president"><span class="ja">署名を消去</span><span class="pt">Limpar assinatura</span></button></div>
+<div class="signature-line"></div>
+</div>
+<div class="signature-card">
+<label class="meta-label" for="reportSecretarySignature"><span class="ja">書記の署名</span><span class="pt">Assinatura do secretário</span></label>
+<div class="signature-name-row"><input id="reportSecretarySignature" class="signature-name-input" type="text" autocomplete="off" placeholder="Nome escrito (opcional)"><span class="print-value" id="reportSecretarySignaturePrint"></span><img id="reportSecretarySignatureImage" class="signature-image-print hidden" alt="Assinatura virtual do secretário"></div>
+<p class="signature-instructions bilingual"><span class="ja">タッチまたはマウスで署名してください</span><span class="pt">Desenhe aqui com o dedo ou mouse</span></p>
+<canvas id="secretarySignatureCanvas" class="signature-pad" width="900" height="250" aria-label="Assinatura virtual do secretário"></canvas>
+<div class="signature-controls no-print"><button type="button" class="btn clear-signature" data-clear-signature="secretary"><span class="ja">署名を消去</span><span class="pt">Limpar assinatura</span></button></div>
+<div class="signature-line"></div>
+</div>
+<div class="signature-card">
+<label class="meta-label" for="reportElderSignature"><span class="ja">長老の署名</span><span class="pt">Assinatura do ancião</span></label>
+<div class="signature-name-row"><input id="reportElderSignature" class="signature-name-input" type="text" autocomplete="off" placeholder="Nome escrito (opcional)"><span class="print-value" id="reportElderSignaturePrint"></span><img id="reportElderSignatureImage" class="signature-image-print hidden" alt="Assinatura virtual do ancião"></div>
+<p class="signature-instructions bilingual"><span class="ja">タッチまたはマウスで署名してください</span><span class="pt">Desenhe aqui com o dedo ou mouse</span></p>
+<canvas id="elderSignatureCanvas" class="signature-pad" width="900" height="250" aria-label="Assinatura virtual do ancião"></canvas>
+<div class="signature-controls no-print"><button type="button" class="btn clear-signature" data-clear-signature="elder"><span class="ja">署名を消去</span><span class="pt">Limpar assinatura</span></button></div>
+<div class="signature-line"></div>
+</div>
+</div></section>
 <div class="report-actions no-print">
 <div class="meeting-pickers"><div class="meeting-picker"><label class="meta-label" for="adminMeeting"><span class="ja">イベントを選択</span><span class="pt">Selecionar evento</span></label><select id="adminMeeting"></select></div><div class="meeting-picker"><label class="meta-label" for="adminMeetingDateTime"><span class="ja">日付と時刻で選択</span><span class="pt">Selecionar data e horário</span></label><select id="adminMeetingDateTime"></select></div></div>
 <button id="saveReport" class="btn primary"><span class="ja">保存</span><span class="pt">Salvar</span></button>
@@ -124,6 +241,8 @@ const SUPABASE_URL='https://uoapmjwdwtpltnxvmniy.supabase.co';
 const SUPABASE_KEY='sb_publishable_10fUBHTtp6sev9kXjMIDJg_CFBkeT8D';
 const PRODUCTION_URL='https://robert123art-cpu.github.io/site-igreja/presenca.html';
 let session=null,meetings=[];
+const SIGNATURES=[{key:'president',input:'reportPresidentSignature',print:'reportPresidentSignaturePrint',image:'reportPresidentSignatureImage',canvas:'presidentSignatureCanvas',column:'president_signature'},{key:'secretary',input:'reportSecretarySignature',print:'reportSecretarySignaturePrint',image:'reportSecretarySignatureImage',canvas:'secretarySignatureCanvas',column:'secretary_signature'},{key:'elder',input:'reportElderSignature',print:'reportElderSignaturePrint',image:'reportElderSignatureImage',canvas:'elderSignatureCanvas',column:'elder_signature'}];
+const signatureState=Object.fromEntries(SIGNATURES.map(x=>[x.key,{hasInk:false,drawing:false,savedImage:''}]));
 const $=id=>document.getElementById(id);
 function H(auth=true){const h={apikey:SUPABASE_KEY,'Content-Type':'application/json',Accept:'application/json'};if(auth&&session?.access_token)h.Authorization='Bearer '+session.access_token;return h}
 async function api(path,o={}){return fetch(SUPABASE_URL+'/rest/v1/'+path,{...o,headers:{...H(o.auth!==false),...(o.headers||{})}})}
@@ -141,13 +260,21 @@ function showReset(){$("publicRegister").classList.add('hidden');$("successBox")
 function handleRecoveryRedirect(){const hash=window.location.hash.replace(/^#/,'');if(!hash)return;const p=new URLSearchParams(hash),type=p.get('type'),token=p.get('access_token');if(type==='recovery'&&token){session={access_token:token,token_type:p.get('token_type')||'bearer',refresh_token:p.get('refresh_token')||null};showReset();msg('resetMsg','O link de recuperação foi validado. Crie agora uma nova senha.','ok');return}const error=p.get('error_code')||p.get('error');if(error){const desc=p.get('error_description');msg('loginMsg',desc?decodeURIComponent(desc.replace(/\+/g,' ')):'O link de recuperação expirou ou é inválido.','err');history.replaceState(null,'',PRODUCTION_URL)}}
 async function saveNewPassword(){const a=$("newPassword").value,b=$("confirmPassword").value;if(!a||a.length<6){msg('resetMsg','A nova senha deve ter pelo menos 6 caracteres.','err');return}if(a!==b){msg('resetMsg','As senhas não são iguais.','err');return}if(!session?.access_token){msg('resetMsg','O link de recuperação não está mais válido. Solicite uma nova recuperação.','err');return}msg('resetMsg','Salvando nova senha...');const r=await fetch(SUPABASE_URL+'/auth/v1/user',{method:'PUT',headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',Authorization:'Bearer '+session.access_token},body:JSON.stringify({password:a})});const d=await r.json().catch(()=>({}));if(!r.ok){msg('resetMsg',d.msg||d.message||d.error_description||'Não foi possível alterar a senha. Solicite uma nova recuperação.','err');return}msg('resetMsg','Senha alterada com sucesso! Agora você pode entrar com a nova senha.','ok');$("newPassword").value='';$("confirmPassword").value='';session=null;history.replaceState(null,'',PRODUCTION_URL+'?v=8');setTimeout(()=>{$("resetBox").classList.add('hidden');$("recoveryBox").classList.remove('hidden');$("recoveryEmail").value=$("email").value.trim()||'CCj.secretariacentral@outlook.com';msg('loginMsg','Senha alterada. Entre usando a nova senha.','ok');window.scrollTo({top:document.querySelector('.adminBox').offsetTop,behavior:'smooth'})},1200)}
 function populateMeetingPickers(selectedId){const placeholder='<option value="">Selecionar / 選択</option>';const eventOptions=meetings.map(m=>'<option value="'+m.id+'">'+esc(m.meeting_type||'')+'</option>').join('');const dateTimeOptions=meetings.map(m=>'<option value="'+m.id+'">'+esc(formatReportDate(m.meeting_date)||'Sem data')+' — '+esc(hm(m.meeting_start_time)||'Sem horário')+'</option>').join('');const selected=meetings.some(m=>String(m.id)===String(selectedId))?String(selectedId):(meetings[0]?String(meetings[0].id):'');$("adminMeeting").innerHTML=placeholder+eventOptions;$("adminMeetingDateTime").innerHTML=placeholder+dateTimeOptions;$("adminMeeting").value=selected;$("adminMeetingDateTime").value=selected}
-async function loadAdmin(){msg('adminMsg','Carregando / 読み込み中...');const r=await api('meetings?select=id,meeting_date,meeting_type,meeting_start_time,gate_open_time,administration,locality,competence,president_signature&order=meeting_date.desc');if(!r.ok){msg('adminMsg','Não foi possível carregar as reuniões / 会議を読み込めませんでした。','err');return}meetings=await r.json();const current=String($("adminMeeting").value||$("adminMeetingDateTime").value||'');populateMeetingPickers(current);await render()}
+async function loadAdmin(){msg('adminMsg','Carregando / 読み込み中...');const r=await api('meetings?select=id,meeting_date,meeting_type,meeting_start_time,gate_open_time,administration,locality,competence,president_signature,secretary_signature,elder_signature&order=meeting_date.desc');if(!r.ok){msg('adminMsg','Não foi possível carregar as reuniões / 会議を読み込めませんでした。','err');return}meetings=await r.json();const current=String($("adminMeeting").value||$("adminMeetingDateTime").value||'');populateMeetingPickers(current);await render()}
 function formatReportDate(value){if(!value)return'';const parts=String(value).slice(0,10).split('-');return parts.length===3?parts[2]+'/'+parts[1]+'/'+parts[0]:String(value)}
-async function render(){const id=$("adminMeeting").value;if(!id){['reportMeetingType','reportDate','reportGateTime','reportStartTime','reportPresidentSignature'].forEach(x=>$(x).value='');['reportMeetingTypePrint','reportDatePrint','reportGateTimePrint','reportStartTimePrint','reportPresidentSignaturePrint','rLocality','rCompetence'].forEach(x=>$(x).textContent='');$("rows").innerHTML='';$("cargoRows").innerHTML='';['tp','ta','taj','tg','ts'].forEach(x=>$(x).textContent='0');return}const m=meetings.find(x=>String(x.id)===String(id));if(!m)return;$("reportMeetingType").value=m.meeting_type||'';$("reportDate").value=m.meeting_date||'';$("reportGateTime").value=hm(m.gate_open_time);$("reportStartTime").value=hm(m.meeting_start_time);$("reportPresidentSignature").value=m.president_signature||'';$("reportMeetingTypePrint").textContent=m.meeting_type||'';$("reportDatePrint").textContent=formatReportDate(m.meeting_date);$("reportGateTimePrint").textContent=hm(m.gate_open_time)||'—';$("reportStartTimePrint").textContent=hm(m.meeting_start_time)||'—';$("reportPresidentSignaturePrint").textContent=m.president_signature||'____________________________';$("rLocality").textContent=m.locality||'—';$("rCompetence").textContent=m.competence||'—';const r=await api('attendance?meeting_id=eq.'+encodeURIComponent(id)+'&select=member_name,role,administration,locality,city,status,absence_reason,check_in_time&order=member_name.asc');if(!r.ok){msg('adminMsg','Não foi possível carregar os registros / 登録を読み込めませんでした。','err');return}const rows=await r.json();let p=0,a=0,j=0;const cargos={};$("rows").innerHTML=rows.map((x,i)=>{const present=x.status==='present';if(present)p++;else{a++;if(x.absence_reason)j++}const c=x.role||'Não informado';if(!cargos[c])cargos[c]={p:0,a:0,j:0};present?cargos[c].p++:cargos[c].a++;if(!present&&x.absence_reason)cargos[c].j++;const stateJa=present?'出席':'欠席',statePt=present?'Presença':'Ausência',stateClass=present?'state-present':'state-absent';return '<tr><td>'+esc(x.member_name)+'</td><td>'+esc(x.role)+'</td><td>'+esc(x.administration)+'</td><td>'+esc(x.locality)+'</td><td>'+esc(x.city)+'</td><td><span class="bilingual '+stateClass+'"><span class="ja">'+stateJa+'</span><span class="pt">'+statePt+'</span></span></td><td class="center">'+(present?'1':'0')+'</td><td class="center">'+(present?'0':'1')+'</td><td>'+esc(x.absence_reason||'')+'</td><td class="center">'+(x.check_in_time?new Date(x.check_in_time).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—')+'</td><td class="center">1</td><td class="center">'+(i+1)+'</td></tr>'}).join('');$("tp").textContent=p;$("ta").textContent=a;$("taj").textContent=j;$("tg").textContent=rows.length;$("ts").textContent=rows.length;$("cargoRows").innerHTML=Object.entries(cargos).map(([c,v])=>'<tr><td>'+esc(c)+'</td><td class="center">'+v.p+'</td><td class="center">'+v.a+'</td><td class="center">'+v.j+'</td><td class="center">'+(v.p+v.a)+'</td></tr>').join('');msg('adminMsg','')}
-async function saveReport(){const id=$("adminMeeting").value;if(!id){msg('adminMsg','Selecione uma reunião antes de salvar / 保存する前に会議を選択してください。','err');return}const payload={meeting_type:$("reportMeetingType").value.trim(),meeting_date:$("reportDate").value,gate_open_time:$("reportGateTime").value||null,meeting_start_time:$("reportStartTime").value||null,president_signature:$("reportPresidentSignature").value.trim()||null};if(!payload.meeting_type||!payload.meeting_date){msg('adminMsg','Informe o tipo e a data da reunião / 会議の種類と日付を入力してください。','err');return}const button=$("saveReport");button.disabled=true;msg('adminMsg','Salvando / 保存中...');try{const r=await api('meetings?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify(payload)});if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.message||d.details||d.hint||'Não foi possível salvar a reunião / 会議を保存できませんでした。')}const m=meetings.find(x=>String(x.id)===String(id));if(m)Object.assign(m,payload);populateMeetingPickers(id);await render();msg('adminMsg','Lista salva com sucesso / 名簿を保存しました。','ok')}catch(error){msg('adminMsg',error.message||'Não foi possível salvar / 保存できませんでした。','err')}finally{button.disabled=false}}
+function signatureCanvas(def){return $(def.canvas)}
+function signatureDisplay(def,value){const image=value&&value.startsWith('data:image/png;base64,');$(def.print).textContent=image?'':(value||'');$(def.print).classList.toggle('hidden',image);const img=$(def.image);if(image){img.src=value;img.classList.remove('hidden')}else{img.removeAttribute('src');img.classList.add('hidden')}}
+function setSignatureFromStored(key,value){const def=SIGNATURES.find(x=>x.key===key),state=signatureState[key],canvas=signatureCanvas(def),ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);state.hasInk=false;state.drawing=false;state.savedImage='';$(def.input).value='';const stored=String(value||'');if(stored.startsWith('data:image/png;base64,')){state.savedImage=stored;signatureDisplay(def,stored);const image=new Image();image.onload=()=>{if(state.savedImage===stored&&!state.hasInk)ctx.drawImage(image,0,0,canvas.width,canvas.height)};image.src=stored}else{$(def.input).value=stored;signatureDisplay(def,stored)}}
+function signatureValue(key){const def=SIGNATURES.find(x=>x.key===key),state=signatureState[key];if(state.hasInk)return signatureCanvas(def).toDataURL('image/png');return state.savedImage||$(def.input).value.trim()||null}
+function clearSignature(key,clearText=true){const def=SIGNATURES.find(x=>x.key===key),state=signatureState[key],canvas=signatureCanvas(def);canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);state.hasInk=false;state.drawing=false;state.savedImage='';if(clearText)$(def.input).value='';signatureDisplay(def,$(def.input).value.trim())}
+function signaturePoint(canvas,event){const rect=canvas.getBoundingClientRect();return{x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height}}
+function initSignaturePads(){SIGNATURES.forEach(def=>{const canvas=signatureCanvas(def),ctx=canvas.getContext('2d'),state=signatureState[def.key];ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#173f4b';ctx.lineWidth=9;canvas.addEventListener('pointerdown',event=>{if(event.button!==undefined&&event.button!==0)return;event.preventDefault();canvas.setPointerCapture(event.pointerId);state.savedImage='';state.hasInk=true;state.drawing=true;$(def.input).value='';signatureDisplay(def,null);const point=signaturePoint(canvas,event);ctx.beginPath();ctx.moveTo(point.x,point.y);ctx.lineTo(point.x+0.1,point.y+0.1);ctx.stroke()});canvas.addEventListener('pointermove',event=>{if(!state.drawing)return;const point=signaturePoint(canvas,event);ctx.lineTo(point.x,point.y);ctx.stroke()});const stop=()=>{if(state.drawing){state.drawing=false;ctx.closePath()}};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);$(def.input).addEventListener('input',()=>{clearSignature(def.key,false);signatureDisplay(def,$(def.input).value.trim())})});document.querySelectorAll('[data-clear-signature]').forEach(button=>button.addEventListener('click',()=>clearSignature(button.dataset.clearSignature,true)))}
+function printReport(){SIGNATURES.forEach(def=>signatureDisplay(def,signatureValue(def.key)));window.print()}
+async function render(){const id=$("adminMeeting").value;if(!id){['reportMeetingType','reportDate','reportGateTime','reportStartTime'].forEach(x=>$(x).value='');['reportMeetingTypePrint','reportDatePrint','reportGateTimePrint','reportStartTimePrint','rLocality','rCompetence'].forEach(x=>$(x).textContent='');SIGNATURES.forEach(def=>setSignatureFromStored(def.key,''));$("rows").innerHTML='';$("cargoRows").innerHTML='';['tp','ta','taj','tg','ts'].forEach(x=>$(x).textContent='0');return}const m=meetings.find(x=>String(x.id)===String(id));if(!m)return;$("reportMeetingType").value=m.meeting_type||'';$("reportDate").value=m.meeting_date||'';$("reportGateTime").value=hm(m.gate_open_time);$("reportStartTime").value=hm(m.meeting_start_time);SIGNATURES.forEach(def=>setSignatureFromStored(def.key,m[def.column]||''));$("reportMeetingTypePrint").textContent=m.meeting_type||'';$("reportDatePrint").textContent=formatReportDate(m.meeting_date);$("reportGateTimePrint").textContent=hm(m.gate_open_time)||'—';$("reportStartTimePrint").textContent=hm(m.meeting_start_time)||'—';$("rLocality").textContent=m.locality||'—';$("rCompetence").textContent=m.competence||'—';const r=await api('attendance?meeting_id=eq.'+encodeURIComponent(id)+'&select=member_name,role,administration,locality,city,status,absence_reason,check_in_time&order=member_name.asc');if(!r.ok){msg('adminMsg','Não foi possível carregar os registros / 登録を読み込めませんでした。','err');return}const rows=await r.json();let p=0,a=0,j=0;const cargos={};$("rows").innerHTML=rows.map((x,i)=>{const present=x.status==='present';if(present)p++;else{a++;if(x.absence_reason)j++}const c=x.role||'Não informado';if(!cargos[c])cargos[c]={p:0,a:0,j:0};present?cargos[c].p++:cargos[c].a++;if(!present&&x.absence_reason)cargos[c].j++;const stateJa=present?'出席':'欠席',statePt=present?'Presença':'Ausência',stateClass=present?'state-present':'state-absent';return '<tr><td data-label="氏名&#10;Nome">'+esc(x.member_name)+'</td><td data-label="職務・役職&#10;Cargo">'+esc(x.role)+'</td><td data-label="管理&#10;Administração">'+esc(x.administration)+'</td><td data-label="所属&#10;Localidade">'+esc(x.locality)+'</td><td data-label="市&#10;Cidade">'+esc(x.city)+'</td><td data-label="出席・欠席&#10;Presença/Ausência"><span class="bilingual '+stateClass+'"><span class="ja">'+stateJa+'</span><span class="pt">'+statePt+'</span></span></td><td class="center" data-label="出席数&#10;Frequência">'+(present?'1':'0')+'</td><td class="center" data-label="欠席数&#10;Ausência">'+(present?'0':'1')+'</td><td data-label="欠席理由&#10;Motivo da ausência">'+esc(x.absence_reason||'')+'</td><td class="center" data-label="入場時刻&#10;Horário de entrada">'+(x.check_in_time?new Date(x.check_in_time).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—')+'</td><td class="center" data-label="出席数＋欠席数&#10;Frequência + ausência">1</td><td class="center" data-label="番号&#10;Nº">'+(i+1)+'</td></tr>'}).join('');$("tp").textContent=p;$("ta").textContent=a;$("taj").textContent=j;$("tg").textContent=rows.length;$("ts").textContent=rows.length;$("cargoRows").innerHTML=Object.entries(cargos).map(([c,v])=>'<tr><td>'+esc(c)+'</td><td class="center">'+v.p+'</td><td class="center">'+v.a+'</td><td class="center">'+v.j+'</td><td class="center">'+(v.p+v.a)+'</td></tr>').join('');msg('adminMsg','')}
+async function saveReport(){const id=$("adminMeeting").value;if(!id){msg('adminMsg','Selecione uma reunião antes de salvar / 保存する前に会議を選択してください。','err');return}const payload={meeting_type:$("reportMeetingType").value.trim(),meeting_date:$("reportDate").value,gate_open_time:$("reportGateTime").value||null,meeting_start_time:$("reportStartTime").value||null,president_signature:signatureValue('president'),secretary_signature:signatureValue('secretary'),elder_signature:signatureValue('elder')};if(!payload.meeting_type||!payload.meeting_date){msg('adminMsg','Informe o tipo e a data da reunião / 会議の種類と日付を入力してください。','err');return}const button=$("saveReport");button.disabled=true;msg('adminMsg','Salvando / 保存中...');try{const r=await api('meetings?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify(payload)});if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.message||d.details||d.hint||'Não foi possível salvar a reunião / 会議を保存できませんでした。')}const m=meetings.find(x=>String(x.id)===String(id));if(m)Object.assign(m,payload);populateMeetingPickers(id);await render();msg('adminMsg','Lista salva com sucesso / 名簿を保存しました。','ok')}catch(error){msg('adminMsg',error.message||'Não foi possível salvar / 保存できませんでした。','err')}finally{button.disabled=false}}
 async function clearReport(){ $("adminMeeting").value='';$("adminMeetingDateTime").value='';await render();msg('adminMsg','Campos limpos. Os registros salvos foram mantidos / 入力欄をクリアしました。保存済みの記録は保持されています。','ok')}
 function backToHome(){window.location.href='index.html'}
 function selectReportMeeting(sourceId){const id=$(sourceId).value;$("adminMeeting").value=id;$("adminMeetingDateTime").value=id;return render()}
-$("meeting").onchange=showMeeting;$("present").onclick=()=>register('present');$("absent").onclick=()=>register('absent');$("newRegister").onclick=newRegister;$("login").onclick=login;$("togglePassword").onclick=()=>toggleField('password','togglePassword');$("forgotPassword").onclick=()=>{$("recoveryBox").classList.toggle('hidden');if(!$('recoveryBox').classList.contains('hidden'))$('recoveryEmail').value=$('email').value.trim()||'CCj.secretariacentral@outlook.com'};$("sendRecovery").onclick=recoverPassword;$("toggleNewPassword").onclick=()=>toggleField('newPassword','toggleNewPassword');$("toggleConfirmPassword").onclick=()=>toggleField('confirmPassword','toggleConfirmPassword');$("saveNewPassword").onclick=saveNewPassword;$("adminMeeting").onchange=()=>selectReportMeeting('adminMeeting');$("adminMeetingDateTime").onchange=()=>selectReportMeeting('adminMeetingDateTime');$("saveReport").onclick=saveReport;$("clearReport").onclick=clearReport;$("backHome").onclick=backToHome;$("refresh").onclick=render;$("print").onclick=()=>window.print();$("logout").onclick=()=>location.reload();loadMeetings();handleRecoveryRedirect();
+$("meeting").onchange=showMeeting;$("present").onclick=()=>register('present');$("absent").onclick=()=>register('absent');$("newRegister").onclick=newRegister;$("login").onclick=login;$("togglePassword").onclick=()=>toggleField('password','togglePassword');$("forgotPassword").onclick=()=>{$("recoveryBox").classList.toggle('hidden');if(!$('recoveryBox').classList.contains('hidden'))$('recoveryEmail').value=$('email').value.trim()||'CCj.secretariacentral@outlook.com'};$("sendRecovery").onclick=recoverPassword;$("toggleNewPassword").onclick=()=>toggleField('newPassword','toggleNewPassword');$("toggleConfirmPassword").onclick=()=>toggleField('confirmPassword','toggleConfirmPassword');$("saveNewPassword").onclick=saveNewPassword;$("adminMeeting").onchange=()=>selectReportMeeting('adminMeeting');$("adminMeetingDateTime").onchange=()=>selectReportMeeting('adminMeetingDateTime');$("saveReport").onclick=saveReport;$("clearReport").onclick=clearReport;$("backHome").onclick=backToHome;$("refresh").onclick=render;$("print").onclick=printReport;$("logout").onclick=()=>location.reload();initSignaturePads();loadMeetings();handleRecoveryRedirect();
 </script>
 </body></html>
