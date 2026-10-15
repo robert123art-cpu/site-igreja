@@ -20,18 +20,13 @@ jobs:
           from pathlib import Path
           p=Path('siga/index.html')
           s=p.read_text(encoding='utf-8')
-
-          old_modal=s[s.index('<div id="loginModal"'):s.index('</script>', s.index('<div id="loginModal"'))] if '<div id="loginModal"' in s else ''
-          if old_modal:
-              start=s.index('<div id="loginModal"')
-              end=s.index('<script>', start)
-              modal='''<div id="loginModal" class="modal hidden"><div class="modal-box"><h2>🔐 Acesso ao SIGA</h2><p class="small-note">Entre com seu e-mail e senha cadastrados.</p><div class="field"><label>E-mail</label><input id="loginUser" type="email" autocomplete="email" inputmode="email"></div><div class="field" style="margin-top:10px"><label>Senha</label><input id="loginPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();login();}"></div><div class="actions"><button id="loginSubmit" type="button" class="btn primary" onclick="login()">Entrar</button><button type="button" class="btn secondary" onclick="requestPasswordRecovery()">Esqueci minha senha</button></div><div id="loginMsg" class="login-msg"></div></div></div>\n'''
-              s=s[:start]+modal+s[end:]
-
+          start=s.index('<div id="loginModal"')
+          end=s.index('<script>', start)
+          modal='''<div id="loginModal" class="modal hidden"><div class="modal-box"><h2>🔐 Acesso ao SIGA</h2><p class="small-note">Entre com seu e-mail e senha cadastrados.</p><div class="field"><label>E-mail</label><input id="loginUser" type="email" autocomplete="email" inputmode="email"></div><div class="field" style="margin-top:10px"><label>Senha</label><input id="loginPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();login();}"></div><div class="actions"><button id="loginSubmit" type="button" class="btn primary" onclick="login()">Entrar</button><button type="button" class="btn secondary" onclick="requestPasswordRecovery()">Esqueci minha senha</button></div><div id="loginMsg" class="login-msg"></div></div></div>\n'''
+          s=s[:start]+modal+s[end:]
           astart=s.find("const SUPABASE_URL='")
-          aend=s.find('let members=', astart) if astart>=0 else -1
-          if astart>=0 and aend>astart:
-              auth='''const SUPABASE_URL='https://uoapmjwdwtpltnxvmniy.supabase.co';
+          aend=s.find('let members=', astart)
+          auth='''const SUPABASE_URL='https://uoapmjwdwtpltnxvmniy.supabase.co';
           const SUPABASE_KEY='sb_publishable_10fUBHTtp6sev9kXjMIDJg_CFBkeT8D';
           const SIGA_RESET_URL='https://robert123art-cpu.github.io/site-igreja/redefinir-senha.html';
           const authClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
@@ -46,8 +41,7 @@ jobs:
           async function requestPasswordRecovery(){const email=(document.getElementById('loginUser')?.value||'').trim();if(!email){alert('Digite primeiro o e-mail cadastrado no SIGA.');document.getElementById('loginUser')?.focus();return}const {error}=await authClient.auth.resetPasswordForEmail(email,{redirectTo:SIGA_RESET_URL});if(error){alert('Não foi possível enviar o link de recuperação: '+error.message);return}alert('Link de recuperação enviado. Verifique seu e-mail e a pasta Spam/Lixo eletrônico.')}
           authClient.auth.onAuthStateChange((_event,session)=>{sigaSession=session;updateSessionUI();if(session)document.getElementById('loginModal')?.classList.add('hidden')});
           '''
-              s=s[:astart]+auth+s[aend:]
-
+          if astart>=0 and aend>astart: s=s[:astart]+auth+s[aend:]
           s=s.replace("applySettings();});","applySettings();requireSession();});",1)
           p.write_text(s,encoding='utf-8')
           PY
@@ -59,3 +53,5 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "[siga-login-fix] Repair SIGA mobile login"
           git push
+
+# Explicit mobile button handling and Supabase Auth feedback.
