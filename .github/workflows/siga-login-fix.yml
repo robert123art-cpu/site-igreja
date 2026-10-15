@@ -54,4 +54,4 @@ jobs:
           git commit -m "[siga-login-fix] Repair SIGA mobile login"
           git push
 
-# Explicit mobile button handling and Supabase Auth feedback.
+# Final retry after both SIGA auth workflows were synchronized.
