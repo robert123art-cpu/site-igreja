@@ -17,7 +17,7 @@ O cadastro público dessa conexão foi desativado. Não há alterações de SMTP
 
 ## Auth0
 
-1. Confirme que a conexão `Username-Password-Authentication` está habilitada para o aplicativo SPA `SIGA` e que **Disable Sign Ups** continua ativado.
+1. Confirme que a conexão `Username-Password-Authentication` está habilitada para o aplicativo SPA `SIGA`, que **Disable Sign Ups** continua ativado e que **Refresh Token Rotation** está habilitado. O SDK do SIGA usa `useRefreshTokens: true`.
 2. Crie uma Action Post Login com o conteúdo de [post-login-action.js](../siga/auth0/post-login-action.js), publique-a e inclua-a no fluxo **Login**.
 3. Crie um aplicativo Machine to Machine para o SIGA e autorize-o na API **Auth0 Management API**. Conceda:
    - `read:users`
