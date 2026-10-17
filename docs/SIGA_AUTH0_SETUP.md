@@ -29,6 +29,10 @@ O cadastro público dessa conexão foi desativado. Não há alterações de SMTP
 4. Para desativar também a recuperação/troca de senha pelo usuário, use um token administrativo com `read:connections` e `update:connections`. Consulte a conexão atual primeiro, preserve todas as opções existentes e defina `options.disable_self_service_change_password` como `true`. Essa opção é uma configuração da conexão e não exige mudança de SMTP.
 5. Guarde o Client ID e o Client Secret do aplicativo Machine to Machine no gerenciador de segredos do Supabase. Não os coloque no repositório nem no navegador.
 
+## Primeiro administrador
+
+Antes de publicar a nova tela de login, crie no Auth0 a conta inicial de administrador usando o e-mail confirmado da conta administradora atual do SIGA. Defina `app_metadata.siga_role = "admin"` por meio do Management API. No primeiro login, o SIGA associará essa identidade ao UUID antigo pelo e-mail confirmado, preservando os vínculos existentes. Não crie uma senha ou um endereço de e-mail fictício.
+
 ## Supabase
 
 1. Em **Authentication → Sign In / Providers → Third-Party Auth**, adicione o Auth0 com tenant `dev-bggmfdxl7xrd7z2c` e região `us`, se solicitada. O emissor usado nas políticas é `https://dev-bggmfdxl7xrd7z2c.us.auth0.com/`.
