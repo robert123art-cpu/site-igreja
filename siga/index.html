@@ -49,6 +49,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 @media(max-width:700px){.unit-form-grid{grid-template-columns:1fr}.unit-form-grid .full{grid-column:auto}.unit-summary{flex-wrap:wrap}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
 </head>
 <body>
 
@@ -148,7 +149,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div id="admin" class="module hidden">
 <div class="title"><div><h1>🔐 Administração</h1><p>Contas, unidades e segurança</p></div><button id="adminLoginButton" type="button" class="btn primary" onclick="openLogin()">🔑 Entrar</button></div>
 <div class="admin-grid">
-<div class="panel"><h2>🔐 Conta de acesso</h2><p class="small-note">A entrada é feita com e-mail e senha. O administrador cadastra e altera as credenciais; a senha nunca aparece na lista de usuários.</p><div class="field"><label>E-mail da sessão</label><input id="sessionEmail" readonly></div><div class="field" style="margin-top:10px"><label>Status</label><input id="sessionStatus" readonly></div><div class="actions"><button type="button" class="btn danger" onclick="signOutSIGA()">Sair do SIGA</button></div></div>
+<div class="panel"><h2>🔐 Conta de acesso</h2><p class="small-note">O acesso usa a conta administrada no Auth0. O administrador cadastra e altera as credenciais; a senha nunca aparece na lista de usuários.</p><div class="field"><label>E-mail da sessão</label><input id="sessionEmail" readonly></div><div class="field" style="margin-top:10px"><label>Status</label><input id="sessionStatus" readonly></div><div class="actions"><button type="button" class="btn danger" onclick="signOutSIGA()">Sair do SIGA</button></div></div>
 <div id="adminAccessNotice" class="panel hidden"><h2>🔒 Acesso administrativo</h2><p id="adminAccessText" class="small-note">Somente administradores podem cadastrar contas e definir permissões.</p></div>
 </div>
 <div id="adminTools" class="hidden">
@@ -187,10 +188,10 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 </div>
 </div>
 </div>
-<div class="panel" style="margin-top:17px"><h2>🛡️ Segurança</h2><p class="small-note">O acesso usa o Supabase Auth. O SIGA não oferece cadastro público nem recuperação de senha para usuários. Em caso de esquecimento, solicite ao administrador que defina uma nova senha.</p></div>
+<div class="panel" style="margin-top:17px"><h2>🛡️ Segurança</h2><p class="small-note">O acesso e as credenciais são administrados no Auth0. O SIGA não oferece cadastro público nem troca de senha pelo usuário. Em caso de esquecimento, solicite ao administrador que defina uma nova senha.</p></div>
 </div>
 
-<div id="loginModal" class="modal hidden"><div class="modal-box"><h2>🔐 Acesso ao SIGA</h2><p class="small-note">Entre com seu e-mail e senha cadastrados.</p><div class="field"><label>E-mail</label><input id="loginUser" type="email" autocomplete="email" inputmode="email"></div><div class="field" style="margin-top:10px"><label>Senha</label><input id="loginPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();login();}"></div><div class="actions"><button id="loginSubmit" type="button" class="btn primary" onclick="login()">Entrar</button></div><p class="small-note">As contas são criadas pelo administrador. Se precisar de uma nova senha, entre em contato com ele.</p><button type="button" class="btn secondary login-back" onclick="closeLogin()" aria-label="Voltar e fechar o login">← Voltar</button><div id="loginMsg" class="login-msg"></div></div></div>
+<div id="loginModal" class="modal hidden"><div class="modal-box"><h2>🔐 Acesso ao SIGA</h2><p class="small-note">Entre com o e-mail e a senha cadastrados pelo administrador.</p><div class="actions"><button id="loginSubmit" type="button" class="btn primary" onclick="login()">Entrar com e-mail e senha</button></div><p class="small-note">As contas são criadas pelo administrador. Para corrigir o e-mail ou definir uma nova senha, entre em contato com ele.</p><button type="button" class="btn secondary login-back" onclick="closeLogin()" aria-label="Voltar e fechar o login">← Voltar</button><div id="loginMsg" class="login-msg"></div></div></div>
 <script>
 const countryMap={JP:{name:'Japão',currency:'JPY',symbol:'¥',locale:'ja-JP',flag:'🇯🇵'},BR:{name:'Brasil',currency:'BRL',symbol:'R$',locale:'pt-BR',flag:'🇧🇷'},US:{name:'Estados Unidos',currency:'USD',symbol:'US$',locale:'en-US',flag:'🇺🇸'},PT:{name:'Portugal',currency:'EUR',symbol:'€',locale:'pt-PT',flag:'🇵🇹'},AO:{name:'Angola',currency:'AOA',symbol:'Kz',locale:'pt-AO',flag:'🇦🇴'}};
 function getSettings(){try{return JSON.parse(localStorage.getItem('sigaSettings'))||{}}catch(e){return {}}}
@@ -198,7 +199,7 @@ function countryChanged(){const c=countryMap[document.getElementById('setCountry
 function saveSettings(){const data={country:document.getElementById('setCountry').value,name:document.getElementById('setName').value||'Minha Organização / Igreja',nameJp:document.getElementById('setNameJp').value,city:document.getElementById('setCity').value,address:document.getElementById('setAddress').value,phone:document.getElementById('setPhone').value,email:document.getElementById('setEmail').value,language:document.getElementById('setLanguage').value};localStorage.setItem('sigaSettings',JSON.stringify(data));applySettings();const m=document.getElementById('savedMsg');m.className='saved';m.textContent='✓ Configurações salvas';setTimeout(()=>m.textContent='',2500)}
 function loadSettings(){const d=getSettings();document.getElementById('setName').value=d.name||'';document.getElementById('setNameJp').value=d.nameJp||'';document.getElementById('setCountry').value=d.country||'JP';document.getElementById('setCity').value=d.city||'';document.getElementById('setAddress').value=d.address||'';document.getElementById('setPhone').value=d.phone||'';document.getElementById('setEmail').value=d.email||'';document.getElementById('setLanguage').value=d.language||'pt-ja';countryChanged()}
 function applySettings(){const d=getSettings(),c=countryMap[d.country]||countryMap.JP,name=typeof d.name==='string'?d.name.trim():'',orgName=name&&name.toLowerCase()!=='undefined'?name:'Minha Organização / Igreja';document.querySelector('.org').childNodes[0].nodeValue=orgName+' ';document.querySelector('.org small').textContent=c.name+' • Moeda oficial: '+c.symbol+' '+c.currency;document.querySelector('.currency').textContent=c.flag+' '+c.symbol+' '+c.currency+' — '+c.name;document.querySelectorAll('.value').forEach(el=>{const n=Number(el.dataset.amount);if(!Number.isNaN(n))el.textContent=new Intl.NumberFormat(c.locale,{style:'currency',currency:c.currency,maximumFractionDigits:0}).format(n)})}
-function isSigaAdmin(){return sigaSession?.user?.app_metadata?.role==='admin'}
+function isSigaAdmin(){return sigaSession?.role==='admin'}
 function go(id,btn){
  try{
   const admin=isSigaAdmin();
@@ -221,8 +222,11 @@ function go(id,btn){
 document.addEventListener('DOMContentLoaded',async()=>{document.querySelectorAll('.value').forEach((el,i)=>{el.dataset.amount=[1250000,480000,315000,165000][i]});applySettings();await requireSession()});
 const SUPABASE_URL='https://uoapmjwdwtpltnxvmniy.supabase.co';
 const SUPABASE_KEY='sb_publishable_10fUBHTtp6sev9kXjMIDJg_CFBkeT8D';
-const authClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
-let sigaSession=null;
+const AUTH0_DOMAIN='dev-bggmfdxl7xrd7z2c.us.auth0.com';
+const AUTH0_CLIENT_ID='yf2CyAxxVuezpyFrK0AY23xpLP10E6xS';
+const AUTH0_REDIRECT_URI=location.origin+location.pathname;
+let auth0Client=null,sigaSession=null,sigaCurrentUserId=null;
+const authClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},accessToken:async()=>{if(!auth0Client)throw new Error('A autenticação ainda está inicializando.');const claims=await auth0Client.getIdTokenClaims();if(!claims?.__raw)throw new Error('Sessão Auth0 inválida.');return claims.__raw;}});
 function setUserHeader(user){const box=document.querySelector('.user');if(!box)return;if(!user){box.innerHTML='Acesso necessário <div class="avatar">🔐</div>';return}const label=user.email||'Usuário';const initials=label.slice(0,2).toUpperCase();box.innerHTML='<span>'+esc(label)+'</span><button type="button" class="btn secondary" style="padding:7px 10px;min-height:36px" onclick="signOutSIGA()">Sair</button><div class="avatar">'+esc(initials)+'</div>';}
 let sigaUnitReadAccess=false;
 function updateSessionUI(){
@@ -249,30 +253,39 @@ async function refreshSigaUnitAccess(){
  if(!sigaSession){sigaUnitReadAccess=false;updateSessionUI();return}
  if(isSigaAdmin()){sigaUnitReadAccess=true;updateSessionUI();return}
  try{
-  const {data,error}=await authClient.from('siga_user_unit_permissions').select('permissions').eq('user_id',sigaSession.user.id);
+  const {data,error}=await authClient.from('siga_user_unit_permissions').select('permissions').eq('user_id',sigaCurrentUserId);
   sigaUnitReadAccess=!error&&(data||[]).some(row=>row.permissions?.['units.read']===true);
  }catch(error){console.error(error);sigaUnitReadAccess=false}
  updateSessionUI();
 }
-async function requireSession(){try{const {data,error}=await authClient.auth.getSession();if(error)throw error;sigaSession=data.session;await refreshSigaUnitAccess();if(!sigaSession)openLogin();}catch(e){console.error(e);openLogin('Não foi possível verificar o acesso. Tente novamente.');}}
-async function login(){
- const btn=document.getElementById('loginSubmit'),email=document.getElementById('loginUser').value.trim(),password=document.getElementById('loginPass').value,msg=document.getElementById('loginMsg');
- msg.textContent='';
- if(!email||!password){msg.textContent='Informe o e-mail e a senha.';return}
- if(btn){btn.disabled=true;btn.textContent='Entrando...'}
+async function requireSession(){
  try{
-  const {data,error}=await authClient.auth.signInWithPassword({email,password});
+  auth0Client=await auth0.createAuth0Client({domain:AUTH0_DOMAIN,clientId:AUTH0_CLIENT_ID,cacheLocation:'localstorage',useRefreshTokens:true,authorizationParams:{redirect_uri:AUTH0_REDIRECT_URI,scope:'openid profile email'}});
+  const params=new URLSearchParams(location.search);
+  if(params.has('error')){const message=params.get('error_description')||params.get('error')||'Não foi possível concluir o login.';history.replaceState({},document.title,AUTH0_REDIRECT_URI);openLogin('Falha no login: '+message);return}
+  if(params.has('code')&&params.has('state')){await auth0Client.handleRedirectCallback();history.replaceState({},document.title,AUTH0_REDIRECT_URI)}
+  if(!await auth0Client.isAuthenticated()){sigaSession=null;sigaCurrentUserId=null;updateSessionUI();openLogin();return}
+  const user=await auth0Client.getUser();
+  if(!user?.sub)throw new Error('Usuário Auth0 sem identificador.');
+  const {data,error}=await authClient.functions.invoke('siga-resolve-identity',{body:{}});
   if(error)throw error;
-  sigaSession=data.session;updateSessionUI();await refreshSigaUnitAccess();
+  if(data?.error)throw new Error(data.error);
+  sigaCurrentUserId=data.user_id;
+  sigaSession={user,role:data.role};
+  await refreshSigaUnitAccess();
   if(isSigaAdmin())await renderUsers();
-  closeLogin();document.getElementById('loginPass').value='';
- }catch(e){console.error(e);msg.textContent='Não foi possível entrar. Verifique o e-mail e a senha.'}
- finally{if(btn){btn.disabled=false;btn.textContent='Entrar'}}
+  closeLogin();
+ }catch(error){console.error(error);sigaSession=null;sigaCurrentUserId=null;updateSessionUI();openLogin('Não foi possível verificar o acesso. Tente novamente ou fale com o administrador.')}
 }
-function openLogin(message=''){const modal=document.getElementById('loginModal');if(!modal)return;modal.classList.remove('hidden');const msg=document.getElementById('loginMsg');if(msg)msg.textContent=message||'';setTimeout(()=>document.getElementById('loginUser')?.focus(),50)}
+async function login(){
+ const btn=document.getElementById('loginSubmit'),msg=document.getElementById('loginMsg');
+ if(msg)msg.textContent='';
+ if(btn){btn.disabled=true;btn.textContent='Abrindo acesso seguro...'}
+ try{if(!auth0Client)auth0Client=await auth0.createAuth0Client({domain:AUTH0_DOMAIN,clientId:AUTH0_CLIENT_ID,cacheLocation:'localstorage',useRefreshTokens:true,authorizationParams:{redirect_uri:AUTH0_REDIRECT_URI,scope:'openid profile email'}});await auth0Client.loginWithRedirect({authorizationParams:{redirect_uri:AUTH0_REDIRECT_URI,screen_hint:'login'}})}catch(error){console.error(error);if(msg)msg.textContent='Não foi possível iniciar o login. Tente novamente.';if(btn){btn.disabled=false;btn.textContent='Entrar com e-mail e senha'}}
+}
+function openLogin(message=''){const modal=document.getElementById('loginModal');if(!modal)return;modal.classList.remove('hidden');const msg=document.getElementById('loginMsg');if(msg)msg.textContent=message||''}
 function closeLogin(){document.getElementById('loginModal')?.classList.add('hidden')}
-async function signOutSIGA(){await authClient.auth.signOut();sigaSession=null;updateSessionUI();openLogin('Sessão encerrada. Entre novamente para acessar o SIGA.')}
-authClient.auth.onAuthStateChange((_event,session)=>{sigaSession=session;updateSessionUI();setTimeout(()=>refreshSigaUnitAccess(),0);if(session)document.getElementById('loginModal')?.classList.add('hidden')});
+async function signOutSIGA(){sigaSession=null;sigaCurrentUserId=null;updateSessionUI();if(auth0Client)await auth0Client.logout({logoutParams:{returnTo:AUTH0_REDIRECT_URI}});else openLogin('Sessão encerrada. Entre novamente para acessar o SIGA.')}
 
 let sigaAdminUsers=[];
 let sigaAdminUnits=[];
@@ -374,11 +387,11 @@ async function renderUsers(){
    return '<tr><td><b>'+esc(user.full_name||'—')+'</b><br><small>'+esc(user.email||'')+'</small></td><td>'+role+'</td><td>'+created+'</td><td><button type="button" class="btnsm" onclick="editSigaUser(\\''+esc(user.id)+'\\')">Alterar</button></td></tr>'
   }).join('')||'<tr><td colspan="4">Nenhuma conta cadastrada.</td></tr>';
   const grantUser=document.getElementById('sigaGrantUser');
-  grantUser.innerHTML='<option value="">Selecione um usuário</option>'+sigaAdminUsers.filter(user=>user.role!=='admin').map(user=>'<option value="'+esc(user.id)+'">'+esc(user.full_name||user.email)+' — '+esc(user.email||'')+'</option>').join('');
+  grantUser.innerHTML='<option value="">Selecione um usuário</option>'+sigaAdminUsers.filter(user=>user.role!=='admin'&&user.siga_user_id).map(user=>'<option value="'+esc(user.siga_user_id)+'">'+esc(user.full_name||user.email)+' — '+esc(user.email||'')+'</option>').join('');
   const grantUnit=document.getElementById('sigaGrantUnit');
   grantUnit.innerHTML='<option value="">Selecione uma unidade</option>'+sigaAdminUnits.filter(unit=>unit.is_active).map(unit=>'<option value="'+esc(unit.id)+'">'+esc(unit.code||'')+' '+esc(unit.name)+' ('+esc(unit.unit_type)+')</option>').join('');
   assignmentTable.innerHTML=sigaAssignments.map(assignment=>{
-   const user=sigaAdminUsers.find(item=>item.id===assignment.user_id),unit=sigaAdminUnits.find(item=>item.id===assignment.unit_id);
+   const user=sigaAdminUsers.find(item=>item.siga_user_id===assignment.user_id),unit=sigaAdminUnits.find(item=>item.id===assignment.unit_id);
    const permission=assignment.permissions?.['units.read']===true?'Consulta de unidades':'Sem permissões de leitura';
    return '<tr><td>'+esc(user?.full_name||user?.email||'Usuário')+'<br><small>'+esc(user?.email||'')+'</small></td><td>'+esc(unit?.name||assignment.unit_id)+'<br><small>'+esc(unit?.code||'')+'</small></td><td>'+permission+'</td><td><button type="button" class="btnsm" onclick="revokeSigaUnitAccess(\\''+esc(assignment.user_id)+'\\',\\''+esc(assignment.unit_id)+'\\')">Remover</button></td></tr>'
   }).join('')||'<tr><td colspan="4">Nenhum vínculo de unidade.</td></tr>';
@@ -424,8 +437,8 @@ function renderUnits(){
 function clearUnitForm(){document.getElementById('unitForm').reset();document.getElementById('unitId').value='';document.getElementById('unitType').value='Localidade/Igreja';document.getElementById('unitActive').value='true';document.getElementById('unitFormTitle').textContent='Cadastrar unidade';document.getElementById('unitSaveButton').textContent='Salvar unidade';setUnitMessage('')}
 function openUnitForm(){if(!isSigaAdmin())return;clearUnitForm();document.getElementById('unitFormPanel').scrollIntoView({behavior:'smooth',block:'start'});document.getElementById('unitName').focus()}
 function editUnit(id){if(!isSigaAdmin())return;const u=sigaUnits.find(x=>String(x.id)===String(id));if(!u)return;document.getElementById('unitId').value=u.id;document.getElementById('unitCode').value=u.code||'';document.getElementById('unitName').value=u.name||'';document.getElementById('unitJapaneseName').value=u.japanese_name||'';document.getElementById('unitType').value=u.unit_type;document.getElementById('unitResponsible').value=u.responsible_name||'';document.getElementById('unitEmail').value=u.responsible_email||'';document.getElementById('unitActive').value=String(!!u.is_active);document.getElementById('unitNotes').value=u.notes||'';document.getElementById('unitFormTitle').textContent='Editar unidade';document.getElementById('unitSaveButton').textContent='Salvar alterações';setUnitMessage('');document.getElementById('unitFormPanel').scrollIntoView({behavior:'smooth',block:'start'})}
-async function saveUnit(event){event.preventDefault();if(!isSigaAdmin()){setUnitMessage('Somente administradores podem alterar unidades.',true);return}const id=document.getElementById('unitId').value;const payload={code:document.getElementById('unitCode').value.trim().toUpperCase()||null,name:document.getElementById('unitName').value.trim(),japanese_name:document.getElementById('unitJapaneseName').value.trim()||null,unit_type:document.getElementById('unitType').value,responsible_name:document.getElementById('unitResponsible').value.trim()||null,responsible_email:document.getElementById('unitEmail').value.trim()||null,is_active:document.getElementById('unitActive').value==='true',notes:document.getElementById('unitNotes').value.trim()||null,updated_by:sigaSession?.user?.id||null,updated_at:new Date().toISOString()};const button=document.getElementById('unitSaveButton');setUnitMessage('Salvando…');button.disabled=true;try{const result=id?await authClient.from('siga_units').update(payload).eq('id',id).select('id').single():await authClient.from('siga_units').insert(payload).select('id').single();if(result.error){console.error(result.error);const msg=result.error.code==='23505'?'Já existe uma unidade com esse código ou nome e tipo.':result.error.code==='42501'?'Sua conta não tem autorização para alterar unidades.':'Não foi possível salvar. Confira os dados e tente novamente.';setUnitMessage(msg,true);return}clearUnitForm();await loadUnits();setUnitMessage('Unidade salva.')}catch(error){console.error(error);setUnitMessage('Não foi possível salvar. Verifique a conexão e tente novamente.',true)}finally{button.disabled=false}}
-async function toggleUnitStatus(id){if(!isSigaAdmin())return;const u=sigaUnits.find(x=>String(x.id)===String(id));if(!u)return;const action=u.is_active?'desativar':'ativar';if(!confirm('Deseja '+action+' “'+u.name+'”? O registro continuará salvo no histórico.'))return;try{const {error}=await authClient.from('siga_units').update({is_active:!u.is_active,updated_by:sigaSession?.user?.id||null,updated_at:new Date().toISOString()}).eq('id',id).select('id').single();if(error)throw error;await loadUnits()}catch(error){console.error(error);setUnitLoadMessage('Não foi possível alterar o status desta unidade.',true)}}
+async function saveUnit(event){event.preventDefault();if(!isSigaAdmin()){setUnitMessage('Somente administradores podem alterar unidades.',true);return}const id=document.getElementById('unitId').value;const payload={code:document.getElementById('unitCode').value.trim().toUpperCase()||null,name:document.getElementById('unitName').value.trim(),japanese_name:document.getElementById('unitJapaneseName').value.trim()||null,unit_type:document.getElementById('unitType').value,responsible_name:document.getElementById('unitResponsible').value.trim()||null,responsible_email:document.getElementById('unitEmail').value.trim()||null,is_active:document.getElementById('unitActive').value==='true',notes:document.getElementById('unitNotes').value.trim()||null,updated_by:sigaCurrentUserId||null,updated_at:new Date().toISOString()};if(!id)payload.created_by=sigaCurrentUserId||null;const button=document.getElementById('unitSaveButton');setUnitMessage('Salvando…');button.disabled=true;try{const result=id?await authClient.from('siga_units').update(payload).eq('id',id).select('id').single():await authClient.from('siga_units').insert(payload).select('id').single();if(result.error){console.error(result.error);const msg=result.error.code==='23505'?'Já existe uma unidade com esse código ou nome e tipo.':result.error.code==='42501'?'Sua conta não tem autorização para alterar unidades.':'Não foi possível salvar. Confira os dados e tente novamente.';setUnitMessage(msg,true);return}clearUnitForm();await loadUnits();setUnitMessage('Unidade salva.')}catch(error){console.error(error);setUnitMessage('Não foi possível salvar. Verifique a conexão e tente novamente.',true)}finally{button.disabled=false}}
+async function toggleUnitStatus(id){if(!isSigaAdmin())return;const u=sigaUnits.find(x=>String(x.id)===String(id));if(!u)return;const action=u.is_active?'desativar':'ativar';if(!confirm('Deseja '+action+' “'+u.name+'”? O registro continuará salvo no histórico.'))return;try{const {error}=await authClient.from('siga_units').update({is_active:!u.is_active,updated_by:sigaCurrentUserId||null,updated_at:new Date().toISOString()}).eq('id',id).select('id').single();if(error)throw error;await loadUnits()}catch(error){console.error(error);setUnitLoadMessage('Não foi possível alterar o status desta unidade.',true)}}
 renderMembers();
 (function(){function initSIGA(){document.querySelectorAll('nav button').forEach(function(btn){btn.addEventListener('touchend',function(e){e.preventDefault();btn.click()},{passive:false})});document.querySelectorAll('button').forEach(function(btn){btn.style.webkitUserSelect='none'})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initSIGA);else initSIGA()})();
 </script>
