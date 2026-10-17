@@ -224,15 +224,18 @@ async function updateUser(admin: any, body: Record<string, unknown>, actor: any)
   }
   if (!isSigaConnectionUser(current)) return respond({ error: "Conta não encontrada na conexão de usuários do SIGA." }, 404);
 
-  const currentRole = roleFrom(current.app_metadata?.siga_role);
+  const currentIdentity = await findSigaIdentity(admin, userId);
+  const currentRole = currentIdentity?.role ?? roleFrom(current.app_metadata?.siga_role);
   if (userId === actor.auth0_sub && role !== "admin") {
     return respond({ error: "Não é permitido remover o próprio perfil de administrador." }, 400);
   }
   if (currentRole === "admin" && role !== "admin") {
-    const users = await listAuth0Users();
-    if (users.filter((user) => user.app_metadata?.siga_role === "admin").length <= 1) {
-      return respond({ error: "Mantenha pelo menos um administrador ativo." }, 400);
-    }
+    const { count, error } = await admin
+      .from("siga_user_identities")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "admin");
+    if (error) throw error;
+    if ((count ?? 0) <= 1) return respond({ error: "Mantenha pelo menos um administrador ativo." }, 400);
   }
 
   await ensureEmailAvailable(admin, email, userId);
