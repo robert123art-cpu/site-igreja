@@ -31,7 +31,7 @@ O cadastro público dessa conexão foi desativado. Não há alterações de SMTP
 
 ## Primeiro administrador
 
-Antes de publicar a nova tela de login, crie no Auth0 a conta inicial de administrador usando o e-mail confirmado da conta administradora atual do SIGA. Defina `app_metadata.siga_role = "admin"` por meio do Management API. No primeiro login, o SIGA associará essa identidade ao UUID antigo pelo e-mail confirmado, preservando os vínculos existentes. Não crie uma senha ou um endereço de e-mail fictício.
+Antes de publicar a nova tela de login, crie no Auth0 a conta inicial de administrador usando o e-mail da conta administradora atual do SIGA. Marque `email_verified = true` e defina `app_metadata.siga_role = "admin"` por meio do Management API. No primeiro login, o SIGA associará essa identidade ao UUID antigo pelo e-mail confirmado, preservando os vínculos existentes. Não crie uma senha ou um endereço de e-mail fictício.
 
 ## Supabase
 
