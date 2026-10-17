@@ -21,7 +21,7 @@ create table if not exists public.siga_user_identities (
 
 comment on table public.siga_user_identities is
   'Private mapping from Auth0 subjects to stable SIGA UUIDs used by unit assignments.';
-create index if not exists siga_user_identities_email_key_idx
+create unique index if not exists siga_user_identities_email_key_uidx
   on public.siga_user_identities (email_key)
   where email_key is not null;
 
