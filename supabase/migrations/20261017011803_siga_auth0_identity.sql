@@ -1,7 +1,6 @@
 -- SIGA uses Auth0 subjects for login while keeping UUIDs for unit assignments and audit history.
 -- Apply only after configuring Supabase Third-Party Auth for the matching Auth0 issuer.
 
-begin;
 
 create schema if not exists siga_private;
 revoke all on schema siga_private from public, anon;
@@ -178,4 +177,3 @@ create policy siga_members_admin_only
   using ((select siga_private.is_admin()))
   with check ((select siga_private.is_admin()));
 
-commit;
