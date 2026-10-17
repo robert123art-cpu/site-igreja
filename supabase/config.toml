@@ -1,0 +1,7 @@
+project_id = "uoapmjwdwtpltnxvmniy"
+
+[functions.siga-resolve-identity]
+verify_jwt = true
+
+[functions.siga-admin-users]
+verify_jwt = true
