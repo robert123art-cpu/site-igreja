@@ -1,4 +1,6 @@
-export const AUTH0_DOMAIN = "dev-bggmfdxl7xrd7z2c.us.auth0.com";
+export const AUTH0_DOMAIN = (Deno.env.get("AUTH0_DOMAIN") ?? "dev-bggmfdxl7xrd7z2c.us.auth0.com")
+  .replace(/^https?:\\/\\//, "")
+  .replace(/\\/+$/, "");
 export const AUTH0_ISSUER = `https://${AUTH0_DOMAIN}/`;
 export const SIGA_ROLE_CLAIM = "https://github.com/robert123art-cpu/site-igreja/claims/siga_role";
 
