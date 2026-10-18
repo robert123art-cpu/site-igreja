@@ -18,7 +18,7 @@ body{display:flex;align-items:center;justify-content:center;padding:12px}
 </head>
 <body>
 <div class="stage">
-<iframe id="cardFrame" src="cartao-visita.html?v=20261019-4" scrolling="no" title="Cartão Digital CCJ"></iframe>
+<iframe id="cardFrame" src="cartao-visita.html?v=20261019-5" scrolling="no" title="Cartão Digital CCJ"></iframe>
 </div>
 <script>
 const frame=document.getElementById('cardFrame');
@@ -27,14 +27,18 @@ frame.addEventListener('load',()=>{
     const doc=frame.contentDocument;
     const style=doc.createElement('style');
     style.textContent=`
-      .body{align-items:flex-start!important;padding:2.8% 3.5%!important;gap:3%!important}
+      .top{padding:3.5%!important;gap:3%!important}
+      .photo{height:72%!important;border-width:3px!important}
+      .org{font-size:clamp(15px,2.45vw,30px)!important;line-height:1.05!important}
+      .sub{font-size:clamp(8px,1.55vw,18px)!important;margin-top:5px!important}
+      .body{height:52%!important;align-items:flex-start!important;padding:2.8% 3.5%!important;gap:3%!important}
       .info{min-width:0!important}
-      .jp{font-size:clamp(18px,3.2vw,38px)!important;line-height:1!important}
-      .pt{font-size:clamp(14px,2.2vw,26px)!important;margin-top:6px!important}
-      .titlejp{font-size:clamp(9px,1.6vw,19px)!important;margin-top:7px!important}
-      .titlept{font-size:clamp(9px,1.5vw,18px)!important;margin-top:3px!important}
-      .contact{font-size:clamp(7px,1.35vw,16px)!important;line-height:1.2!important;margin-top:6px!important}
-      .qr{flex-basis:18%!important;max-width:170px!important;padding:4px!important}
+      .jp{font-size:clamp(20px,3.1vw,36px)!important;line-height:1!important}
+      .pt{font-size:clamp(13px,2.05vw,24px)!important;margin-top:5px!important}
+      .titlejp{font-size:clamp(9px,1.45vw,17px)!important;margin-top:6px!important}
+      .titlept{font-size:clamp(9px,1.35vw,16px)!important;margin-top:2px!important}
+      .contact{font-size:clamp(7px,1.15vw,14px)!important;line-height:1.15!important;margin-top:5px!important}
+      .qr{flex-basis:18%!important;max-width:160px!important;padding:4px!important}
     `;
     doc.head.appendChild(style);
   }catch(e){}
