@@ -1,0 +1,18 @@
+{
+  "name": "Cartão Digital CCJ — Paisagem",
+  "short_name": "Cartão CCJ",
+  "start_url": "./cartao-visita-paisagem.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#063d78",
+  "theme_color": "#063d78",
+  "description": "Cartão de visita digital da Congregação Cristã no Japão em formato paisagem.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
