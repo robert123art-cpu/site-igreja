@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#063d78">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cartão CCJ Paisagem">
+<link rel="manifest" href="manifest-paisagem.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Cartão Digital CCJ — Paisagem</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:#063d78;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif}
+body{display:flex;align-items:center;justify-content:center}
+#cardFrame{display:block;border:0;background:#fff;box-shadow:0 0 24px rgba(0,0,0,.28);width:min(100vw,158.73vh);height:min(100vw,158.73vh)/1.5873}
+.rotate-help{display:none;color:#fff;text-align:center;padding:24px;font-size:20px;line-height:1.4}
+@media (orientation:portrait){#cardFrame{width:92vw;height:58vw}.rotate-help{display:block;position:absolute;bottom:12px;left:0;right:0;font-size:15px;opacity:.9} }
+@media (orientation:landscape){#cardFrame{width:min(100vw,158.73vh);height:min(100vw,158.73vh)/1.5873}}
+</style>
+</head>
+<body>
+<iframe id="cardFrame" src="cartao-visita.html" title="Cartão de visita digital"></iframe>
+<div class="rotate-help">Gire o iPhone para a posição horizontal para visualizar o cartão em formato paisagem.</div>
+</body>
+</html>
