@@ -26,7 +26,7 @@
 <a class="btn" href="index.html">🌐 Abrir site</a>
 <button class="btn secondary" id="copyBtn" type="button">📋 Copiar contato</button>
 <button class="btn secondary" id="shareBtn" type="button">📤 Compartilhar</button>
-<a class="btn secondary" href="presenca.html">📋 Lista de presença</a>
+<a class="btn" href="presenca.html">📋 Lista de presença</a>
 </div>
 <div id="status" class="status"></div>
 <div id="panel" class="panel">
@@ -54,7 +54,7 @@ function save(){const d=getData();try{localStorage.setItem('cartaoDados',JSON.st
 try{const saved=JSON.parse(localStorage.getItem('cartaoDados')||'null');apply(saved||defaults);$('photo').src=localStorage.getItem('cartaoFoto')||fallback}catch(e){apply(defaults);$('photo').src=fallback}
 $('editBtn').onclick=()=>{$('panel').classList.toggle('open');$('editBtn').textContent=$('panel').classList.contains('open')?'✏️ Fechar edição':'✏️ Editar cartão';if($('panel').classList.contains('open'))$('panel').scrollIntoView({behavior:'smooth',block:'start'})};
 $('saveBtn').onclick=save;
-$('translateBtn').onclick=()=>{const v=$('titlePt').value.trim().toLowerCase();const map={'presidente':'会長','vice-presidente':'副会長','secretário':'書記','secretaria':'事務局','tesoureiro':'会計','pastor':'牧師','ministro':'牧師','diácono':'執事','diacono':'執事'};if(map[v]){$('titleJp').value=map[v];status('Tradução sugerida. Revise e toque em Salvar alterações.')}else status('Não encontrei uma tradução segura para esse cargo. Digite o japonês manualmente.')};
+$('translateBtn').onclick=()=>{const v=$('titlePt').value.trim().toLowerCase();const map={'presidente':'管理代表役員（会長）','vice-presidente':'副会長','secretário':'書記','secretaria':'事務局','tesoureiro':'会計','pastor':'牧師','ministro':'牧師','diácono':'執事','diacono':'執事'};if(map[v]){$('titleJp').value=map[v];status('Tradução sugerida. Revise e toque em Salvar alterações.')}else status('Não encontrei uma tradução segura para esse cargo. Digite o japonês manualmente.')};
 $('photoFile').onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith('image/'))return status('Selecione uma fotografia válida.');const r=new FileReader();r.onload=()=>{try{localStorage.setItem('cartaoFoto',r.result)}catch(e){}$('photo').src=r.result;status('Fotografia atualizada. Toque em Salvar alterações para concluir os dados.')};r.readAsDataURL(f)};
 function makeVcard(){const d=getData();return ['BEGIN:VCARD','VERSION:3.0','FN:'+d.namePt,'N:'+d.namePt+';;;','ORG:'+d.org,'TITLE:'+d.titlePt,'TEL;TYPE=CELL:+'+d.phone.replace(/\D/g,''),'EMAIL:'+d.email,'ADR;TYPE=WORK:;;'+d.address.replace(/^〒[^ ]+ /,'')+';;;','URL:'+cardUrl,'NOTE:会社法人等番号 1803-05-009092','END:VCARD'].join('\r\n')}
 $('contactBtn').onclick=async()=>{const file=new File([makeVcard()],'Atos_Roberto_Tosha.vcf',{type:'text/vcard'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Atos Roberto Tosha',files:[file]});status('No menu do iPhone, escolha Contatos para adicionar.');return}const url=URL.createObjectURL(file);window.location.href=url;setTimeout(()=>URL.revokeObjectURL(url),5000);status('Arquivo de contato preparado. Abra o .vcf e escolha Adicionar aos Contatos.')}catch(e){if(e.name!=='AbortError')status('Não foi possível abrir o contato. Tente novamente no Safari.')}};
