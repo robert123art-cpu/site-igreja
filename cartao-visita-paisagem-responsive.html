@@ -18,7 +18,7 @@ body{display:flex;align-items:center;justify-content:center;padding:12px}
 </head>
 <body>
 <div class="stage">
-<iframe id="cardFrame" src="cartao-visita.html?v=20261019-5" scrolling="no" title="Cartão Digital CCJ"></iframe>
+<iframe id="cardFrame" src="cartao-visita.html?v=20261019-6" scrolling="no" title="Cartão Digital CCJ"></iframe>
 </div>
 <script>
 const frame=document.getElementById('cardFrame');
@@ -27,18 +27,18 @@ frame.addEventListener('load',()=>{
     const doc=frame.contentDocument;
     const style=doc.createElement('style');
     style.textContent=`
-      .top{padding:3.5%!important;gap:3%!important}
-      .photo{height:72%!important;border-width:3px!important}
-      .org{font-size:clamp(15px,2.45vw,30px)!important;line-height:1.05!important}
-      .sub{font-size:clamp(8px,1.55vw,18px)!important;margin-top:5px!important}
-      .body{height:52%!important;align-items:flex-start!important;padding:2.8% 3.5%!important;gap:3%!important}
-      .info{min-width:0!important}
-      .jp{font-size:clamp(20px,3.1vw,36px)!important;line-height:1!important}
-      .pt{font-size:clamp(13px,2.05vw,24px)!important;margin-top:5px!important}
-      .titlejp{font-size:clamp(9px,1.45vw,17px)!important;margin-top:6px!important}
-      .titlept{font-size:clamp(9px,1.35vw,16px)!important;margin-top:2px!important}
-      .contact{font-size:clamp(7px,1.15vw,14px)!important;line-height:1.15!important;margin-top:5px!important}
-      .qr{flex-basis:18%!important;max-width:160px!important;padding:4px!important}
+      .top{height:42%!important;padding:3% 4%!important;gap:3%!important}
+      .photo{height:72%!important}
+      .org{font-size:clamp(12px,2.55vw,31px)!important;line-height:1.08!important}
+      .sub{font-size:clamp(8px,1.55vw,19px)!important;margin-top:5px!important}
+      .body{height:58%!important;align-items:flex-start!important;padding:2.6% 3.5%!important;gap:3%!important}
+      .info{min-width:0!important;padding-top:0!important}
+      .jp{font-size:clamp(17px,3.15vw,38px)!important;line-height:1!important}
+      .pt{font-size:clamp(13px,2.05vw,25px)!important;margin-top:5px!important}
+      .titlejp{font-size:clamp(8px,1.45vw,17px)!important;margin-top:5px!important}
+      .titlept{font-size:clamp(8px,1.35vw,16px)!important;margin-top:2px!important}
+      .contact{font-size:clamp(6.5px,1.12vw,13.5px)!important;line-height:1.05!important;margin-top:4px!important}
+      .qr{flex-basis:17%!important;max-width:155px!important;padding:3px!important;border-width:2px!important}
     `;
     doc.head.appendChild(style);
   }catch(e){}
