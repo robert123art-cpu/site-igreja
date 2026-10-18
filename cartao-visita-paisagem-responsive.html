@@ -14,11 +14,11 @@
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;background:#eef2f7;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif}
 body{display:flex;align-items:center;justify-content:center;padding:10px}
-#cardFrame{display:block;border:0;background:#fff;box-shadow:0 10px 28px rgba(0,0,0,.18);width:min(100%,1200px);height:auto;aspect-ratio:1200/756;flex:none;overflow:hidden}
-@media (max-aspect-ratio: 1200/756){#cardFrame{width:100%;height:auto}}
+#cardFrame{display:block;border:0;background:#fff;box-shadow:0 10px 28px rgba(0,0,0,.18);width:min(100%,1200px);height:calc(min(100vw - 20px,1200px)*0.63 + 44px);flex:none;overflow:hidden}
+@media (min-width:1201px){#cardFrame{width:1200px;height:800px}}
 </style>
 </head>
 <body>
-<iframe id="cardFrame" src="cartao-visita.html?v=20261018-4" title="Cartão de visita digital" scrolling="no"></iframe>
+<iframe id="cardFrame" src="cartao-visita.html?v=20261018-5" title="Cartão de visita digital" scrolling="no"></iframe>
 </body>
 </html>
