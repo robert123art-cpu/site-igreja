@@ -1,12 +1,12 @@
 {
-  "name": "Cartão Digital CCJ — Paisagem",
+  "name": "Cartão Digital CCJ",
   "short_name": "Cartão CCJ",
-  "start_url": "./cartao-visita-paisagem.html",
+  "start_url": "./cartao-visita-paisagem-responsive.html",
   "display": "standalone",
-  "orientation": "landscape",
-  "background_color": "#063d78",
+  "orientation": "portrait",
+  "background_color": "#eef2f7",
   "theme_color": "#063d78",
-  "description": "Cartão de visita digital da Congregação Cristã no Japão em formato paisagem.",
+  "description": "Cartão de visita digital da Congregação Cristã no Japão. O celular permanece na vertical e o cartão aparece na horizontal.",
   "icons": [
     {
       "src": "icon.svg",
