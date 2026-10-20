@@ -8,7 +8,7 @@
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;min-height:100%;background:#eef2f7}
-body{display:flex;justify-content:flex-start;align-items:center;padding:12px 6px 24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{display:flex;justify-content:center;align-items:flex-start;padding:12px 6px 24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .page{width:min(1200px,100%)}
 .stage{position:relative;width:100%;aspect-ratio:1200/756;overflow:hidden;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.16);border-radius:12px}
 .stage iframe{display:block;width:100%;height:100%;border:0}
@@ -19,6 +19,8 @@ body{display:flex;justify-content:flex-start;align-items:center;padding:12px 6px
 .status{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10000;background:rgba(0,0,0,.86);color:#fff;border-radius:10px;padding:9px 12px;font-size:13px;display:none;max-width:92%;text-align:center}
 @media(max-width:600px){body{padding:8px 5px 18px}.stage{border-radius:10px}.actions{gap:6px;margin-top:9px}.actions a,.actions button{min-height:58px;border-radius:11px;font-size:14px;padding:7px 3px}}
 @media(max-width:390px){.actions a,.actions button{font-size:12px;min-height:54px}}
+@media (orientation:landscape) and (max-height:900px){body{padding:6px 8px 10px}.page{width:min(1200px,calc((100vh - 105px) * 1200 / 756),100%)}.actions{margin-top:8px;gap:7px}.actions a,.actions button{min-height:48px;font-size:13px;padding:6px 4px}}
+@media (orientation:landscape) and (max-height:650px){.page{width:min(1200px,calc((100vh - 82px) * 1200 / 756),100%)}.actions{margin-top:6px}.actions a,.actions button{min-height:42px;font-size:12px}}
 </style>
 </head>
 <body>
