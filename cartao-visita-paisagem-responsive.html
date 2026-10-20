@@ -26,7 +26,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:12px 6px
 <body>
 <div class="page">
   <div class="stage">
-    <iframe id="cardFrame" src="cartao-visita.html?v=20261020-12" scrolling="no" title="Cartão Digital CCJ"></iframe>
+    <iframe id="cardFrame" src="cartao-visita.html?v=20261020-13" scrolling="no" title="Cartão Digital CCJ"></iframe>
   </div>
   <div class="actions" aria-label="Ações do cartão">
     <a href="tel:+81566931383">📞<br>Ligar</a>
@@ -46,12 +46,13 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:12px 6px
     try{
       const d=frame.contentDocument;
       if(!d)return;
-      const s=d.createElement('style');
-      s.textContent='.top{background:#89cff0 !important}.pt,.titlejp{color:#1f5f87 !important}.sub{color:#fff !important}';
-      d.head.appendChild(s);
+      let s=d.getElementById('babyBlueOverride');
+      if(!s){s=d.createElement('style');s.id='babyBlueOverride';d.head.appendChild(s)}
+      s.textContent='html,body,.card{background:#fff !important}.top{background:#89cff0 !important}.pt,.titlejp{color:#1f5f87 !important}.sub{color:#fff !important}';
     }catch(e){}
   }
-  frame.addEventListener('load',applyBabyBlue);
+  frame.addEventListener('load',function(){applyBabyBlue();setTimeout(applyBabyBlue,100);setTimeout(applyBabyBlue,500);});
+  setTimeout(applyBabyBlue,300);
   document.getElementById('share').addEventListener('click',async function(){
     try{if(navigator.share){await navigator.share({title:'Cartão Digital CCJ — Atos Roberto Tosha',text:'Cartão Digital CCJ — Atos Roberto Tosha',url:SHARE_URL});return}}catch(e){if(e&&e.name==='AbortError')return}
     try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(SHARE_URL);msg('Link copiado. Agora cole no WhatsApp, E-mail ou outro aplicativo.');return}}catch(e){}
