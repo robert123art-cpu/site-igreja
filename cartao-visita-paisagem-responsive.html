@@ -14,8 +14,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:12px 6px
 .stage iframe{display:block;width:100%;height:100%;border:0}
 .actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 2px 0}
 .actions a,.actions button{min-height:52px;border:0;border-radius:12px;padding:8px 6px;background:#89cff0;color:#16364a;text-decoration:none;font:700 15px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.18);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15}
-.actions .save{background:#2f6f3e;color:#fff}
-.actions .share{background:#c99a32;color:#142235}
+.actions .save{background:#2f6f3e;color:#fff}.actions .share{background:#c99a32;color:#142235}
 .status{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10000;background:rgba(0,0,0,.86);color:#fff;border-radius:10px;padding:9px 12px;font-size:13px;display:none;max-width:92%;text-align:center}
 @media(max-width:600px){body{padding:8px 5px 18px}.stage{border-radius:10px}.actions{gap:6px;margin-top:9px}.actions a,.actions button{min-height:58px;border-radius:11px;font-size:14px;padding:7px 3px}}
 @media(max-width:390px){.actions a,.actions button{font-size:12px;min-height:54px}}
@@ -25,47 +24,11 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:12px 6px
 </head>
 <body>
 <div class="page">
-  <div class="stage">
-    <iframe id="cardFrame" src="cartao-visita.html?v=20261020-15" scrolling="no" title="Cartão Digital CCJ"></iframe>
-  </div>
-  <div class="actions" aria-label="Ações do cartão">
-    <a href="tel:+81566931383">📞<br>Ligar</a>
-    <a href="mailto:CCj.secretariacentral@outlook.com">✉️<br>E-mail</a>
-    <a class="save" href="Atos_Roberto_Tosha.vcf">👤<br>Salvar contato</a>
-    <button id="share" class="share" type="button">↗️<br>Compartilhar</button>
-  </div>
-  <div id="status" class="status" role="status" aria-live="polite"></div>
-</div>
+<div class="stage"><iframe id="cardFrame" src="cartao-visita.html?v=20261020-15" scrolling="no" title="Cartão Digital CCJ"></iframe></div>
+<div class="actions" aria-label="Ações do cartão">
+<a href="tel:+81566931383">📞<br>Ligar</a><a href="mailto:CCj.secretariacentral@outlook.com">✉️<br>E-mail</a><a class="save" href="Atos_Roberto_Tosha.vcf">👤<br>Salvar contato</a><button id="share" class="share" type="button">↗️<br>Compartilhar</button>
+</div><div id="status" class="status" role="status" aria-live="polite"></div></div>
 <script>
-(function(){
-  const SHARE_URL=location.href.split('#')[0];
-  const status=document.getElementById('status');
-  const frame=document.getElementById('cardFrame');
-  function msg(t){status.textContent=t;status.style.display='block';clearTimeout(window.__msg);window.__msg=setTimeout(()=>status.style.display='none',3500)}
-  function applyBabyBlue(){
-    try{
-      const d=frame.contentDocument;
-      if(!d)return;
-      let s=d.getElementById('babyBlueOverride');
-      if(!s){s=d.createElement('style');s.id='babyBlueOverride';d.head.appendChild(s)}
-      s.textContent='html,body,.card{background:#fff !important}.top{background:#89cff0 !important}.org{color:#111 !important}.sub{color:#16364a !important}.pt,.titlejp{color:#1f5f87 !important}.reg{display:block;color:#111;font-weight:700;margin-top:7px;font-size:clamp(8px,1.6vw,20px);line-height:1.15}';
-      let r=d.getElementById('companyRegistration');
-      if(!r){
-        const org=d.querySelector('.org');
-        const sub=d.querySelector('.sub');
-        if(sub){r=d.createElement('div');r.id='companyRegistration';r.className='reg';r.textContent='会社法人等番号：1803-05-009092';sub.insertAdjacentElement('afterend',r)}
-        else if(org){r=d.createElement('div');r.id='companyRegistration';r.className='reg';r.textContent='会社法人等番号：1803-05-009092';org.insertAdjacentElement('afterend',r)}
-      }
-    }catch(e){}
-  }
-  frame.addEventListener('load',function(){applyBabyBlue();setTimeout(applyBabyBlue,100);setTimeout(applyBabyBlue,500);});
-  setTimeout(applyBabyBlue,300);
-  document.getElementById('share').addEventListener('click',async function(){
-    try{if(navigator.share){await navigator.share({title:'Cartão Digital CCJ — Atos Roberto Tosha',text:'Cartão Digital CCJ — Atos Roberto Tosha',url:SHARE_URL});return}}catch(e){if(e&&e.name==='AbortError')return}
-    try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(SHARE_URL);msg('Link copiado. Agora cole no WhatsApp, E-mail ou outro aplicativo.');return}}catch(e){}
-    window.prompt('Copie o link do cartão:',SHARE_URL);
-  });
-})();
+(function(){const SHARE_URL='https://robert123art-cpu.github.io/site-igreja/cartao-visita-paisagem-responsive.html?v=20261020-16',status=document.getElementById('status'),frame=document.getElementById('cardFrame');function msg(t){status.textContent=t;status.style.display='block';clearTimeout(window.__msg);window.__msg=setTimeout(()=>status.style.display='none',3500)}function applyBabyBlue(){try{const d=frame.contentDocument;if(!d)return;let s=d.getElementById('babyBlueOverride');if(!s){s=d.createElement('style');s.id='babyBlueOverride';d.head.appendChild(s)}s.textContent='html,body,.card{background:#fff !important}.top{background:#89cff0 !important}.org{color:#111 !important}.sub{color:#16364a !important}.pt,.titlejp{color:#1f5f87 !important}.reg{display:block;color:#111;font-weight:700;margin-top:7px;font-size:clamp(8px,1.6vw,20px);line-height:1.15}';let r=d.getElementById('companyRegistration');if(!r){const org=d.querySelector('.org'),sub=d.querySelector('.sub');if(sub){r=d.createElement('div');r.id='companyRegistration';r.className='reg';r.textContent='会社法人等番号：1803-05-009092';sub.insertAdjacentElement('afterend',r)}else if(org){r=d.createElement('div');r.id='companyRegistration';r.className='reg';r.textContent='会社法人等番号：1803-05-009092';org.insertAdjacentElement('afterend',r)}}}catch(e){}}frame.addEventListener('load',function(){applyBabyBlue();setTimeout(applyBabyBlue,100);setTimeout(applyBabyBlue,500)});setTimeout(applyBabyBlue,300);document.getElementById('share').addEventListener('click',async function(){try{if(navigator.share){await navigator.share({title:'Cartão Digital CCJ — Atos Roberto Tosha',text:'Cartão Digital CCJ — Atos Roberto Tosha',url:SHARE_URL});return}}catch(e){if(e&&e.name==='AbortError')return}try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(SHARE_URL);msg('Link copiado. Agora cole no WhatsApp, E-mail ou outro aplicativo.');return}}catch(e){}window.prompt('Copie o link do cartão:',SHARE_URL)})})();
 </script>
-</body>
-</html>
+</body></html>
