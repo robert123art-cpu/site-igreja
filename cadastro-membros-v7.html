@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cadastro de Membros CCJ — V7</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7f8;color:#222;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif}.top{background:#fff;border-bottom:1px solid #d9e0e4;padding:16px}.brand{font-weight:800;color:#244b5a}.brand small{display:block;color:#66727a;font-weight:500;margin-top:4px}main{max-width:900px;margin:auto;padding:14px 10px 50px}.card{background:#fff;border:1px solid #d9e0e4;border-radius:14px;padding:15px;margin-bottom:14px;box-shadow:0 2px 10px #00000008}h1,h2{color:#244b5a;margin-top:0}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:13px;color:#66727a;margin-bottom:4px}.field input,.field select{width:100%;padding:12px;border:1px solid #cbd5da;border-radius:9px;font:inherit;background:#fff}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{font:inherit;border:1px solid #ccd5da;background:#fff;border-radius:9px;padding:11px 14px;cursor:pointer;touch-action:manipulation}.primary{background:#244b5a;color:#fff;border-color:#244b5a}.danger{background:#fff0f0;color:#a33;border-color:#e8b7b7}.hint{font-size:13px;color:#66727a}.search{width:100%;padding:12px;border:1px solid #cbd5da;border-radius:9px;font:inherit;margin-bottom:10px}.member{border:1px solid #d9e0e4;border-radius:12px;padding:12px;margin-top:10px}.member-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.member-name{font-weight:800;color:#244b5a;font-size:18px}.id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#66727a;font-size:13px}.status{font-size:12px;border:1px solid #ccd5da;border-radius:999px;padding:4px 8px}.qr{display:flex;justify-content:center;margin:12px 0}.qr canvas,.qr img{max-width:220px;height:auto}.empty{padding:20px;text-align:center;color:#66727a}@media(max-width:600px){.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">日本クリスチャンコングレゲーション<small>Cadastro de Membros / 会員登録 — V7</small></div></header>
+<main>
+<section class="card"><h1>Cadastro de Membros / 会員登録</h1><p class="hint">Cada membro recebe um ID único. O QR Code desse ID abre a Lista de Presença V7 e identifica o membro automaticamente.</p>
+<div class="form">
+<div class="field"><label>Nome / 氏名</label><input id="name" autocomplete="name"></div>
+<div class="field"><label>Ministério/Cargo / 役職</label><input id="role"></div>
+<div class="field"><label>Administração / 管理</label><input id="admin"></div>
+<div class="field"><label>Localidade / 地域</label><input id="local"></div>
+<div class="field"><label>Cidade / 市</label><input id="city"></div>
+<div class="field"><label>Status / 状態</label><select id="status"><option value="Ativo">Ativo / 有効</option><option value="Inativo">Inativo / 無効</option></select></div>
+</div>
+<div class="actions"><button id="add" class="primary" type="button">Cadastrar membro / 会員を登録</button><button id="clear" type="button">Limpar / クリア</button></div><div id="msg" class="hint"></div></section>
+<section class="card"><h2>Membros cadastrados / 登録会員</h2><input id="search" class="search" placeholder="Pesquisar nome, cargo ou ID / 名前・役職・IDで検索">
+<div id="list"></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);const KEY='ccj_membros_v7';let members=[];
+function load(){try{members=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(members))members=[]}catch(e){members=[]}render()}
+function save(){localStorage.setItem(KEY,JSON.stringify(members))}
+function nextId(){let n=1;const used=new Set(members.map(m=>m.id));while(used.has('CCJ-'+String(n).padStart(4,'0')))n++;return 'CCJ-'+String(n).padStart(4,'0')}
+function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function addMember(){const name=$('name').value.trim();if(!name){$('msg').textContent='Digite o nome do membro.';$('name').focus();return}const m={id:nextId(),name,role:$('role').value.trim(),admin:$('admin').value.trim(),local:$('local').value.trim(),city:$('city').value.trim(),status:$('status').value};members.push(m);save();$('msg').textContent='Membro '+m.id+' cadastrado.';['name','role','admin','local','city'].forEach(k=>$(k).value='');$('status').value='Ativo';render()}
+function qrUrl(id){return location.origin+location.pathname.replace('cadastro-membros-v7.html','lista-presenca-v7.html')+'?m='+encodeURIComponent(id)}
+function render(){const q=$('search').value.trim().toLowerCase();const list=$('list');const filtered=members.filter(m=>(m.name+' '+m.role+' '+m.id+' '+m.admin+' '+m.local+' '+m.city).toLowerCase().includes(q));if(!filtered.length){list.innerHTML='<div class="empty">Nenhum membro cadastrado.</div>';return}list.innerHTML=filtered.map(m=>'<div class="member"><div class="member-head"><div><div class="member-name">'+esc(m.name)+'</div><div class="id">'+esc(m.id)+'</div><div>'+esc(m.role||'')+'</div></div><span class="status">'+esc(m.status)+'</span></div><div class="hint">'+esc(m.admin||'')+(m.local?' · '+esc(m.local):'')+(m.city?' · '+esc(m.city):'')+'</div><div class="qr" id="qr-'+m.id+'"></div><div class="hint">QR Code do membro — ao escanear, abre a Lista V7 e identifica '+esc(m.id)+'.</div><div class="actions"><button type="button" data-open="'+esc(m.id)+'">Abrir Lista V7</button><button class="danger" type="button" data-del="'+esc(m.id)+'">Excluir</button></div></div>').join('');filtered.forEach(m=>{const box=$('qr-'+m.id);if(window.QRCode)new QRCode(box,{text:qrUrl(m.id),width:200,height:200,correctLevel:QRCode.CorrectLevel.M})});list.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>location.href=qrUrl(b.dataset.open));list.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Excluir este membro?')){members=members.filter(m=>m.id!==b.dataset.del);save();render()}})}
+$('add').onclick=addMember;$('clear').onclick=()=>{['name','role','admin','local','city'].forEach(k=>$(k).value='');$('status').value='Ativo';$('msg').textContent=''};$('search').oninput=render;load();
+</script>
+</body></html>
