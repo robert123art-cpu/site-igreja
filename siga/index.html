@@ -378,7 +378,7 @@ async function renderUsers(){
   userTable.innerHTML=sigaAdminUsers.map(user=>{
    const role=user.role==='admin'?'Administrador':'Usuário';
    const created=user.created_at?new Intl.DateTimeFormat('pt-BR').format(new Date(user.created_at)):'—';
-   return '<tr><td><b>'+esc(user.full_name||'—')+'</b><br><small>'+esc(user.email||'')+'</small></td><td>'+role+'</td><td>'+created+'</td><td><button type="button" class="btnsm" onclick="editSigaUser(\\''+esc(user.id)+'\\')">Alterar</button></td></tr>'
+   return '<tr><td><b>'+esc(user.full_name||'—')+'</b><br><small>'+esc(user.email||'')+'</small></td><td>'+role+'</td><td>'+created+'</td><td><button type="button" class="btnsm" onclick="editSigaUser(\''+esc(user.id)+'\')">Alterar</button></td></tr>'
   }).join('')||'<tr><td colspan="4">Nenhuma conta cadastrada.</td></tr>';
   const grantUser=document.getElementById('sigaGrantUser');
   grantUser.innerHTML='<option value="">Selecione um usuário</option>'+sigaAdminUsers.filter(user=>user.role!=='admin').map(user=>'<option value="'+esc(user.id)+'">'+esc(user.full_name||user.email)+' — '+esc(user.email||'')+'</option>').join('');
@@ -387,7 +387,7 @@ async function renderUsers(){
   assignmentTable.innerHTML=sigaAssignments.map(assignment=>{
    const user=sigaAdminUsers.find(item=>item.id===assignment.user_id),unit=sigaAdminUnits.find(item=>item.id===assignment.unit_id);
    const permission=assignment.permissions?.['units.read']===true?'Consulta de unidades':'Sem permissões de leitura';
-   return '<tr><td>'+esc(user?.full_name||user?.email||'Usuário')+'<br><small>'+esc(user?.email||'')+'</small></td><td>'+esc(unit?.name||assignment.unit_id)+'<br><small>'+esc(unit?.code||'')+'</small></td><td>'+permission+'</td><td><button type="button" class="btnsm" onclick="revokeSigaUnitAccess(\\''+esc(assignment.user_id)+'\\',\\''+esc(assignment.unit_id)+'\\')">Remover</button></td></tr>'
+   return '<tr><td>'+esc(user?.full_name||user?.email||'Usuário')+'<br><small>'+esc(user?.email||'')+'</small></td><td>'+esc(unit?.name||assignment.unit_id)+'<br><small>'+esc(unit?.code||'')+'</small></td><td>'+permission+'</td><td><button type="button" class="btnsm" onclick="revokeSigaUnitAccess(\''+esc(assignment.user_id)+'\',\''+esc(assignment.unit_id)+'\')">Remover</button></td></tr>'
   }).join('')||'<tr><td colspan="4">Nenhum vínculo de unidade.</td></tr>';
  }catch(error){
   console.error(error);
