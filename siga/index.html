@@ -19,7 +19,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 @media(max-width:900px){aside{transform:translateX(-100%);transition:.2s;z-index:5}aside.open{transform:translateX(0)}main{margin-left:0}.mobile{display:block}.top{padding:0 15px}.content{padding:17px}.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
 @media(max-width:560px){.cards,.quick{grid-template-columns:1fr}.title{display:block}.currency{display:inline-block;margin-top:10px}}
 
-.admin-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:17px}.role{font-size:11px;padding:4px 7px;border-radius:12px;background:#edf5fb;color:#285b7e}.status-on{color:var(--ok);font-weight:bold}.status-off{color:var(--bad);font-weight:bold}.small-note{font-size:12px;color:var(--muted);line-height:1.5}.danger{background:#fcebea;color:#8f2118}.modal{position:fixed;inset:0;background:#0008;display:grid;place-items:center;z-index:20;padding:20px}.modal.hidden{display:none}.modal-box{width:min(430px,100%);background:#fff;border-radius:14px;padding:24px;box-shadow:0 20px 60px #0005}.modal-box h2{margin-top:0}.login-msg{font-size:13px;margin-top:10px;color:var(--bad)}.login-back{width:100%;min-height:44px;margin-top:12px;border:1px solid var(--line);color:var(--nav)}@media(max-width:900px){.admin-grid{grid-template-columns:1fr}}
+.admin-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:17px}.role{font-size:11px;padding:4px 7px;border-radius:12px;background:#edf5fb;color:#285b7e}.status-on{color:var(--ok);font-weight:bold}.status-off{color:var(--bad);font-weight:bold}.small-note{font-size:12px;color:var(--muted);line-height:1.5}.danger{background:#fcebea;color:#8f2118}.modal{position:fixed;inset:0;background:#0008;display:grid;place-items:center;z-index:20;padding:20px}.modal.hidden{display:none}.modal-box{width:min(430px,100%);background:#fff;border-radius:14px;padding:24px;box-shadow:0 20px 60px #0005}.modal-box h2{margin-top:0}.login-msg{font-size:13px;margin-top:10px;color:var(--bad)}.login-msg.info{color:#285b7e}.login-back{width:100%;min-height:44px;margin-top:12px;border:1px solid var(--line);color:var(--nav)}@media(max-width:900px){.admin-grid{grid-template-columns:1fr}}
 .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.formgrid label{font-size:12px;color:var(--muted)}.formgrid input,.formgrid select,.toolbar input{display:block;width:100%;padding:10px;border:1px solid var(--line);border-radius:7px;margin-top:5px;background:#fff}.actions{display:flex;gap:8px;margin-top:14px}.toolbar{display:flex;gap:10px;margin-bottom:12px}.toolbar input{max-width:420px;margin:0}.stats{display:flex;gap:12px}.stats div{background:#f7f9fb;border:1px solid var(--line);padding:14px;border-radius:8px;min-width:90px}.stats b{display:block;font-size:22px}.stats small{color:var(--muted)}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{background:#f7f9fb}.btnsm{padding:6px 9px;border:1px solid var(--line);background:white;border-radius:6px;cursor:pointer}@media(max-width:700px){.formgrid{grid-template-columns:1fr}.toolbar{flex-direction:column}.toolbar input{max-width:none}}
 
 
@@ -194,10 +194,11 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 </div>
 </div>
 </div>
-<div class="panel" style="margin-top:17px"><h2>🛡️ Segurança</h2><p class="small-note">O acesso usa o Supabase Auth. O SIGA não oferece cadastro público nem recuperação de senha para usuários. Em caso de esquecimento, solicite ao administrador que defina uma nova senha.</p></div>
+<div class="panel" style="margin-top:17px"><h2>🛡️ Segurança</h2><p class="small-note">O acesso usa o Supabase Auth. O cadastro público continua desativado. Usuários podem redefinir a própria senha pelo link na tela de acesso.</p></div>
 </div>
 
-<div id="loginModal" class="modal hidden"><div class="modal-box"><h2>🔐 Acesso ao SIGA</h2><p class="small-note">Entre com seu e-mail e senha cadastrados.</p><div class="field"><label>E-mail</label><input id="loginUser" type="email" autocomplete="email" inputmode="email"></div><div class="field" style="margin-top:10px"><label>Senha</label><input id="loginPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();login();}"></div><div class="actions"><button id="loginSubmit" type="button" class="btn primary" onclick="login()">Entrar</button></div><p class="small-note">As contas são criadas pelo administrador. Se precisar de uma nova senha, entre em contato com ele.</p><button type="button" class="btn secondary login-back" onclick="closeLogin()" aria-label="Voltar e fechar o login">← Voltar</button><div id="loginMsg" class="login-msg"></div></div></div>
+<div id="loginModal" class="modal hidden"><div class="modal-box"><h2>🔐 Acesso ao SIGA</h2><p class="small-note">Entre com seu e-mail e senha cadastrados.</p><div class="field"><label>E-mail</label><input id="loginUser" type="email" autocomplete="email" inputmode="email"></div><div class="field" style="margin-top:10px"><label>Senha</label><input id="loginPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();login();}"></div><div class="actions"><button id="loginSubmit" type="button" class="btn primary" onclick="login()">Entrar</button></div><button id="loginRecoveryButton" type="button" class="btn secondary login-back" onclick="requestPasswordRecovery()">Esqueci minha senha</button><p class="small-note">As contas são criadas pelo administrador. O cadastro público continua desativado. Se esse e-mail estiver cadastrado, enviaremos instruções para redefinir a senha.</p><button type="button" class="btn secondary login-back" onclick="closeLogin()" aria-label="Voltar e fechar o login">← Voltar</button><div id="loginMsg" class="login-msg"></div></div></div>
+<div id="passwordRecoveryModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="passwordRecoveryTitle"><div class="modal-box"><h2 id="passwordRecoveryTitle">🔑 Redefinir senha</h2><p class="small-note">Escolha uma nova senha com pelo menos 8 caracteres.</p><form onsubmit="saveRecoveredPassword(event)"><div class="field"><label for="recoveryPassword">Nova senha</label><input id="recoveryPassword" type="password" minlength="8" autocomplete="new-password" required></div><div class="field" style="margin-top:10px"><label for="recoveryPasswordConfirm">Confirme a nova senha</label><input id="recoveryPasswordConfirm" type="password" minlength="8" autocomplete="new-password" required></div><div class="actions"><button id="recoverySubmit" type="submit" class="btn primary">Salvar nova senha</button></div></form><div id="recoveryMsg" class="login-msg" role="status" aria-live="polite"></div><button type="button" class="btn secondary login-back" onclick="cancelPasswordRecovery()">← Voltar ao login</button></div></div>
 <script>
 const countryMap={JP:{name:'Japão',currency:'JPY',symbol:'¥',locale:'ja-JP',flag:'🇯🇵'},BR:{name:'Brasil',currency:'BRL',symbol:'R$',locale:'pt-BR',flag:'🇧🇷'},US:{name:'Estados Unidos',currency:'USD',symbol:'US$',locale:'en-US',flag:'🇺🇸'},PT:{name:'Portugal',currency:'EUR',symbol:'€',locale:'pt-PT',flag:'🇵🇹'},AO:{name:'Angola',currency:'AOA',symbol:'Kz',locale:'pt-AO',flag:'🇦🇴'}};
 function getSettings(){try{return JSON.parse(localStorage.getItem('sigaSettings'))||{}}catch(e){return {}}}
@@ -276,10 +277,73 @@ async function login(){
  }catch(e){console.error(e);msg.textContent='Não foi possível entrar. Verifique o e-mail e a senha.'}
  finally{if(btn){btn.disabled=false;btn.textContent='Entrar'}}
 }
+async function requestPasswordRecovery(){
+ const input=document.getElementById('loginUser'),msg=document.getElementById('loginMsg'),button=document.getElementById('loginRecoveryButton');
+ const email=(input?.value||'').trim();
+ msg.className='login-msg';msg.textContent='';
+ if(!email||!input.checkValidity()){msg.textContent='Digite um e-mail válido cadastrado no SIGA.';return}
+ if(button){button.disabled=true;button.textContent='Enviando...'}
+ try{
+  const redirectTo=window.location.origin+window.location.pathname;
+  const {error}=await authClient.auth.resetPasswordForEmail(email,{redirectTo});
+  if(error)throw error;
+  msg.className='login-msg info';
+  msg.textContent='Se esse e-mail estiver cadastrado, enviaremos instruções para redefinir a senha. Confira também a pasta de spam.';
+ }catch(error){
+  console.error('Falha ao solicitar recuperação de senha.');
+  msg.textContent='Não foi possível solicitar a recuperação agora. Confira a conexão e tente novamente mais tarde.';
+ }finally{
+  if(button){button.disabled=false;button.textContent='Esqueci minha senha'}
+ }
+}
+function showPasswordRecovery(){
+ document.getElementById('loginModal')?.classList.add('hidden');
+ const modal=document.getElementById('passwordRecoveryModal');
+ modal?.classList.remove('hidden');
+ const msg=document.getElementById('recoveryMsg');if(msg)msg.textContent='';
+ setTimeout(()=>document.getElementById('recoveryPassword')?.focus(),50);
+}
+function cancelPasswordRecovery(){
+ document.getElementById('passwordRecoveryModal')?.classList.add('hidden');
+ openLogin();
+}
+async function saveRecoveredPassword(event){
+ event.preventDefault();
+ const password=document.getElementById('recoveryPassword').value;
+ const confirmation=document.getElementById('recoveryPasswordConfirm').value;
+ const button=document.getElementById('recoverySubmit'),msg=document.getElementById('recoveryMsg');
+ msg.className='login-msg';msg.textContent='';
+ if(password.length<8){msg.textContent='A nova senha precisa ter pelo menos 8 caracteres.';return}
+ if(password!==confirmation){msg.textContent='As senhas informadas não coincidem.';return}
+ if(button){button.disabled=true;button.textContent='Salvando...'}
+ let passwordChanged=false;
+ try{
+  const {error}=await authClient.auth.updateUser({password});
+  if(error)throw error;
+  passwordChanged=true;
+  const {data,error:sessionError}=await authClient.auth.getSession();
+  if(sessionError)throw sessionError;
+  sigaSession=data.session;
+  updateSessionUI();
+  document.getElementById('passwordRecoveryModal')?.classList.add('hidden');
+  if(sigaSession){closeLogin();setTimeout(()=>refreshSigaUnitAccess(),0)}
+  else openLogin('Senha atualizada. Entre com a nova senha.');
+ }catch(error){
+  console.error('Falha ao concluir redefinição de senha.');
+  if(passwordChanged){
+   document.getElementById('passwordRecoveryModal')?.classList.add('hidden');
+   openLogin('Senha atualizada. Entre com a nova senha.');
+  }else{
+   msg.textContent='Não foi possível atualizar a senha. O link pode ter expirado; solicite uma nova recuperação.';
+  }
+ }finally{
+  if(button){button.disabled=false;button.textContent='Salvar nova senha'}
+ }
+}
 function openLogin(message=''){const modal=document.getElementById('loginModal');if(!modal)return;modal.classList.remove('hidden');const msg=document.getElementById('loginMsg');if(msg)msg.textContent=message||'';setTimeout(()=>document.getElementById('loginUser')?.focus(),50)}
 function closeLogin(){document.getElementById('loginModal')?.classList.add('hidden')}
 async function signOutSIGA(){await authClient.auth.signOut();sigaSession=null;updateSessionUI();openLogin('Sessão encerrada. Entre novamente para acessar o SIGA.')}
-authClient.auth.onAuthStateChange((_event,session)=>{sigaSession=session;updateSessionUI();setTimeout(()=>refreshSigaUnitAccess(),0);if(session)document.getElementById('loginModal')?.classList.add('hidden')});
+authClient.auth.onAuthStateChange((event,session)=>{sigaSession=session;updateSessionUI();setTimeout(()=>refreshSigaUnitAccess(),0);if(event==='PASSWORD_RECOVERY')showPasswordRecovery();else if(session)document.getElementById('loginModal')?.classList.add('hidden')});
 
 let sigaAdminUsers=[];
 let sigaAdminUnits=[];
