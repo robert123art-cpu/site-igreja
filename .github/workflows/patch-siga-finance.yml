@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - '.github/workflows/patch-siga-finance.yml'
+      - 'siga/index.html'
 
 permissions:
   contents: write
