@@ -1,6 +1,7 @@
 name: Atualizar Livro Caixa do SIGA
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - '.github/workflows/patch-siga-finance.yml'
@@ -33,7 +34,7 @@ jobs:
           </div>
         </div>'''
 
-          pattern = re.compile(r'<div id="finance" class="module hidden">.*?(?=\n<div id="bank")', re.S)
+          pattern = re.compile(r'<div id="finance" class="module hidden">.*?(?=\s*<div id="bank")', re.S)
           s, n = pattern.subn(finance_html, s, count=1)
           if n != 1:
               raise SystemExit('Não foi possível localizar o módulo Financeiro; nenhuma alteração feita.')
@@ -100,6 +101,11 @@ function exportFinanceCsv(){const rows=[['Data','Unidade','Descrição','Tipo','
 
           if 'async function loadFinance()' not in s:
               s = s.replace('</body>', finance_js + '\n</body>', 1)
+
+          required = ('id="financeForm"', 'id="financeTable"', 'async function loadFinance()', 'async function saveFinance(', 'async function renderFinance()', 'siga_financial_transactions')
+          missing = [item for item in required if item not in s]
+          if missing:
+              raise SystemExit('Implementação incompleta: ' + ', '.join(missing))
 
           p.write_text(s,encoding='utf-8')
 
