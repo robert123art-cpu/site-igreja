@@ -1,0 +1,110 @@
+name: Ativar transferencias do SIGA
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/siga-finance-transfer.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Adicionar transferência ao Financeiro
+        shell: python {0}
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('siga/index.html')
+          s = p.read_text(encoding='utf-8')
+
+          old_html = '<label>Conta do Plano / 勘定科目<select id="fChart" required></select></label><label>Tipo / 種類<select id="fType"><option value="entry">Entrada / 収入</option><option value="expense">Saída / 支出</option></select></label>'
+          new_html = '<label id="fChartField">Conta do Plano / 勘定科目<select id="fChart"></select></label><label>Tipo / 種類<select id="fType"><option value="entry">Entrada / 収入</option><option value="expense">Saída / 支出</option><option value="transfer">Transferência / 振替</option></select></label><label id="fTransferField" style="display:none">Conta de destino / 振替先<select id="fTargetAccount"></select></label>'
+          if old_html not in s:
+              raise SystemExit('HTML do Financeiro não encontrado.')
+          s = s.replace(old_html, new_html, 1)
+
+          old_accounts = "a.innerHTML='<option value=\"\">Selecione / 選択</option>'+(accounts||[]).map(x=>'<option value=\"'+esc(x.id)+'\" data-unit=\"'+esc(x.unit_id)+'\">'+esc(x.name||'')+' — '+esc(x.account_type||'')+' ('+esc(x.currency_code||'')+')</option>').join('');"
+          new_accounts = "a.innerHTML='<option value=\"\">Selecione / 選択</option>'+(accounts||[]).map(x=>'<option value=\"'+esc(x.id)+'\" data-unit=\"'+esc(x.unit_id)+'\" data-currency=\"'+esc(x.currency_code||'')+'\">'+esc(x.name||'')+' — '+esc(x.account_type||'')+' ('+esc(x.currency_code||'')+')</option>').join('');document.getElementById('fTargetAccount').innerHTML=a.innerHTML;"
+          if old_accounts not in s:
+              raise SystemExit('Carregamento das contas financeiras não encontrado.')
+          s = s.replace(old_accounts, new_accounts, 1)
+
+          old_hook = 'u.onchange=filterFinanceAccounts;\n    filterFinanceAccounts();'
+          if old_hook not in s:
+              old_hook = 'u.onchange=filterFinanceAccounts;\n              filterFinanceAccounts();'
+          if old_hook not in s:
+              raise SystemExit('Hook do formulário financeiro não encontrado.')
+          new_hook = old_hook.split('\n')[0] + "\n    document.getElementById('fType').onchange=toggleTransferFields;\n    filterFinanceAccounts();\n    toggleTransferFields();"
+          s = s.replace(old_hook, new_hook, 1)
+
+          old_filter = "function filterFinanceAccounts(){const uid=document.getElementById('fUnit')?.value||'';document.querySelectorAll('#fAccount option').forEach((o,i)=>{if(i===0)return;o.hidden=!!uid&&o.dataset.unit!==uid;});}"
+          new_filter = "function filterFinanceAccounts(){const uid=document.getElementById('fUnit')?.value||'';['fAccount','fTargetAccount'].forEach(id=>document.querySelectorAll('#'+id+' option').forEach((o,i)=>{if(i===0)return;o.hidden=!!uid&&o.dataset.unit!==uid;}));}"
+          if old_filter not in s:
+              raise SystemExit('Filtro de contas financeiras não encontrado.')
+          s = s.replace(old_filter, new_filter, 1)
+
+          marker = 'function setFinanceDate(){const d=document.getElementById(\'fDate\');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}'
+          toggle = "function toggleTransferFields(){const transfer=document.getElementById('fType')?.value==='transfer';const chart=document.getElementById('fChartField');const target=document.getElementById('fTransferField');const chartSelect=document.getElementById('fChart');const targetSelect=document.getElementById('fTargetAccount');if(chart)chart.style.display=transfer?'none':'';if(target)target.style.display=transfer?'':'none';if(chartSelect)chartSelect.required=!transfer;if(targetSelect)targetSelect.required=transfer;}"
+          if marker not in s:
+              raise SystemExit('Função de data financeira não encontrada.')
+          if 'function toggleTransferFields()' not in s:
+              s = s.replace(marker, marker + toggle, 1)
+
+          pattern = re.compile(r'async function saveFinance\(ev\)\{.*?\n          \}\n          async function renderFinance', re.S)
+          replacement = '''async function saveFinance(ev){
+            ev.preventDefault();
+            if(!sigaSession){openLogin('Sessão expirada. Entre novamente.');return;}
+            try{
+              const type=document.getElementById('fType').value;
+              const source=document.getElementById('fAccount');
+              const target=document.getElementById('fTargetAccount');
+              const payload={unit_id:document.getElementById('fUnit').value,financial_account_id:source.value,chart_account_id:type==='transfer'?null:document.getElementById('fChart').value,transaction_date:document.getElementById('fDate').value,transaction_type:type,amount:Number(document.getElementById('fAmount').value),description:document.getElementById('fDescription').value.trim(),document_number:document.getElementById('fDoc').value.trim()||null,counterparty:document.getElementById('fCounterparty').value.trim()||null,transfer_target_account_id:type==='transfer'?(target?.value||null):null};
+              if(!payload.unit_id||!payload.financial_account_id||!payload.transaction_date||!payload.amount||!payload.description)throw new Error('Preencha todos os campos obrigatórios.');
+              if(type!=='transfer'&&!payload.chart_account_id)throw new Error('Selecione a conta do Plano.');
+              const sourceOpt=source.options[source.selectedIndex],targetOpt=target?.options[target.selectedIndex];
+              if(sourceOpt?.dataset.unit&&sourceOpt.dataset.unit!==payload.unit_id)throw new Error('A conta financeira pertence a outra unidade.');
+              if(type==='transfer'){
+                if(!payload.transfer_target_account_id)throw new Error('Selecione a conta de destino.');
+                if(payload.transfer_target_account_id===payload.financial_account_id)throw new Error('A conta de destino deve ser diferente da conta de origem.');
+                if(targetOpt?.dataset.unit&&targetOpt.dataset.unit!==payload.unit_id)throw new Error('A conta de destino pertence a outra unidade.');
+                if(sourceOpt?.dataset.currency&&targetOpt?.dataset.currency&&sourceOpt.dataset.currency!==targetOpt.dataset.currency)throw new Error('A transferência deve usar contas na mesma moeda.');
+              }
+              const {error}=await authClient.from('siga_financial_transactions').insert(payload);
+              if(error)throw error;
+              alert(type==='transfer'?'Transferência salva / 振替を保存しました':'Lançamento salvo / 取引を保存しました');
+              document.getElementById('financeForm').reset();setFinanceDate();toggleTransferFields();await renderFinance();
+            }catch(e){console.error(e);alert('Não foi possível salvar: '+(e.message||e));}
+          }
+          async function renderFinance'''
+          s, n = pattern.subn(replacement, s, count=1)
+          if n != 1:
+              raise SystemExit('Função saveFinance não encontrada.')
+
+          old_render = "x.transaction_type==='entry'?'Entrada':'Saída'"
+          new_render = "x.transaction_type==='entry'?'Entrada':x.transaction_type==='expense'?'Saída':'Transferência'"
+          s = s.replace(old_render, new_render)
+          s = s.replace("x.transaction_type==='entry'?'ok':'bad'", "x.transaction_type==='entry'?'ok':x.transaction_type==='expense'?'bad':' '")
+
+          required = ['id="fTargetAccount"','value="transfer"','function toggleTransferFields()','transfer_target_account_id:type===\'transfer\'']
+          for item in required:
+              if item not in s:
+                  raise SystemExit('Patch incompleto: '+item)
+
+          p.write_text(s,encoding='utf-8')
+
+      - name: Publicar correção
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add siga/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Adicionar transferencia ao financeiro [skip ci]"
+          git push
