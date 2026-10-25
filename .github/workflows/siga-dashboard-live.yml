@@ -1,0 +1,96 @@
+name: Corrigir painel financeiro do SIGA
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/siga-dashboard-live.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Corrigir dados demonstrativos do painel
+        shell: python {0}
+        run: |
+          from pathlib import Path
+          p=Path('siga/index.html')
+          s=p.read_text(encoding='utf-8')
+          if 'siga-dashboard-live-patch' in s:
+              print('Patch do painel ja instalado.')
+              raise SystemExit(0)
+          patch=r'''<script id="siga-dashboard-live-patch">
+          (function(){
+            function money(v){
+              const n=Number(v)||0;
+              return new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(n);
+            }
+            function fmtDate(v){
+              if(!v)return '';
+              const p=String(v).slice(0,10).split('-');
+              return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : String(v);
+            }
+            async function loadLiveDashboard(){
+              try{
+                if(typeof authClient==='undefined')return;
+                const {data,error}=await authClient.from('siga_financial_transactions').select('transaction_date,transaction_type,amount,description,counterparty,created_at').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).limit(5000);
+                if(error)throw error;
+                const rows=data||[];
+                let balance=0,entries=0,expenses=0;
+                const now=new Date();
+                const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+                rows.forEach(r=>{
+                  const a=Number(r.amount)||0;
+                  if(r.transaction_type==='entry'){
+                    balance+=a;
+                    if(String(r.transaction_date).slice(0,7)===ym)entries+=a;
+                  }else if(r.transaction_type==='expense'){
+                    balance-=a;
+                    if(String(r.transaction_date).slice(0,7)===ym)expenses+=a;
+                  }
+                  // transfer is internal and must not change the organization total.
+                });
+                const result=entries-expenses;
+                const vals=document.querySelectorAll('#dashboard .cards .value');
+                if(vals.length>=4){
+                  vals[0].dataset.amount=balance; vals[0].textContent=money(balance);
+                  vals[1].dataset.amount=entries; vals[1].textContent=money(entries);
+                  vals[2].dataset.amount=expenses; vals[2].textContent=money(expenses);
+                  vals[3].dataset.amount=result; vals[3].textContent=money(result);
+                  vals[3].classList.toggle('ok',result>=0); vals[3].classList.toggle('bad',result<0);
+                }
+                const dash=document.getElementById('dashboard');
+                const table=dash?.querySelector('table');
+                if(table){
+                  const latest=rows.slice(0,10);
+                  table.innerHTML='<tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th></tr>'+latest.map(r=>{
+                    const isExpense=r.transaction_type==='expense';
+                    const isTransfer=r.transaction_type==='transfer';
+                    const cls=isExpense?'bad':(isTransfer?'':'ok');
+                    const label=isExpense?'Saída':(isTransfer?'Transferência':'Entrada');
+                    const cat=isExpense?'Despesas':(isTransfer?'Transferências':'Receitas');
+                    return '<tr><td>'+fmtDate(r.transaction_date)+'</td><td>'+String(r.description||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))+'</td><td>'+cat+'</td><td class="'+cls+'">'+label+'</td><td class="'+cls+'">'+money(r.amount)+'</td></tr>';
+                  }).join('') || '<tr><td colspan="5">Nenhuma movimentação registrada.</td></tr>';
+                }
+              }catch(e){console.error('Painel financeiro:',e);}
+            }
+            window.loadLiveDashboard=loadLiveDashboard;
+            function start(){loadLiveDashboard();setInterval(loadLiveDashboard,30000);}
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+          })();
+          </script>'''
+          if '</body>' not in s: raise SystemExit('Final do HTML nao encontrado.')
+          s=s.replace('</body>',patch+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
+      - name: Publicar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add siga/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Conectar painel financeiro aos lancamentos reais [skip ci]"
+          git push
