@@ -16,7 +16,7 @@ jobs:
       - name: Baixar repositorio
         uses: actions/checkout@v4
 
-      - name: Ativar Transferencia no Financeiro
+      - name: Corrigir transferencia no Financeiro
         shell: python {0}
         run: |
           from pathlib import Path
@@ -24,117 +24,17 @@ jobs:
           p = Path('siga/index.html')
           s = p.read_text(encoding='utf-8')
 
-          if 'siga-transfer-live-patch' in s:
-              print('Patch de transferencia ja esta instalado.')
-              raise SystemExit(0)
+          old = "const targetLabel=target.closest('label');\n              if(targetLabel)targetLabel.style.display=transfer?'':'';"
+          new = "const targetLabel=target.closest('label');\n              if(targetLabel){targetLabel.hidden=!transfer;targetLabel.style.display=transfer?'':'none';}\n              target.hidden=!transfer;"
 
-          patch = r'''<script id="siga-transfer-live-patch">
-          (function(){
-            function esc(v){return String(v??'').replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]})}
-            function ensureTransferUI(){
-              const type=document.getElementById('fType');
-              const account=document.getElementById('fAccount');
-              const form=document.getElementById('financeForm');
-              if(!type||!account||!form)return;
-              if(!Array.from(type.options).some(o=>o.value==='transfer')){
-                const o=document.createElement('option');o.value='transfer';o.textContent='Transferência / 振替';type.appendChild(o);
-              }
-              let target=document.getElementById('fTargetAccount');
-              if(!target){
-                const label=document.createElement('label');
-                label.id='fTransferField';
-                label.innerHTML='Conta de destino / 振替先<select id="fTargetAccount"></select>';
-                type.closest('label')?.insertAdjacentElement('afterend',label);
-                target=document.getElementById('fTargetAccount');
-              }
-              const current=target.value;
-              target.innerHTML=account.innerHTML;
-              Array.from(target.options).forEach(o=>{
-                if(o.value===account.value)o.disabled=true;
-                o.hidden=!!document.getElementById('fUnit')?.value && o.dataset.unit && o.dataset.unit!==document.getElementById('fUnit').value;
-              });
-              if(current && Array.from(target.options).some(o=>o.value===current&&!o.hidden&&!o.disabled))target.value=current;
-              const chart=document.getElementById('fChart');
-              const chartLabel=chart?.closest('label');
-              const transfer=type.value==='transfer';
-              if(chartLabel)chartLabel.style.display=transfer?'none':'';
-              if(chart)chart.required=!transfer;
-              target.required=transfer;
-              const targetLabel=target.closest('label');
-              if(targetLabel)targetLabel.style.display=transfer?'':'';
-              if(type.dataset.transferBound!=='1'){
-                type.dataset.transferBound='1';
-                type.addEventListener('change',ensureTransferUI);
-              }
-              if(account.dataset.transferBound!=='1'){
-                account.dataset.transferBound='1';
-                account.addEventListener('change',ensureTransferUI);
-              }
-              const unit=document.getElementById('fUnit');
-              if(unit&&unit.dataset.transferBound!=='1'){
-                unit.dataset.transferBound='1';
-                unit.addEventListener('change',function(){setTimeout(ensureTransferUI,0)});
-              }
-              if(form.dataset.transferBound!=='1'){
-                form.dataset.transferBound='1';
-                form.onsubmit=function(ev){return window.sigaTransferSave(ev)};
-              }
-            }
-
-            async function sigaTransferSave(ev){
-              ev.preventDefault();
-              const type=document.getElementById('fType')?.value;
-              if(type!=='transfer'){
-                if(typeof window.sigaOriginalSaveFinance==='function')return window.sigaOriginalSaveFinance(ev);
-                return false;
-              }
-              try{
-                if(!window.sigaSession && typeof sigaSession!=='undefined' && sigaSession){}
-                const unit=document.getElementById('fUnit')?.value;
-                const source=document.getElementById('fAccount');
-                const target=document.getElementById('fTargetAccount');
-                const amount=Number(document.getElementById('fAmount')?.value);
-                const description=document.getElementById('fDescription')?.value.trim();
-                if(!unit||!source?.value||!target?.value||!amount||!description)throw new Error('Preencha todos os campos obrigatórios.');
-                if(source.value===target.value)throw new Error('A conta de destino deve ser diferente da conta de origem.');
-                const so=source.options[source.selectedIndex],to=target.options[target.selectedIndex];
-                if(so?.dataset.unit&&so.dataset.unit!==unit)throw new Error('A conta de origem pertence a outra unidade.');
-                if(to?.dataset.unit&&to.dataset.unit!==unit)throw new Error('A conta de destino pertence a outra unidade.');
-                if(so?.dataset.currency&&to?.dataset.currency&&so.dataset.currency!==to.dataset.currency)throw new Error('A transferência deve usar contas na mesma moeda.');
-                const payload={unit_id:unit,financial_account_id:source.value,chart_account_id:null,transaction_date:document.getElementById('fDate').value,transaction_type:'transfer',amount:amount,description:description,document_number:document.getElementById('fDoc').value.trim()||null,counterparty:document.getElementById('fCounterparty').value.trim()||null,transfer_target_account_id:target.value};
-                if(typeof authClient==='undefined')throw new Error('Conexao financeira indisponivel.');
-                const {error}=await authClient.from('siga_financial_transactions').insert(payload);
-                if(error)throw error;
-                alert('Transferência salva / 振替を保存しました');
-                document.getElementById('financeForm').reset();
-                if(typeof setFinanceDate==='function')setFinanceDate();
-                ensureTransferUI();
-                if(typeof renderFinance==='function')await renderFinance();
-              }catch(e){console.error(e);alert('Não foi possível salvar: '+(e.message||e));}
-              return false;
-            }
-
-            function install(){
-              window.sigaOriginalSaveFinance=window.saveFinance;
-              window.sigaTransferSave=sigaTransferSave;
-              ensureTransferUI();
-              if(typeof window.loadFinance==='function' && !window.sigaLoadFinanceWrapped){
-                const original=window.loadFinance;
-                window.loadFinance=async function(){const r=await original.apply(this,arguments);ensureTransferUI();return r;};
-                window.sigaLoadFinanceWrapped=true;
-              }
-            }
-            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
-            setInterval(ensureTransferUI,1500);
-          })();
-          </script>'''
-
-          marker='</body>'
-          if marker not in s:
-              raise SystemExit('Final do HTML nao encontrado.')
-          s=s.replace(marker,patch+'\n'+marker,1)
-          p.write_text(s,encoding='utf-8')
-          print('Patch de transferencia instalado no siga/index.html')
+          if old in s:
+              s = s.replace(old, new, 1)
+              p.write_text(s, encoding='utf-8')
+              print('Visibilidade do campo de destino corrigida.')
+          elif 'target.hidden=!transfer;' in s:
+              print('Correcao de visibilidade ja instalada.')
+          else:
+              raise SystemExit('Trecho da transferencia nao encontrado.')
 
       - name: Publicar
         run: |
@@ -142,5 +42,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add siga/index.html
           git diff --cached --quiet && exit 0
-          git commit -m "Ativar transferencia no financeiro SIGA [skip ci]"
+          git commit -m "Corrigir visibilidade da conta de destino [skip ci]"
           git push
