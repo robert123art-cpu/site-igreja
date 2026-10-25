@@ -1,0 +1,59 @@
+name: Reforcar painel financeiro do SIGA
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  push:
+    paths:
+      - '.github/workflows/siga-dashboard-auth-refresh.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Corrigir atualizacao apos login
+        shell: python {0}
+        run: |
+          from pathlib import Path
+          p=Path('siga/index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='siga-dashboard-auth-refresh-v2'
+          if marker in s:
+              print('Correcao ja instalada.')
+              raise SystemExit(0)
+          patch=r'''<script id="siga-dashboard-auth-refresh-v2">
+          (function(){
+            function refresh(){
+              if(typeof window.loadLiveDashboard==='function')setTimeout(function(){window.loadLiveDashboard()},300);
+            }
+            function start(){
+              refresh();
+              setTimeout(refresh,1000);
+              setTimeout(refresh,3000);
+              setTimeout(refresh,7000);
+              setTimeout(refresh,15000);
+              if(typeof authClient!=='undefined'&&authClient.auth){
+                authClient.auth.onAuthStateChange(function(event,session){
+                  if(session)refresh();
+                });
+              }
+            }
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+          })();
+          </script>'''
+          if '</body>' not in s: raise SystemExit('Final do HTML nao encontrado.')
+          s=s.replace('</body>',patch+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
+      - name: Publicar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add siga/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Corrigir atualizacao do painel apos login [skip ci]"
+          git push
