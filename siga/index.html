@@ -584,6 +584,8 @@ function exportFinanceCsv(){const rows=[['Data','Unidade','Descrição','Tipo','
     const chart=document.getElementById('fChart');
     const chartLabel=chart?.closest('label');
     const transfer=type.value==='transfer';
+              const transferField=document.getElementById('fTransferField');
+              if(transferField)transferField.style.display=transfer?'':'none';
     if(chartLabel)chartLabel.style.display=transfer?'none':'';
     if(chart)chart.required=!transfer;
     target.required=transfer;
