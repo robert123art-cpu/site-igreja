@@ -717,6 +717,26 @@ function exportFinanceCsv(){const rows=[['Data','Unidade','Descrição','Tipo','
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
 </script>
+<script id="siga-dashboard-auth-refresh-v2">
+(function(){
+  function refresh(){
+    if(typeof window.loadLiveDashboard==='function')setTimeout(function(){window.loadLiveDashboard()},300);
+  }
+  function start(){
+    refresh();
+    setTimeout(refresh,1000);
+    setTimeout(refresh,3000);
+    setTimeout(refresh,7000);
+    setTimeout(refresh,15000);
+    if(typeof authClient!=='undefined'&&authClient.auth){
+      authClient.auth.onAuthStateChange(function(event,session){
+        if(session)refresh();
+      });
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+</script>
 </body></html>
 
 
