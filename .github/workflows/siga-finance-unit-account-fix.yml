@@ -1,0 +1,67 @@
+name: Corrigir vinculo da conta financeira com a unidade
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/siga-finance-unit-account-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Corrigir selecao de contas por unidade
+        shell: python {0}
+        run: |
+          from pathlib import Path
+
+          p = Path('siga/index.html')
+          s = p.read_text(encoding='utf-8')
+
+          old = "function filterFinanceAccounts(){const uid=document.getElementById('fUnit')?.value||'';document.querySelectorAll('#fAccount option').forEach((o,i)=>{if(i===0)return;o.hidden=!!uid&&o.dataset.unit!==uid;});}"
+          new = """function filterFinanceAccounts(){
+            const uid=document.getElementById('fUnit')?.value||'';
+            ['fAccount','fTargetAccount'].forEach(id=>{
+              const el=document.getElementById(id); if(!el)return;
+              document.querySelectorAll('#'+id+' option').forEach((o,i)=>{if(i===0)return;o.hidden=!!uid&&o.dataset.unit!==uid;});
+              if(uid && el.value && el.options[el.selectedIndex]?.dataset.unit!==uid) el.value='';
+            });
+          }"""
+          if old in s:
+              s = s.replace(old, new, 1)
+              print('Filtro de contas por unidade corrigido.')
+          elif new in s:
+              print('Filtro de contas por unidade ja corrigido.')
+          else:
+              raise SystemExit('Funcao filterFinanceAccounts nao encontrada.')
+
+          old_validation = "if(sourceOpt?.dataset.unit&&sourceOpt.dataset.unit!==payload.unit_id)throw new Error('A conta financeira pertence a outra unidade.');"
+          new_validation = """if(sourceOpt?.dataset.unit&&sourceOpt.dataset.unit!==payload.unit_id)throw new Error('A conta financeira pertence a outra unidade.');
+              const {data:sourceRow,error:sourceError}=await authClient.from('siga_financial_accounts').select('id,unit_id,currency_code').eq('id',payload.financial_account_id).maybeSingle();
+              if(sourceError)throw sourceError;
+              if(!sourceRow)throw new Error('A conta financeira selecionada não foi encontrada.');
+              if(sourceRow.unit_id!==payload.unit_id)throw new Error('A conta de origem pertence a outra unidade.');"""
+          if old_validation in s and 'const {data:sourceRow,error:sourceError}' not in s:
+              s = s.replace(old_validation, new_validation, 1)
+              print('Validacao real da conta de origem instalada.')
+          elif 'const {data:sourceRow,error:sourceError}' in s:
+              print('Validacao real da conta de origem ja instalada.')
+          else:
+              raise SystemExit('Validacao da conta de origem nao encontrada.')
+
+          p.write_text(s, encoding='utf-8')
+
+      - name: Publicar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add siga/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Corrigir conta financeira por unidade [skip ci]"
+          git push
