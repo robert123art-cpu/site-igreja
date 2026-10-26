@@ -112,7 +112,21 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div class="title"><div><h1>💰 Financeiro / 財務</h1><p>Livro Caixa, lançamentos e saldo automático</p></div><button class="btn primary" type="button" onclick="loadFinance()">↻ Atualizar</button></div>
 <div class="cards" id="financeCards"><div class="card"><div class="label">Saldo atual</div><div class="value" id="finBalance">¥ 0</div><div class="sub">Saldo das contas financeiras</div></div><div class="card"><div class="label">Entradas do mês</div><div class="value ok" id="finEntries">¥ 0</div><div class="sub">Receitas</div></div><div class="card"><div class="label">Saídas do mês</div><div class="value bad" id="finExpenses">¥ 0</div><div class="sub">Despesas</div></div><div class="card"><div class="label">Resultado</div><div class="value" id="finResult">¥ 0</div><div class="sub">Entradas − saídas</div></div></div>
 <div class="grid2">
-  <div class="panel"><h2>Novo lançamento / 新規取引</h2><form id="financeForm" onsubmit="saveFinance(event)"><div class="formgrid"><label>Unidade / 拠点<select id="fUnit" required></select></label><label>Conta financeira / 金融口座<select id="fAccount" required></select></label><label>Conta do Plano / 勘定科目<select id="fChart" required></select></label><label>Tipo / 種類<select id="fType"><option value="entry">Entrada / 収入</option><option value="expense">Saída / 支出</option></select></label><label>Data / 日付<input id="fDate" type="date" required></label><label>Valor / 金額<input id="fAmount" type="number" min="0.01" step="0.01" required></label><label>Documento / 証憑<input id="fDoc"></label><label>Favorecido / 相手先<input id="fCounterparty"></label><label style="grid-column:1/-1">Descrição / 摘要<input id="fDescription" required></label></div><div class="actions"><button type="submit" class="btn primary">Salvar / 保存</button><button type="button" class="btn secondary" onclick="document.getElementById('financeForm').reset();setFinanceDate()">Limpar / クリア</button></div></form></div>
+  <div class="panel"><h2>Novo lançamento / 新規取引</h2><form id="financeForm" onsubmit="saveFinance(event)">
+    <div class="formgrid">
+      <label>Unidade / 拠点<select id="fUnit" required></select></label>
+      <label>Conta financeira / 金融口座<select id="fAccount" required></select></label>
+      <label id="fChartField">Conta do Plano / 勘定科目<select id="fChart" required></select></label>
+      <label>Tipo / 種類<select id="fType" required><option value="entry">Entrada / 収入</option><option value="expense">Saída / 支出</option><option value="transfer">Transferência / 振替</option></select></label>
+      <label id="fTransferField" class="hidden">Conta de destino / 振替先<select id="fTargetAccount"></select></label>
+      <label>Data / 日付<input id="fDate" type="date" required></label>
+      <label>Valor / 金額<input id="fAmount" type="number" min="0.01" step="0.01" required></label>
+      <label>Documento / 証憑<input id="fDoc"></label>
+      <label>Favorecido / 相手先<input id="fCounterparty"></label>
+      <label style="grid-column:1/-1">Descrição / 摘要<input id="fDescription" required></label>
+    </div>
+    <div class="actions"><button type="submit" class="btn primary">Salvar / 保存</button><button type="button" class="btn secondary" onclick="document.getElementById('financeForm').reset();loadFinanceAccounts();toggleFinanceType();setFinanceDate()">Limpar / クリア</button></div>
+  </form></div>
   <div class="panel"><h2>Livro Caixa / 現金出納帳</h2><div class="toolbar"><input id="financeSearch" placeholder="Pesquisar descrição..." oninput="renderFinance()"><button type="button" class="btn secondary" onclick="exportFinanceCsv()">Exportar CSV</button></div><div class="tablewrap"><table><thead><tr><th>Data</th><th>Unidade</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody id="financeTable"></tbody></table></div></div>
 </div>
 </div>
@@ -501,41 +515,118 @@ renderMembers();
 (function(){function initSIGA(){document.querySelectorAll('nav button').forEach(function(btn){btn.addEventListener('touchend',function(e){e.preventDefault();btn.click()},{passive:false})});document.querySelectorAll('button').forEach(function(btn){btn.style.webkitUserSelect='none'})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initSIGA);else initSIGA()})();
 </script>
 <script>
+let financeAccountsForUnit=[];
+let financeAccountRequestId=0;
 async function loadFinance(){
   if(!sigaSession){openLogin('Entre no SIGA para acessar o Livro Caixa.');return;}
   try{
     const {data:units,error:ue}=await authClient.from('siga_units').select('id,code,name').eq('is_active',true).order('code');
     if(ue)throw ue;
-    const {data:accounts,error:ae}=await authClient.from('siga_financial_accounts').select('id,unit_id,name,account_type,currency_code,initial_balance').eq('is_active',true).order('name');
-    if(ae)throw ae;
     const {data:charts,error:ce}=await authClient.from('siga_chart_of_accounts').select('id,code,name_pt,name_ja,account_kind').order('code');
     if(ce)throw ce;
     const u=document.getElementById('fUnit'),a=document.getElementById('fAccount'),c=document.getElementById('fChart');
-    if(!u||!a||!c)return;
+    const type=document.getElementById('fType'),target=document.getElementById('fTargetAccount');
+    if(!u||!a||!c||!type||!target)return;
+    const selectedUnit=u.value,selectedChart=c.value,selectedType=type.value;
     u.innerHTML='<option value="">Selecione / 選択</option>'+(units||[]).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||'')+' — '+esc(x.name||'')+'</option>').join('');
-    a.innerHTML='<option value="">Selecione / 選択</option>'+(accounts||[]).map(x=>'<option value="'+esc(x.id)+'" data-unit="'+esc(x.unit_id)+'">'+esc(x.name||'')+' — '+esc(x.account_type||'')+' ('+esc(x.currency_code||'')+')</option>').join('');
+    if((units||[]).some(x=>String(x.id)===selectedUnit))u.value=selectedUnit;
     c.innerHTML='<option value="">Selecione / 選択</option>'+(charts||[]).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code)+' — '+esc(x.name_ja||'')+' / '+esc(x.name_pt||'')+(x.account_kind==='synthetic'?' [grupo]':'')+'</option>').join('');
-    u.onchange=filterFinanceAccounts;
-    filterFinanceAccounts();
+    if((charts||[]).some(x=>String(x.id)===selectedChart))c.value=selectedChart;
+    type.value=selectedType;
+    a.innerHTML='<option value="">Selecione / 選択</option>';
+    target.innerHTML='<option value="">Selecione / 選択</option>';
+    u.onchange=function(){a.value='';target.value='';loadFinanceAccounts().catch(showFinanceError);};
+    a.onchange=updateFinanceTargetAccounts;
+    type.onchange=toggleFinanceType;
+    await loadFinanceAccounts();
+    toggleFinanceType();
     setFinanceDate();
     await renderFinance();
   }catch(e){console.error(e);showFinanceError(e);}
 }
 function showFinanceError(e){const t=document.getElementById('financeTable');if(t)t.innerHTML='<tr><td colspan="5">Erro ao carregar o Livro Caixa: '+esc(e?.message||e)+'</td></tr>';}
-function filterFinanceAccounts(){const uid=document.getElementById('fUnit')?.value||'';document.querySelectorAll('#fAccount option').forEach((o,i)=>{if(i===0)return;o.hidden=!!uid&&o.dataset.unit!==uid;});}
+async function loadFinanceAccounts(){
+  const unitId=document.getElementById('fUnit')?.value||'';
+  const source=document.getElementById('fAccount'),target=document.getElementById('fTargetAccount');
+  if(!source||!target)return;
+  const requestId=++financeAccountRequestId,previousSource=source.value,previousTarget=target.value;
+  const placeholder='<option value="">Selecione / 選択</option>';
+  financeAccountsForUnit=[];
+  source.innerHTML=placeholder;target.innerHTML=placeholder;source.disabled=true;target.disabled=true;
+  if(!unitId){updateFinanceTargetAccounts();return;}
+  const {data:accounts,error}=await authClient.from('siga_financial_accounts')
+    .select('id,unit_id,name,account_type,currency_code')
+    .eq('unit_id',unitId).eq('is_active',true).order('name');
+  if(error)throw error;
+  if(requestId!==financeAccountRequestId)return;
+  financeAccountsForUnit=(accounts||[]).filter(x=>String(x.unit_id)===String(unitId));
+  source.innerHTML=placeholder+financeAccountsForUnit.map(x=>'<option value="'+esc(x.id)+'" data-unit="'+esc(x.unit_id)+'" data-currency="'+esc(x.currency_code||'')+'">'+esc(x.name||'')+' — '+esc(x.account_type||'')+' ('+esc(x.currency_code||'')+')</option>').join('');
+  if(previousSource&&financeAccountsForUnit.some(x=>String(x.id)===previousSource))source.value=previousSource;
+  updateFinanceTargetAccounts(previousTarget);
+  source.disabled=financeAccountsForUnit.length===0;
+}
+function updateFinanceTargetAccounts(preferredTarget){
+  const unitId=document.getElementById('fUnit')?.value||'';
+  const source=document.getElementById('fAccount'),target=document.getElementById('fTargetAccount');
+  if(!source||!target)return;
+  const selectedTarget=preferredTarget===undefined?target.value:preferredTarget;
+  const accounts=financeAccountsForUnit.filter(x=>String(x.unit_id)===String(unitId)&&String(x.id)!==String(source.value));
+  target.innerHTML='<option value="">Selecione / 選択</option>'+accounts.map(x=>'<option value="'+esc(x.id)+'" data-unit="'+esc(x.unit_id)+'" data-currency="'+esc(x.currency_code||'')+'">'+esc(x.name||'')+' — '+esc(x.account_type||'')+' ('+esc(x.currency_code||'')+')</option>').join('');
+  if(selectedTarget&&accounts.some(x=>String(x.id)===String(selectedTarget)))target.value=selectedTarget;
+  target.disabled=!unitId||accounts.length===0;
+}
+function toggleFinanceType(){
+  const isTransfer=document.getElementById('fType')?.value==='transfer';
+  const chart=document.getElementById('fChart'),chartField=document.getElementById('fChartField');
+  const target=document.getElementById('fTargetAccount'),targetField=document.getElementById('fTransferField');
+  if(chartField)chartField.classList.toggle('hidden',isTransfer);
+  if(targetField)targetField.classList.toggle('hidden',!isTransfer);
+  if(chart)chart.required=!isTransfer;
+  if(target)target.required=isTransfer;
+  if(isTransfer)updateFinanceTargetAccounts();
+}
 function setFinanceDate(){const d=document.getElementById('fDate');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
 async function saveFinance(ev){
   ev.preventDefault();
   if(!sigaSession){openLogin('Sessão expirada. Entre novamente.');return;}
   try{
-    const payload={unit_id:document.getElementById('fUnit').value,financial_account_id:document.getElementById('fAccount').value,chart_account_id:document.getElementById('fChart').value,transaction_date:document.getElementById('fDate').value,transaction_type:document.getElementById('fType').value,amount:Number(document.getElementById('fAmount').value),description:document.getElementById('fDescription').value.trim(),document_number:document.getElementById('fDoc').value.trim()||null,counterparty:document.getElementById('fCounterparty').value.trim()||null};
-    if(!payload.unit_id||!payload.financial_account_id||!payload.chart_account_id||!payload.transaction_date||!payload.amount||!payload.description)throw new Error('Preencha todos os campos obrigatórios.');
-    const accountUnit=document.querySelector('#fAccount option:checked')?.dataset.unit;
-    if(accountUnit&&accountUnit!==payload.unit_id)throw new Error('A conta financeira pertence a outra unidade.');
+    const unitId=document.getElementById('fUnit').value,type=document.getElementById('fType').value,isTransfer=type==='transfer';
+    const source=document.getElementById('fAccount'),target=document.getElementById('fTargetAccount'),chart=document.getElementById('fChart');
+    const amount=Number(document.getElementById('fAmount').value),description=document.getElementById('fDescription').value.trim();
+    const payload={
+      unit_id:unitId,
+      financial_account_id:source.value,
+      chart_account_id:isTransfer?null:(chart.value||null),
+      transaction_date:document.getElementById('fDate').value,
+      transaction_type:isTransfer?'transfer':type,
+      amount:amount,
+      description:description,
+      document_number:document.getElementById('fDoc').value.trim()||null,
+      counterparty:document.getElementById('fCounterparty').value.trim()||null,
+      transfer_target_account_id:isTransfer?(target.value||null):null
+    };
+    if(!['entry','expense','transfer'].includes(type))throw new Error('Selecione um tipo de lançamento válido.');
+    if(!unitId||!payload.financial_account_id||!payload.transaction_date||!Number.isFinite(amount)||amount<=0||!description)throw new Error('Preencha todos os campos obrigatórios.');
+    const sourceAccount=financeAccountsForUnit.find(x=>String(x.id)===String(payload.financial_account_id));
+    if(!sourceAccount||String(sourceAccount.unit_id)!==String(unitId))throw new Error('A conta de origem não pertence à unidade selecionada.');
+    if(isTransfer){
+      if(!payload.transfer_target_account_id)throw new Error('Selecione a conta de destino.');
+      const targetAccount=financeAccountsForUnit.find(x=>String(x.id)===String(payload.transfer_target_account_id));
+      if(!targetAccount||String(targetAccount.unit_id)!==String(unitId))throw new Error('A conta de destino não pertence à unidade selecionada.');
+      if(String(targetAccount.id)===String(sourceAccount.id))throw new Error('A conta de destino deve ser diferente da conta de origem.');
+      if(sourceAccount.currency_code&&targetAccount.currency_code&&sourceAccount.currency_code!==targetAccount.currency_code)throw new Error('A transferência deve usar contas na mesma moeda.');
+      if(payload.chart_account_id!==null)throw new Error('Transferências não usam conta do Plano.');
+    }else if(!payload.chart_account_id){
+      throw new Error('Selecione a conta do Plano.');
+    }
     const {error}=await authClient.from('siga_financial_transactions').insert(payload);
     if(error)throw error;
-    alert('Lançamento salvo / 取引を保存しました');
-    document.getElementById('financeForm').reset();setFinanceDate();await renderFinance();
+    alert(isTransfer?'Transferência salva / 振替を保存しました':'Lançamento salvo / 取引を保存しました');
+    document.getElementById('financeForm').reset();
+    await loadFinanceAccounts();
+    toggleFinanceType();
+    setFinanceDate();
+    await renderFinance();
   }catch(e){console.error(e);alert('Não foi possível salvar: '+(e.message||e));}
 }
 async function renderFinance(){
@@ -549,114 +640,13 @@ async function renderFinance(){
     const expenses=rows.filter(x=>x.transaction_type==='expense').reduce((s,x)=>s+Number(x.amount),0);
     const opening=(accounts||[]).reduce((s,x)=>s+Number(x.initial_balance||0),0);
     document.getElementById('finEntries').textContent=money(entries);document.getElementById('finExpenses').textContent=money(expenses);document.getElementById('finResult').textContent=money(entries-expenses);document.getElementById('finBalance').textContent=money(opening+entries-expenses);
-    document.getElementById('financeTable').innerHTML=rows.filter(x=>(x.description||'').toLowerCase().includes(q)).map(x=>'<tr><td>'+new Date(x.transaction_date+'T00:00:00').toLocaleDateString('pt-BR')+'</td><td>'+esc((x.siga_units?.code||'')+' '+(x.siga_units?.name||''))+'</td><td>'+esc(x.description)+'</td><td class="'+(x.transaction_type==='entry'?'ok':'bad')+'">'+(x.transaction_type==='entry'?'Entrada':'Saída')+'</td><td class="'+(x.transaction_type==='entry'?'ok':'bad')+'">'+money(x.amount)+'</td></tr>').join('')||'<tr><td colspan="5">Nenhum lançamento.</td></tr>';
+    document.getElementById('financeTable').innerHTML=rows.filter(x=>(x.description||'').toLowerCase().includes(q)).map(x=>'<tr><td>'+new Date(x.transaction_date+'T00:00:00').toLocaleDateString('pt-BR')+'</td><td>'+esc((x.siga_units?.code||'')+' '+(x.siga_units?.name||''))+'</td><td>'+esc(x.description)+'</td><td class="'+(x.transaction_type==='entry'?'ok':x.transaction_type==='expense'?'bad':'')+'">'+(x.transaction_type==='entry'?'Entrada':x.transaction_type==='expense'?'Saída':'Transferência')+'</td><td class="'+(x.transaction_type==='entry'?'ok':x.transaction_type==='expense'?'bad':'')+'">'+money(x.amount)+'</td></tr>').join('')||'<tr><td colspan="5">Nenhum lançamento.</td></tr>';
   }catch(e){console.error(e);showFinanceError(e);}
 }
 function money(v){return new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(Number(v)||0)}
 function exportFinanceCsv(){const rows=[['Data','Unidade','Descrição','Tipo','Valor'],...Array.from(document.querySelectorAll('#financeTable tr')).map(tr=>Array.from(tr.cells).map(td=>td.innerText))];const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='SIGA_Livro_Caixa.csv';a.click();}
 </script>
-<script id="siga-transfer-live-patch">
-(function(){
-  function esc(v){return String(v??'').replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]})}
-  function ensureTransferUI(){
-    const type=document.getElementById('fType');
-    const account=document.getElementById('fAccount');
-    const form=document.getElementById('financeForm');
-    if(!type||!account||!form)return;
-    if(!Array.from(type.options).some(o=>o.value==='transfer')){
-      const o=document.createElement('option');o.value='transfer';o.textContent='Transferência / 振替';type.appendChild(o);
-    }
-    let target=document.getElementById('fTargetAccount');
-    if(!target){
-      const label=document.createElement('label');
-      label.id='fTransferField';
-      label.innerHTML='Conta de destino / 振替先<select id="fTargetAccount"></select>';
-      type.closest('label')?.insertAdjacentElement('afterend',label);
-      target=document.getElementById('fTargetAccount');
-    }
-    const current=target.value;
-    target.innerHTML=account.innerHTML;
-    Array.from(target.options).forEach(o=>{
-      if(o.value===account.value)o.disabled=true;
-      o.hidden=!!document.getElementById('fUnit')?.value && o.dataset.unit && o.dataset.unit!==document.getElementById('fUnit').value;
-    });
-    if(current && Array.from(target.options).some(o=>o.value===current&&!o.hidden&&!o.disabled))target.value=current;
-    const chart=document.getElementById('fChart');
-    const chartLabel=chart?.closest('label');
-    const transfer=type.value==='transfer';
-              const transferField=document.getElementById('fTransferField');
-              if(transferField)transferField.style.display=transfer?'':'none';
-    if(chartLabel)chartLabel.style.display=transfer?'none':'';
-    if(chart)chart.required=!transfer;
-    target.required=transfer;
-    const targetLabel=target.closest('label');
-    if(targetLabel)targetLabel.style.display=transfer?'':'';
-    if(type.dataset.transferBound!=='1'){
-      type.dataset.transferBound='1';
-      type.addEventListener('change',ensureTransferUI);
-    }
-    if(account.dataset.transferBound!=='1'){
-      account.dataset.transferBound='1';
-      account.addEventListener('change',ensureTransferUI);
-    }
-    const unit=document.getElementById('fUnit');
-    if(unit&&unit.dataset.transferBound!=='1'){
-      unit.dataset.transferBound='1';
-      unit.addEventListener('change',function(){setTimeout(ensureTransferUI,0)});
-    }
-    if(form.dataset.transferBound!=='1'){
-      form.dataset.transferBound='1';
-      form.onsubmit=function(ev){return window.sigaTransferSave(ev)};
-    }
-  }
 
-  async function sigaTransferSave(ev){
-    ev.preventDefault();
-    const type=document.getElementById('fType')?.value;
-    if(type!=='transfer'){
-      if(typeof window.sigaOriginalSaveFinance==='function')return window.sigaOriginalSaveFinance(ev);
-      return false;
-    }
-    try{
-      if(!window.sigaSession && typeof sigaSession!=='undefined' && sigaSession){}
-      const unit=document.getElementById('fUnit')?.value;
-      const source=document.getElementById('fAccount');
-      const target=document.getElementById('fTargetAccount');
-      const amount=Number(document.getElementById('fAmount')?.value);
-      const description=document.getElementById('fDescription')?.value.trim();
-      if(!unit||!source?.value||!target?.value||!amount||!description)throw new Error('Preencha todos os campos obrigatórios.');
-      if(source.value===target.value)throw new Error('A conta de destino deve ser diferente da conta de origem.');
-      const so=source.options[source.selectedIndex],to=target.options[target.selectedIndex];
-      if(so?.dataset.unit&&so.dataset.unit!==unit)throw new Error('A conta de origem pertence a outra unidade.');
-      if(to?.dataset.unit&&to.dataset.unit!==unit)throw new Error('A conta de destino pertence a outra unidade.');
-      if(so?.dataset.currency&&to?.dataset.currency&&so.dataset.currency!==to.dataset.currency)throw new Error('A transferência deve usar contas na mesma moeda.');
-      const payload={unit_id:unit,financial_account_id:source.value,chart_account_id:null,transaction_date:document.getElementById('fDate').value,transaction_type:'transfer',amount:amount,description:description,document_number:document.getElementById('fDoc').value.trim()||null,counterparty:document.getElementById('fCounterparty').value.trim()||null,transfer_target_account_id:target.value};
-      if(typeof authClient==='undefined')throw new Error('Conexao financeira indisponivel.');
-      const {error}=await authClient.from('siga_financial_transactions').insert(payload);
-      if(error)throw error;
-      alert('Transferência salva / 振替を保存しました');
-      document.getElementById('financeForm').reset();
-      if(typeof setFinanceDate==='function')setFinanceDate();
-      ensureTransferUI();
-      if(typeof renderFinance==='function')await renderFinance();
-    }catch(e){console.error(e);alert('Não foi possível salvar: '+(e.message||e));}
-    return false;
-  }
-
-  function install(){
-    window.sigaOriginalSaveFinance=window.saveFinance;
-    window.sigaTransferSave=sigaTransferSave;
-    ensureTransferUI();
-    if(typeof window.loadFinance==='function' && !window.sigaLoadFinanceWrapped){
-      const original=window.loadFinance;
-      window.loadFinance=async function(){const r=await original.apply(this,arguments);ensureTransferUI();return r;};
-      window.sigaLoadFinanceWrapped=true;
-    }
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
-  setInterval(ensureTransferUI,1500);
-})();
-</script>
 <script id="siga-dashboard-live-patch">
 (function(){
   function money(v){
