@@ -112,21 +112,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div class="title"><div><h1>💰 Financeiro / 財務</h1><p>Livro Caixa, lançamentos e saldo automático</p></div><button class="btn primary" type="button" onclick="loadFinance()">↻ Atualizar</button></div>
 <div class="cards" id="financeCards"><div class="card"><div class="label">Saldo atual</div><div class="value" id="finBalance">¥ 0</div><div class="sub">Saldo das contas financeiras</div></div><div class="card"><div class="label">Entradas do mês</div><div class="value ok" id="finEntries">¥ 0</div><div class="sub">Receitas</div></div><div class="card"><div class="label">Saídas do mês</div><div class="value bad" id="finExpenses">¥ 0</div><div class="sub">Despesas</div></div><div class="card"><div class="label">Resultado</div><div class="value" id="finResult">¥ 0</div><div class="sub">Entradas − saídas</div></div></div>
 <div class="grid2">
-  <div class="panel"><h2>Novo lançamento / 新規取引</h2><form id="financeForm" onsubmit="saveFinance(event)">
-    <div class="formgrid">
-      <label>Unidade / 拠点<select id="fUnit" required></select></label>
-      <label>Conta financeira / 金融口座<select id="fAccount" required></select></label>
-      <label id="fChartField">Conta do Plano / 勘定科目<select id="fChart" required></select></label>
-      <label>Tipo / 種類<select id="fType" required><option value="entry">Entrada / 収入</option><option value="expense">Saída / 支出</option><option value="transfer">Transferência / 振替</option></select></label>
-      <label id="fTransferField" class="hidden">Conta de destino / 振替先<select id="fTargetAccount"></select></label>
-      <label>Data / 日付<input id="fDate" type="date" required></label>
-      <label>Valor / 金額<input id="fAmount" type="number" min="0.01" step="0.01" required></label>
-      <label>Documento / 証憑<input id="fDoc"></label>
-      <label>Favorecido / 相手先<input id="fCounterparty"></label>
-      <label style="grid-column:1/-1">Descrição / 摘要<input id="fDescription" required></label>
-    </div>
-    <div class="actions"><button type="submit" class="btn primary">Salvar / 保存</button><button type="button" class="btn secondary" onclick="document.getElementById('financeForm').reset();loadFinanceAccounts();toggleFinanceType();setFinanceDate()">Limpar / クリア</button></div>
-  </form></div>
+  <div class="panel"><h2>Novo lançamento / 新規取引</h2><form id="financeForm" onsubmit="saveFinance(event)"><div class="formgrid"><label>Unidade / 拠点<select id="fUnit" required></select></label><label>Conta financeira / 金融口座<select id="fAccount" required></select></label><label>Conta do Plano / 勘定科目<select id="fChart" required></select></label><label>Tipo / 種類<select id="fType"><option value="entry">Entrada / 収入</option><option value="expense">Saída / 支出</option></select></label><label>Data / 日付<input id="fDate" type="date" required></label><label>Valor / 金額<input id="fAmount" type="number" min="0.01" step="0.01" required></label><label>Documento / 証憑<input id="fDoc"></label><label>Favorecido / 相手先<input id="fCounterparty"></label><label style="grid-column:1/-1">Descrição / 摘要<input id="fDescription" required></label></div><div class="actions"><button type="submit" class="btn primary">Salvar / 保存</button><button type="button" class="btn secondary" onclick="document.getElementById('financeForm').reset();setFinanceDate()">Limpar / クリア</button></div></form></div>
   <div class="panel"><h2>Livro Caixa / 現金出納帳</h2><div class="toolbar"><input id="financeSearch" placeholder="Pesquisar descrição..." oninput="renderFinance()"><button type="button" class="btn secondary" onclick="exportFinanceCsv()">Exportar CSV</button></div><div class="tablewrap"><table><thead><tr><th>Data</th><th>Unidade</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody id="financeTable"></tbody></table></div></div>
 </div>
 </div>
