@@ -575,7 +575,10 @@ function updateFinanceTargetAccounts(preferredTarget){
   target.innerHTML='<option value="">Selecione / 選択</option>'+accounts.map(x=>'<option value="'+esc(x.id)+'" data-unit="'+esc(x.unit_id)+'" data-currency="'+esc(x.currency_code||'')+'">'+esc(x.name||'')+' — '+esc(x.account_type||'')+' ('+esc(x.currency_code||'')+')</option>').join('');
   if(selectedTarget&&accounts.some(x=>String(x.id)===String(selectedTarget)))target.value=selectedTarget;
   target.disabled=!unitId||accounts.length===0;
-  if(hint)hint.textContent=!unitId?'Selecione uma unidade para listar as contas de destino.':accounts.length?accounts.length+' conta(s) de destino disponível(is) nesta unidade.':'Não há outra conta ativa nesta unidade para usar como destino.';
+  if(hint){
+    const count=accounts.length;
+    hint.textContent=!unitId?'Selecione uma unidade para listar as contas de destino.':count===1?'1 conta de destino disponível nesta unidade.':count+' contas de destino disponíveis nesta unidade.';
+  }
 }
 function toggleFinanceType(){
   const isTransfer=document.getElementById('fType')?.value==='transfer';
