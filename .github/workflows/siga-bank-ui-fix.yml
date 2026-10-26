@@ -1,0 +1,127 @@
+name: SIGA bank UI fix
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-bank-ui:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch bank accounts UI and transfer destination
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          p = Path('siga/index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'siga-bank-ui-v3'
+          if marker in s:
+              print('Patch already present')
+              raise SystemExit(0)
+
+          old_bank = '''<div id="bank" class="module hidden"><div class="title"><div><h1>🏦 Contas Bancárias</h1><p>Contas, saldos e conciliação</p></div></div><div class="panel"><h2>Contas bancárias / 銀行口座</h2><p class="small-note">Módulo preparado para integração com o controle bancário existente.</p></div></div>'''
+          new_bank = '''<div id="bank" class="module hidden">
+          <div class="title"><div><h1>🏦 Contas Bancárias</h1><p>Contas, saldos e conciliação</p></div><button class="btn secondary" type="button" onclick="loadBankAccounts()">↻ Atualizar / 更新</button></div>
+          <div class="panel">
+            <h2>Contas bancárias / 銀行口座</h2>
+            <p class="small-note">Relação das contas bancárias cadastradas, com unidade, banco, agência e número da conta.</p>
+            <div class="toolbar" style="margin-top:12px"><select id="bankUnitFilter" onchange="loadBankAccounts()"><option value="">Todas as unidades / 全拠点</option></select></div>
+            <div id="bankAccountsMsg" class="small-note" style="margin:8px 0"></div>
+            <div class="tablewrap"><table><thead><tr><th>Código</th><th>Unidade / 拠点</th><th>Banco / 銀行</th><th>Agência / 支店</th><th>Conta / 口座</th><th>Moeda</th><th>Status</th></tr></thead><tbody id="bankAccountsTable"><tr><td colspan="7">Carregando / 読み込み中...</td></tr></tbody></table></div>
+          </div>
+          </div>'''
+          if old_bank not in s:
+              raise SystemExit('Banco: bloco original não encontrado; nenhuma alteração feita.')
+          s = s.replace(old_bank, new_bank, 1)
+
+          inject = r'''<style id="siga-bank-ui-v3">
+          #bank .tablewrap{overflow:auto;-webkit-overflow-scrolling:touch}#bank table{min-width:760px}#bank td,#bank th{white-space:nowrap}
+          .bank-account-name{font-weight:bold}.bank-unit{font-weight:bold}.bank-code{font-family:monospace}.bank-muted{color:var(--muted)}
+          @media(max-width:700px){#bank .title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}#bank .title>button{margin-top:8px}}
+          </style>
+          <script>
+          // siga-bank-ui-v3
+          (function(){
+            const escBank=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+            const bankLabel=a=>{
+              const name=a.bank_name||a.name||'Conta bancária / 銀行口座';
+              const parts=[];
+              if(a.branch) parts.push('Ag. '+a.branch);
+              if(a.account_number) parts.push('C/C '+a.account_number);
+              return parts.length?name+' — '+parts.join(' • '):name;
+            };
+            window.loadBankAccounts=async function(){
+              const table=document.getElementById('bankAccountsTable'),msg=document.getElementById('bankAccountsMsg'),filter=document.getElementById('bankUnitFilter');
+              if(!table)return;
+              table.innerHTML='<tr><td colspan="7">Carregando / 読み込み中...</td></tr>';
+              try{
+                const [{data:units,error:ue},{data:accounts,error:ae}]=await Promise.all([
+                  authClient.from('siga_units').select('id,code,name,japanese_name').eq('is_active',true).order('code'),
+                  authClient.from('siga_financial_accounts').select('id,unit_id,name,account_type,bank_name,branch,account_number,currency_code,is_active').eq('account_type','bank').order('name')
+                ]);
+                if(ue)throw ue;if(ae)throw ae;
+                const unitMap=new Map((units||[]).map(u=>[u.id,u]));
+                if(filter && filter.options.length===1){(units||[]).forEach(u=>{const o=document.createElement('option');o.value=u.id;o.textContent=(u.code||'')+' — '+(u.name||u.japanese_name||'');filter.appendChild(o);});}
+                const selected=filter?.value||'';
+                const rows=(accounts||[]).filter(a=>!selected||a.unit_id===selected);
+                if(msg)msg.textContent=rows.length+' conta(s) bancária(s) encontrada(s) / 銀行口座 '+rows.length+'件';
+                if(!rows.length){table.innerHTML='<tr><td colspan="7">Nenhuma conta bancária encontrada / 銀行口座がありません</td></tr>';return;}
+                table.innerHTML=rows.map(a=>{const u=unitMap.get(a.unit_id)||{};return '<tr><td class="bank-code">'+escBank(u.code||'—')+'</td><td class="bank-unit">'+escBank(u.name||u.japanese_name||'—')+'</td><td class="bank-account-name">'+escBank(a.bank_name||a.name||'—')+'</td><td>'+escBank(a.branch||'—')+'</td><td>'+escBank(a.account_number||'—')+'</td><td>'+escBank(a.currency_code||'—')+'</td><td>'+(a.is_active?'Ativa / 有効':'Inativa / 無効')+'</td></tr>';}).join('');
+              }catch(e){console.error(e);if(msg)msg.textContent='Erro: '+(e.message||e);table.innerHTML='<tr><td colspan="7">Não foi possível carregar as contas / 読み込みエラー</td></tr>';}
+            };
+
+            // Make the transfer source/destination selectors show bank details when available.
+            window.loadFinanceAccounts=async function(){
+              const unitId=document.getElementById('fUnit')?.value||'';
+              const source=document.getElementById('fAccount'),target=document.getElementById('fTargetAccount');
+              if(!source||!target)return;
+              const placeholder='<option value="">Selecione / 選択</option>';
+              financeAccountsForUnit=[];source.innerHTML=placeholder;target.innerHTML=placeholder;source.disabled=true;target.disabled=true;
+              if(!unitId){updateFinanceTargetAccounts();return;}
+              const {data,error}=await authClient.from('siga_financial_accounts').select('id,unit_id,name,account_type,bank_name,branch,account_number,currency_code,initial_balance,is_active').eq('unit_id',unitId).eq('is_active',true).order('account_type').order('name');
+              if(error)throw error;
+              financeAccountsForUnit=data||[];
+              source.innerHTML=placeholder+financeAccountsForUnit.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.bank_name||a.name)+' — '+esc(a.account_type||'')+(a.branch?' — Ag. '+esc(a.branch):'')+(a.account_number?' — C/C '+esc(a.account_number):'')+'</option>').join('');
+              source.disabled=financeAccountsForUnit.length===0;
+              updateFinanceTargetAccounts();
+            };
+            window.updateFinanceTargetAccounts=function(preferredTarget){
+              const unitId=document.getElementById('fUnit')?.value||'';
+              const source=document.getElementById('fAccount'),target=document.getElementById('fTargetAccount'),hint=document.getElementById('fTransferHint');
+              if(!target)return;
+              const current=preferredTarget||target.value||'';
+              const options=financeAccountsForUnit.filter(a=>a.unit_id===unitId && a.id!==(source?.value||''));
+              target.innerHTML='<option value="">Selecione a conta de destino / 振替先を選択</option>'+options.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.bank_name||a.name)+' — '+esc(a.account_type||'')+(a.branch?' — Ag. '+esc(a.branch):'')+(a.account_number?' — C/C '+esc(a.account_number):'')+'</option>').join('');
+              if(current && options.some(a=>a.id===current))target.value=current;
+              if(hint)hint.textContent=!unitId?'Selecione uma unidade para listar as contas de destino.':options.length===1?'1 conta de destino disponível nesta unidade.':options.length+' contas de destino disponíveis nesta unidade.';
+            };
+
+            const originalGo=window.go;
+            if(typeof originalGo==='function')window.go=function(id,btn){const r=originalGo.apply(this,arguments);if(id==='bank')setTimeout(window.loadBankAccounts,50);return r;};
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{if(document.getElementById('bank')&&!document.getElementById('bank').classList.contains('hidden'))loadBankAccounts();});
+            else if(document.getElementById('bank')&&!document.getElementById('bank').classList.contains('hidden'))loadBankAccounts();
+          })();
+          </script>'''
+          if '</body>' not in s:
+              raise SystemExit('Tag </body> não encontrada')
+          s=s.replace('</body>',inject+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
+          print('Patched',p)
+          PY
+
+      - name: Commit patched site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add siga/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "SIGA: mostrar contas bancárias e destinos"
+          git push
