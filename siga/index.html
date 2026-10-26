@@ -118,7 +118,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
       <label>Conta financeira / 金融口座<select id="fAccount" required></select></label>
       <label id="fChartField">Conta do Plano / 勘定科目<select id="fChart" required></select></label>
       <label>Tipo / 種類<select id="fType" required><option value="entry">Entrada / 収入</option><option value="expense">Saída / 支出</option><option value="transfer">Transferência / 振替</option></select></label>
-      <label id="fTransferField" class="hidden">Conta de destino / 振替先<select id="fTargetAccount"></select></label>
+      <label id="fTransferField" class="hidden">Conta de destino / 振替先<select id="fTargetAccount"></select><small id="fTransferHint" class="small-note">Escolha uma unidade para carregar as contas de destino dessa unidade.</small></label>
       <label>Data / 日付<input id="fDate" type="date" required></label>
       <label>Valor / 金額<input id="fAmount" type="number" min="0.01" step="0.01" required></label>
       <label>Documento / 証憑<input id="fDoc"></label>
@@ -568,12 +568,14 @@ async function loadFinanceAccounts(){
 function updateFinanceTargetAccounts(preferredTarget){
   const unitId=document.getElementById('fUnit')?.value||'';
   const source=document.getElementById('fAccount'),target=document.getElementById('fTargetAccount');
+  const hint=document.getElementById('fTransferHint');
   if(!source||!target)return;
   const selectedTarget=preferredTarget===undefined?target.value:preferredTarget;
   const accounts=financeAccountsForUnit.filter(x=>String(x.unit_id)===String(unitId)&&String(x.id)!==String(source.value));
   target.innerHTML='<option value="">Selecione / 選択</option>'+accounts.map(x=>'<option value="'+esc(x.id)+'" data-unit="'+esc(x.unit_id)+'" data-currency="'+esc(x.currency_code||'')+'">'+esc(x.name||'')+' — '+esc(x.account_type||'')+' ('+esc(x.currency_code||'')+')</option>').join('');
   if(selectedTarget&&accounts.some(x=>String(x.id)===String(selectedTarget)))target.value=selectedTarget;
   target.disabled=!unitId||accounts.length===0;
+  if(hint)hint.textContent=!unitId?'Selecione uma unidade para listar as contas de destino.':accounts.length?accounts.length+' conta(s) de destino disponível(is) nesta unidade.':'Não há outra conta ativa nesta unidade para usar como destino.';
 }
 function toggleFinanceType(){
   const isTransfer=document.getElementById('fType')?.value==='transfer';
@@ -583,7 +585,13 @@ function toggleFinanceType(){
   if(targetField)targetField.classList.toggle('hidden',!isTransfer);
   if(chart)chart.required=!isTransfer;
   if(target)target.required=isTransfer;
-  if(isTransfer)updateFinanceTargetAccounts();
+  if(isTransfer){
+    updateFinanceTargetAccounts();
+    if(targetField)requestAnimationFrame(function(){
+      const rect=targetField.getBoundingClientRect(),height=window.innerHeight||document.documentElement.clientHeight;
+      if(rect.top<0||rect.bottom>height)targetField.scrollIntoView({behavior:'smooth',block:'center'});
+    });
+  }
 }
 function setFinanceDate(){const d=document.getElementById('fDate');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
 async function saveFinance(ev){
