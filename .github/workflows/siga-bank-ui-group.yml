@@ -1,0 +1,97 @@
+name: SIGA - Organizar contas bancárias por unidade
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'siga/index.html'
+      - '.github/workflows/siga-bank-ui-group.yml'
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Organizar visualização bancária
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('siga/index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'siga-bank-ui-group-v1'
+          if marker in s:
+              print('Patch já aplicado')
+              raise SystemExit(0)
+          insert = r'''<!-- siga-bank-ui-group-v1 -->
+<style>
+.bank-groups{display:grid;gap:14px;margin-top:14px}
+.bank-group{border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden}
+.bank-group-head{padding:13px 15px;background:#f7f9fb;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.bank-group-head b{font-size:15px}.bank-count{font-size:11px;color:var(--muted);white-space:nowrap}
+.bank-item{padding:12px 15px;border-bottom:1px solid var(--line)}.bank-item:last-child{border-bottom:0}
+.bank-name{font-weight:bold}.bank-meta{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45}
+.bank-status{font-size:11px;margin-top:6px;font-weight:bold}.bank-status.ok{color:var(--ok)}.bank-status.warn{color:#9a6a00}
+@media(max-width:560px){.bank-group-head{align-items:flex-start}.bank-item{padding:13px}.bank-name{font-size:14px}.bank-meta{font-size:12px}}
+</style>
+<script>
+window.loadBankAccounts = async function(){
+  const box=document.getElementById('bankAccountsTable');
+  const msg=document.getElementById('bankAccountsMsg');
+  const filter=document.getElementById('bankUnitFilter');
+  if(!box)return;
+  box.innerHTML='<div class="small-note">Carregando / 読み込み中...</div>';
+  try{
+    const {data:units,error:ue}=await authClient.from('siga_units')
+      .select('id,code,name,japanese_name').eq('is_active',true).order('code');
+    if(ue)throw ue;
+    const {data:accounts,error:ae}=await authClient.from('siga_financial_accounts')
+      .select('id,unit_id,name,account_type,bank_name,branch,account_number,currency_code,is_active')
+      .eq('account_type','bank').eq('is_active',true).order('name');
+    if(ae)throw ae;
+    const byUnit=new Map((units||[]).map(u=>[u.id,u]));
+    const selected=filter?.value||'';
+    if(filter && filter.options.length<=1){
+      filter.innerHTML='<option value="">Todas as unidades / 全拠点</option>'+(units||[]).map(u=>`<option value="${u.id}">${u.code} — ${u.name}</option>`).join('');
+      if(selected)filter.value=selected;
+    }
+    const rows=(accounts||[]).filter(a=>!selected||a.unit_id===selected).map(a=>({...a,unit:byUnit.get(a.unit_id)}));
+    if(msg)msg.textContent=`${rows.length} conta(s) bancária(s) encontrada(s) / 銀行口座 ${rows.length}件`;
+    if(!rows.length){box.innerHTML='<div class="small-note">Nenhuma conta bancária encontrada para esta unidade / この拠点の銀行口座はありません。</div>';return;}
+    const groups=new Map();
+    rows.forEach(a=>{const key=a.unit_id||'sem-unidade';if(!groups.has(key))groups.set(key,[]);groups.get(key).push(a);});
+    const esc=v=>String(v??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    box.className='bank-groups';
+    box.innerHTML=[...groups.entries()].sort((x,y)=>String(x[1][0].unit?.code||'').localeCompare(String(y[1][0].unit?.code||''))).map(([key,list])=>{
+      const u=list[0].unit||{};
+      const title=`${esc(u.code||'Sem unidade')} — ${esc(u.name||'Unidade')}`;
+      return `<div class="bank-group"><div class="bank-group-head"><b>${title}</b><span class="bank-count">${list.length} conta(s)</span></div>${list.map(a=>{
+        const complete=!!(a.bank_name||a.account_number||a.branch);
+        const bank=esc(a.bank_name||a.name||'Banco não informado');
+        const branch=esc(a.branch||'Agência não informada');
+        const acc=esc(a.account_number||'Conta não informada');
+        const cur=esc(a.currency_code||'JPY');
+        return `<div class="bank-item"><div class="bank-name">${bank}</div><div class="bank-meta">Agência: ${branch} • C/C: ${acc} • Moeda: ${cur}</div><div class="bank-status ${complete?'ok':'warn'}">${complete?'✓ Cadastro bancário':'⚠ Cadastro incompleto'}</div></div>`;
+      }).join('')}</div>`;
+    }).join('');
+  }catch(e){
+    if(msg)msg.textContent='';
+    box.innerHTML='<div class="small-note">Não foi possível carregar as contas bancárias: '+String(e.message||e)+'</div>';
+  }
+};
+</script>
+'''
+          s=s.replace('</body>', insert+'\n</body>')
+          p.write_text(s,encoding='utf-8')
+      - name: Commit alteração
+        run: |
+          if git diff --quiet; then
+            echo 'Sem alterações'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add siga/index.html
+          git commit -m 'Organiza contas bancárias por unidade'
+          git push
