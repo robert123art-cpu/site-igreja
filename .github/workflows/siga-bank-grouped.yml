@@ -1,0 +1,75 @@
+name: SIGA bank grouped UI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Organizar contas por unidade
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('siga/index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='siga-bank-grouped-v1'
+          if marker in s:
+              print('Patch already present')
+              raise SystemExit(0)
+          inject=r'''<style id="siga-bank-grouped-v1">
+          #bank .bank-group{margin:16px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+          #bank .bank-group-title{padding:12px 14px;background:#f7f9fb;border-bottom:1px solid var(--line);font-weight:bold}
+          #bank .bank-group-title small{display:block;color:var(--muted);font-weight:normal;margin-top:3px}
+          #bank .bank-group table{margin:0;min-width:680px}
+          </style>
+          <script>
+          // siga-bank-grouped-v1
+          (function(){
+            const escG=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+            window.loadBankAccounts=async function(){
+              const root=document.getElementById('bankAccountsTable'),msg=document.getElementById('bankAccountsMsg'),filter=document.getElementById('bankUnitFilter');
+              if(!root)return;
+              root.innerHTML='<tr><td colspan="7">Carregando / 読み込み中...</td></tr>';
+              try{
+                const [{data:units,error:ue},{data:accounts,error:ae}]=await Promise.all([
+                  authClient.from('siga_units').select('id,code,name,japanese_name').eq('is_active',true).order('code'),
+                  authClient.from('siga_financial_accounts').select('id,unit_id,name,account_type,bank_name,branch,account_number,currency_code,is_active').eq('account_type','bank').order('bank_name').order('account_number')
+                ]);
+                if(ue)throw ue;if(ae)throw ae;
+                const map=new Map((units||[]).map(u=>[u.id,u]));
+                if(filter && filter.options.length===1){(units||[]).forEach(u=>{const o=document.createElement('option');o.value=u.id;o.textContent=(u.code||'')+' — '+(u.name||u.japanese_name||'');filter.appendChild(o);});}
+                const selected=filter?.value||'';
+                const rows=(accounts||[]).filter(a=>!selected||a.unit_id===selected);
+                if(msg)msg.textContent=rows.length+' conta(s) bancária(s) encontrada(s) / 銀行口座 '+rows.length+'件';
+                if(!rows.length){root.innerHTML='<tr><td colspan="7">Nenhuma conta bancária encontrada / 銀行口座がありません</td></tr>';return;}
+                const groups=new Map();
+                rows.forEach(a=>{const u=map.get(a.unit_id)||{};const key=a.unit_id||'sem-unidade';if(!groups.has(key))groups.set(key,{u,rows:[]});groups.get(key).rows.push(a);});
+                const html=[];
+                for(const [key,g] of groups){
+                  const u=g.u||{};
+                  html.push('<div class="bank-group"><div class="bank-group-title">'+escG(u.code||'Sem código')+' — '+escG(u.name||u.japanese_name||'Unidade')+'<small>'+g.rows.length+' conta(s) bancária(s)</small></div><div class="tablewrap"><table><thead><tr><th>Banco / 銀行</th><th>Agência / 支店</th><th>Conta / 口座</th><th>Moeda</th><th>Status</th></tr></thead><tbody>');
+                  g.rows.forEach(a=>html.push('<tr><td><b>'+escG(a.bank_name||a.name||'—')+'</b></td><td>'+escG(a.branch||'—')+'</td><td>'+escG(a.account_number||'—')+'</td><td>'+escG(a.currency_code||'—')+'</td><td>'+(a.is_active?'Ativa / 有効':'Inativa / 無効')+'</td></tr>'));
+                  html.push('</tbody></table></div></div>');
+                }
+                root.innerHTML='<tr><td colspan="7" style="padding:0;border:0">'+html.join('')+'</td></tr>';
+              }catch(e){console.error(e);if(msg)msg.textContent='Erro: '+(e.message||e);root.innerHTML='<tr><td colspan="7">Não foi possível carregar as contas / 銀行口座を読み込めません</td></tr>';}
+            };
+          })();
+          </script>'''
+          if '</body>' not in s: raise SystemExit('Tag </body> não encontrada')
+          p.write_text(s.replace('</body>',inject+'\n</body>',1),encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add siga/index.html .github/workflows/siga-bank-grouped.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "SIGA: agrupar contas bancarias por unidade"
+          git push
