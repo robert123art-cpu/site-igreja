@@ -918,6 +918,56 @@ function exportFinanceCsv(){const rows=[['Data','Unidade','Descrição','Tipo','
   else setTimeout(window.loadBankAccounts,100);
 })();
 </script>
+<style id="siga-bank-click-details-v1">
+#bank .bank-item{cursor:pointer;transition:background .15s,box-shadow .15s}
+#bank .bank-item:hover{background:#f7fafc;box-shadow:inset 3px 0 0 var(--nav2)}
+#bank .bank-item:focus-visible{outline:2px solid var(--nav2);outline-offset:-2px}
+</style>
+<script>
+// siga-bank-click-details-v1
+(function(){
+  function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function openBankDetail(item){
+    const group=item.closest('.bank-group');
+    const unit=(group?.querySelector('.bank-group-title')?.textContent||'').trim();
+    const name=(item.querySelector('.bank-main b')?.textContent||'').replace(/^🏦\s*/,'').trim();
+    const agencyAccount=(item.querySelector('.bank-main small')?.textContent||'').trim();
+    const type=(item.children[1]?.querySelector('b')?.textContent||'').trim();
+    const currency=(item.querySelector('.bank-currency b')?.textContent||'').trim();
+    const status=(item.querySelector('.bank-status b')?.textContent||'').trim();
+    let modal=document.getElementById('bankDetailModal');
+    if(!modal){
+      modal=document.createElement('div');
+      modal.id='bankDetailModal';
+      modal.className='modal hidden';
+      modal.innerHTML='<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="bankDetailTitle"><h2 id="bankDetailTitle">🏦 Detalhes da conta</h2><div id="bankDetailBody"></div><button type="button" class="btn secondary login-back" data-bank-detail-close>← Fechar</button></div>';
+      document.body.appendChild(modal);
+      modal.querySelector('[data-bank-detail-close]').addEventListener('click',()=>modal.classList.add('hidden'));
+      modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});
+    }
+    const fields=[['Unidade',unit],['Banco',name],['Agência / Conta',agencyAccount],['Tipo',type],['Moeda',currency],['Status',status]];
+    document.getElementById('bankDetailBody').innerHTML=fields.map(([label,value])=>'<div class="field" style="margin-top:10px"><label>'+esc(label)+'</label><input value="'+esc(value)+'" readonly></div>').join('');
+    modal.classList.remove('hidden');
+  }
+  function bind(){
+    document.querySelectorAll('#bank .bank-item').forEach(item=>{
+      if(item.dataset.bankDetailBound==='1')return;
+      item.dataset.bankDetailBound='1';
+      item.setAttribute('role','button');
+      item.setAttribute('tabindex','0');
+      item.addEventListener('click',()=>openBankDetail(item));
+      item.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openBankDetail(item)}});
+    });
+  }
+  const original=window.loadBankAccounts;
+  if(typeof original==='function'){
+    window.loadBankAccounts=async function(){const result=await original.apply(this,arguments);setTimeout(bind,0);return result;};
+    setTimeout(bind,300);
+  }else{
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(bind,500));
+  }
+})();
+</script>
 </body></html>
 
 
