@@ -1,0 +1,88 @@
+name: SIGA - Detalhes das contas bancárias
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'siga/index.html'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-bank-details:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add bank account detail interaction
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('siga/index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='siga-bank-click-details-v1'
+          if marker in s:
+              print('Already patched')
+              raise SystemExit(0)
+          inject=r'''<style id="siga-bank-click-details-v1">
+          #bank .bank-item{cursor:pointer;transition:background .15s,box-shadow .15s}
+          #bank .bank-item:hover{background:#f7fafc;box-shadow:inset 3px 0 0 var(--nav2)}
+          #bank .bank-item:focus{outline:2px solid var(--nav2);outline-offset:-2px}
+          </style>
+          <script>
+          // siga-bank-click-details-v1
+          (function(){
+            function esc(v){return String(v??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));}
+            function openBankDetail(item){
+              const group=item.closest('.bank-group');
+              const unit=(group?.querySelector('.bank-group-title')?.textContent||'').trim();
+              const name=(item.querySelector('.bank-main b')?.textContent||'').replace(/^🏦\s*/,'').trim();
+              const meta=(item.querySelector('.bank-main small')?.textContent||'').trim();
+              const type=(item.children[1]?.querySelector('b')?.textContent||'').trim();
+              const currency=(item.querySelector('.bank-currency b')?.textContent||'').trim();
+              const status=(item.querySelector('.bank-status b')?.textContent||'').trim();
+              let modal=document.getElementById('bankDetailModal');
+              if(!modal){
+                modal=document.createElement('div');
+                modal.id='bankDetailModal';
+                modal.className='modal hidden';
+                modal.innerHTML='<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="bankDetailTitle"><h2 id="bankDetailTitle">🏦 Detalhes da conta</h2><div id="bankDetailBody"></div><button type="button" class="btn secondary login-back" onclick="document.getElementById(\'bankDetailModal\').classList.add(\'hidden\')">← Fechar</button></div>';
+                document.body.appendChild(modal);
+                modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});
+              }
+              document.getElementById('bankDetailBody').innerHTML='<div class="field"><label>Unidade</label><input value="'+esc(unit)+'" readonly></div><div class="field" style="margin-top:10px"><label>Banco</label><input value="'+esc(name)+'" readonly></div><div class="field" style="margin-top:10px"><label>Agência / Conta</label><input value="'+esc(meta)+'" readonly></div><div class="field" style="margin-top:10px"><label>Tipo</label><input value="'+esc(type)+'" readonly></div><div class="field" style="margin-top:10px"><label>Moeda</label><input value="'+esc(currency)+'" readonly></div><div class="field" style="margin-top:10px"><label>Status</label><input value="'+esc(status)+'" readonly></div>';
+              modal.classList.remove('hidden');
+            }
+            function bind(){
+              document.querySelectorAll('#bank .bank-item').forEach(item=>{
+                if(item.dataset.bankDetailBound==='1')return;
+                item.dataset.bankDetailBound='1';
+                item.setAttribute('role','button');
+                item.setAttribute('tabindex','0');
+                item.addEventListener('click',()=>openBankDetail(item));
+                item.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openBankDetail(item)}});
+              });
+            }
+            const original=window.loadBankAccounts;
+            if(typeof original==='function'){
+              window.loadBankAccounts=async function(){const r=await original.apply(this,arguments);setTimeout(bind,0);return r;};
+              setTimeout(bind,300);
+            }else{
+              document.addEventListener('DOMContentLoaded',()=>setTimeout(bind,500));
+            }
+          })();
+          </script>'''
+          s=s.replace('</body>',inject+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
+          print('patched',p)
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add siga/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "SIGA: abrir detalhes das contas bancárias"
+          git push
