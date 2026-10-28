@@ -806,6 +806,7 @@ function exportFinanceCsv(){const rows=[['Data','Unidade','Descrição','Tipo','
     const options=financeAccountsForUnit.filter(a=>a.unit_id===unitId && a.id!==(source?.value||''));
     target.innerHTML='<option value="">Selecione a conta de destino / 振替先を選択</option>'+options.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.bank_name||a.name)+' — '+esc(a.account_type||'')+(a.branch?' — Ag. '+esc(a.branch):'')+(a.account_number?' — C/C '+esc(a.account_number):'')+'</option>').join('');
     if(current && options.some(a=>a.id===current))target.value=current;
+    target.disabled=!unitId||options.length===0;
     if(hint)hint.textContent=!unitId?'Selecione uma unidade para listar as contas de destino.':options.length===1?'1 conta de destino disponível nesta unidade.':options.length+' contas de destino disponíveis nesta unidade.';
   };
 
