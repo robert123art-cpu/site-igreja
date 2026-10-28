@@ -929,7 +929,10 @@ function exportFinanceCsv(){const rows=[['Data','Unidade','Descrição','Tipo','
   function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
   function openBankDetail(item){
     const group=item.closest('.bank-group');
-    const unit=(group?.querySelector('.bank-group-title')?.textContent||'').trim();
+    const title=group?.querySelector('.bank-group-title');
+    const unitText=(title?.textContent||'').trim();
+    const code=(title?.querySelector('.bank-group-code')?.textContent||'').trim();
+    const unit=code&&unitText.startsWith(code)?code+' — '+unitText.slice(code.length).trim():unitText;
     const name=(item.querySelector('.bank-main b')?.textContent||'').replace(/^🏦\s*/,'').trim();
     const agencyAccount=(item.querySelector('.bank-main small')?.textContent||'').trim();
     const type=(item.children[1]?.querySelector('b')?.textContent||'').trim();
