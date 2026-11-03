@@ -847,7 +847,7 @@ async function renderFinance(forceRefresh=false){
         const unit=x.siga_units||{};
         const unitName=[unit.name,unit.japanese_name].filter(Boolean).join(' / ');
         const unitLabel=[unit.code,unitName].filter(Boolean).join(' — ');
-        return '<tr><td>'+datePt+(dateJa?'<small class="finance-date-ja">'+dateJa+'</small>':'')+'</td><td>'+esc(unitLabel)+'</td><td>'+esc(x.description||'')+'</td><td class="'+typeClass+'">'+typeLabel+'</td><td class="'+typeClass+'">'+money(x.amount)+'</td></tr>';
+        return '<tr><td>'+datePt+(dateJa?'<small class="finance-date-ja">'+dateJa+'</small>':'')+'</td><td>'+esc(unitLabel)+'</td><td>'+formatLedgerDescription(x.description)+'</td><td class="'+typeClass+'">'+typeLabel+'</td><td class="'+typeClass+'">'+money(x.amount)+'</td></tr>';
       }).join('')||'<tr><td colspan="5">Nenhum lançamento / 取引はありません</td></tr>';
     }
     renderGeneralLedger();
@@ -875,6 +875,28 @@ function populateGeneralLedgerFilters(){
     if(Array.from(unitSelect.options).some(o=>o.value===current))unitSelect.value=current;
   }
 }
+const LEDGER_DESCRIPTION_JA={
+  'coleta':'献金','coleta de oferta':'献金','coleta de ofertas':'献金','coleta para manutencao':'維持献金',
+  'reforma':'改修費','internet':'インターネット通信費','teste':'テスト',
+  'transferencia':'振替','transf':'振替','luz':'電気料金','energia eletrica':'電気料金',
+  'contribuicao':'献金','contribuicoes':'献金','doacao':'寄付金','oferta':'献金','dizimo':'十分の一献金',
+  'agua':'水道料金','telefone':'電話料金','aluguel':'賃料','manutencao':'維持管理費',
+  'material administrativo':'事務用品費','salario':'給与','combustivel':'燃料費','transporte':'交通費','limpeza':'清掃費'
+};
+function ledgerDescriptionJapanese(value){
+  const raw=String(value||'').trim();
+  if(!raw)return '—';
+  if(/[\u3040-\u30ff\u3400-\u9fff]/.test(raw))return raw;
+  const key=raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/\s+/g,' ');
+  return LEDGER_DESCRIPTION_JA[key]||'日本語訳未登録';
+}
+function formatLedgerDescription(value){
+  const raw=String(value||'').trim();
+  if(!raw)return '—';
+  const japanese=ledgerDescriptionJapanese(raw);
+  if(japanese===raw)return '<span>'+esc(japanese)+'</span>';
+  return '<span>'+esc(japanese)+'</span><small class="finance-date-ja">'+esc(raw)+'</small>';
+}
 function renderGeneralLedger(){
   const body=document.getElementById('generalLedgerBody');
   if(!body)return;
@@ -894,7 +916,7 @@ function renderGeneralLedger(){
     if(to&&date>to)return false;
     const account=chartById.get(String(x.chart_account_id))||{};
     const unit=x.siga_units||{};
-    const searchable=[x.description,account.code,account.name_pt,account.name_ja,unit.code,unit.name,unit.japanese_name].filter(Boolean).join(' ').toLocaleLowerCase();
+    const searchable=[x.description,ledgerDescriptionJapanese(x.description),account.code,account.name_pt,account.name_ja,unit.code,unit.name,unit.japanese_name].filter(Boolean).join(' ').toLocaleLowerCase();
     return !query||searchable.includes(query);
   });
   body.innerHTML=rows.map(x=>{
