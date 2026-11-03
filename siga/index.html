@@ -847,7 +847,13 @@ async function renderFinance(forceRefresh=false){
         const unit=x.siga_units||{};
         const unitName=[unit.name,unit.japanese_name].filter(Boolean).join(' / ');
         const unitLabel=[unit.code,unitName].filter(Boolean).join(' — ');
-        return '<tr><td>'+datePt+(dateJa?'<small class="finance-date-ja">'+dateJa+'</small>':'')+'</td><td>'+esc(unitLabel)+'</td><td>'+formatLedgerDescription(x.description)+'</td><td class="'+typeClass+'">'+typeLabel+'</td><td class="'+typeClass+'">'+money(x.amount)+'</td></tr>';
+        const chartAccount=financeChartAccounts.find(account=>String(account.id)===String(x.chart_account_id));
+        const chartNameJa=String(chartAccount?.name_ja||'').trim();
+        const chartNamePt=String(chartAccount?.name_pt||'').trim();
+        const descriptionHtml=chartAccount
+          ? '<span>'+esc(chartNameJa||chartNamePt||'—')+'</span>'+(chartNameJa&&chartNamePt&&chartNameJa!==chartNamePt?'<small class="finance-date-ja">'+esc(chartNamePt)+'</small>':'')+(x.description?'<small>Detalhe / 詳細: '+formatLedgerDescription(x.description)+'</small>':'')
+          : formatLedgerDescription(x.description);
+        return '<tr><td>'+datePt+(dateJa?'<small class="finance-date-ja">'+dateJa+'</small>':'')+'</td><td>'+esc(unitLabel)+'</td><td>'+descriptionHtml+'</td><td class="'+typeClass+'">'+typeLabel+'</td><td class="'+typeClass+'">'+money(x.amount)+'</td></tr>';
       }).join('')||'<tr><td colspan="5">Nenhum lançamento / 取引はありません</td></tr>';
     }
     renderGeneralLedger();
