@@ -73,6 +73,20 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
   #finance tr{break-inside:avoid}
   #financePrintMeta{display:block!important;margin:8px 0;color:#555;font-size:9pt}
 }
+
+@media print{
+  body.printing-ledger aside,body.printing-ledger .top,body.printing-ledger .module:not(#finance){display:none!important}
+  body.printing-ledger main{margin:0!important;width:100%!important}
+  body.printing-ledger .content{padding:0!important}
+  body.printing-ledger #finance{display:block!important}
+  body.printing-ledger #finance>:not(.title):not(#generalLedgerPanel){display:none!important}
+  body.printing-ledger #generalLedgerPanel{display:block!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}
+  body.printing-ledger #generalLedgerToolbar{display:none!important}
+  body.printing-ledger #generalLedgerPanel .tablewrap{overflow:visible!important}
+  body.printing-ledger #generalLedgerPanel table{width:100%!important;font-size:9pt!important}
+  body.printing-ledger #generalLedgerPanel th,body.printing-ledger #generalLedgerPanel td{padding:6px!important;border:1px solid #aaa!important}
+  body.printing-ledger #generalLedgerPanel tr{break-inside:avoid}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -135,7 +149,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 </div>
 <div id="attendance" class="module hidden"><div class="title"><div><h1>📝 Reuniões / Presença</h1><p>Registro de reuniões, frequência e ausência</p></div></div><div class="panel"><h2>Controle de presença / 出席管理</h2><div class="formgrid"><label>Tipo de reunião<select><option>Reunião administrativa</option><option>Culto</option><option>Assembleia</option><option>Reunião de liderança</option></select></label><label>Data<input type="date"></label><label>Horário de início da portaria<input type="time"></label><label>Horário de início da reunião<input type="time"></label></div><div class="small-note" style="margin-top:14px">Nesta etapa a estrutura da lista está preparada. A próxima fase ligará a presença ao cadastro de membros e aos relatórios.</div></div></div>
 <div id="finance" class="module hidden">
-<div class="title"><div><h1>💰 Financeiro / 財務</h1><p>Livro Caixa, lançamentos e saldo automático / 現金出納帳・取引・自動残高</p></div><div class="finance-refresh-controls"><button id="financeRefreshButton" class="btn primary" type="button" onclick="loadFinance()" aria-describedby="financeRefreshStatus">↻ Atualizar / 更新</button><span id="financeRefreshStatus" role="status" aria-live="polite"></span></div></div>
+<div class="title"><div><h1>💰 Financeiro / 財務</h1><p>Livro Caixa, lançamentos e saldo automático / 現金出納帳・取引・自動残高</p></div><div class="finance-refresh-controls"><button class="btn secondary" type="button" onclick="document.getElementById('generalLedgerPanel').scrollIntoView({behavior:'smooth'})">Razão Geral / 総勘定元帳</button><button id="financeRefreshButton" class="btn primary" type="button" onclick="loadFinance()" aria-describedby="financeRefreshStatus">↻ Atualizar / 更新</button><span id="financeRefreshStatus" role="status" aria-live="polite"></span></div></div>
 <div id="financePrintMeta" class="finance-print-meta"></div><div class="cards" id="financeCards"><div class="card"><div class="label">Saldo atual / 現在残高</div><div class="value" id="finBalance">¥ 0</div><div class="sub">Saldo das contas financeiras / 金融口座残高</div></div><div class="card"><div class="label">Entradas do mês / 今月の入金</div><div class="value ok" id="finEntries">¥ 0</div><div class="sub">Receitas / 収入</div></div><div class="card"><div class="label">Saídas do mês / 今月の出金</div><div class="value bad" id="finExpenses">¥ 0</div><div class="sub">Despesas / 支出</div></div><div class="card"><div class="label">Resultado / 収支</div><div class="value" id="finResult">¥ 0</div><div class="sub">Entradas − saídas / 入金 − 出金</div></div></div>
 <div class="grid2">
   <div class="panel"><h2>Novo lançamento / 新規取引</h2><form id="financeForm" onsubmit="saveFinance(event)">
@@ -154,6 +168,26 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
     <div class="actions"><button type="submit" class="btn primary">Salvar / 保存</button><button type="button" class="btn secondary" onclick="document.getElementById('financeForm').reset();loadFinanceAccounts();toggleFinanceType();setFinanceDate()">Limpar / クリア</button></div>
   </form></div>
   <div class="panel"><h2>Livro Caixa / 現金出納帳</h2><div class="toolbar"><input id="financeSearch" placeholder="Pesquisar descrição... / 摘要を検索..." oninput="renderFinance()"><button type="button" class="btn secondary" onclick="exportFinanceCsv()">Exportar CSV / CSV出力</button><button type="button" class="btn secondary" onclick="printFinance()" aria-label="Imprimir Livro Caixa / 現金出納帳を印刷">Imprimir / 印刷</button></div><div class="tablewrap"><table><thead><tr><th>Data / 日付</th><th>Unidade / 拠点</th><th>Descrição / 摘要</th><th>Tipo / 種類</th><th>Valor / 金額</th></tr></thead><tbody id="financeTable"></tbody></table></div></div>
+</div>
+
+<div class="panel" id="generalLedgerPanel" style="margin-top:17px">
+  <h2>Razão Geral / 総勘定元帳</h2>
+  <p class="small-note">Movimentações de entrada e saída ligadas a uma conta do Plano. Transferências internas podem ser consultadas no Livro Caixa. Como os lançamentos atuais não registram partidas de débito e crédito em pares, este relatório organiza as movimentações por conta e não calcula saldo contábil. / 勘定科目に紐付いた入金・出金を表示します。口座間振替は現金出納帳で確認してください。現在は借方・貸方の複式仕訳を記録していないため、このレポートは科目別の取引を表示し、会計残高は計算しません。</p>
+  <div class="toolbar" id="generalLedgerToolbar" style="flex-wrap:wrap;margin-top:12px">
+    <select id="ledgerChartFilter" aria-label="Filtrar por conta contábil / 勘定科目で絞り込む" onchange="renderGeneralLedger()"><option value="">Todas as contas / すべての勘定科目</option></select>
+    <select id="ledgerUnitFilter" aria-label="Filtrar por unidade / 拠点で絞り込む" onchange="renderGeneralLedger()"><option value="">Todas as unidades / 全拠点</option></select>
+    <label class="small-note">De / 開始日<input id="ledgerFrom" type="date" onchange="renderGeneralLedger()"></label>
+    <label class="small-note">Até / 終了日<input id="ledgerTo" type="date" onchange="renderGeneralLedger()"></label>
+    <input id="ledgerSearch" type="search" placeholder="Pesquisar conta ou descrição / 科目・摘要を検索..." oninput="renderGeneralLedger()">
+    <button class="btn secondary" type="button" onclick="exportGeneralLedgerCsv()">Exportar CSV / CSV出力</button>
+    <button class="btn secondary" type="button" onclick="printGeneralLedger()">Imprimir / 印刷</button>
+  </div>
+  <p id="generalLedgerCount" class="small-note" role="status" aria-live="polite"></p>
+  <div id="generalLedgerPrintMeta" class="finance-print-meta"></div>
+  <div class="tablewrap"><table id="generalLedgerTable">
+    <thead><tr><th>Data / 日付</th><th>Unidade / 拠点</th><th>Código / コード</th><th>Conta / 勘定科目</th><th>Descrição / 摘要</th><th>Tipo / 種類</th><th>Valor / 金額</th></tr></thead>
+    <tbody id="generalLedgerBody"><tr><td colspan="7">Atualize o Financeiro para carregar o Razão. / 財務を更新して元帳を読み込んでください。</td></tr></tbody>
+  </table></div>
 </div>
 </div>
 <div id="bank" class="module hidden">
@@ -553,6 +587,8 @@ renderMembers();
 let financeAccountsForUnit=[];
 let financeAccountRequestId=0;
 let financeDataCache=null;
+let financeChartAccounts=[];
+let financeUnitsForLedger=[];
 let financeLoadRequestId=0;
 async function loadFinance(){
   const requestId=++financeLoadRequestId;
@@ -583,6 +619,7 @@ async function loadFinance(){
       console.error('Não foi possível atualizar as unidades do formulário:',unitsError);
     }else{
       const units=unitResponse?.data||[];
+      financeUnitsForLedger=units;
       u.innerHTML='<option value="">Selecione / 選択</option>'+(units||[]).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||'')+' — '+esc(x.name||'')+(x.japanese_name?' / '+esc(x.japanese_name):'')+'</option>').join('');
       if((units||[]).some(x=>String(x.id)===selectedUnit))u.value=selectedUnit;
     }
@@ -593,9 +630,11 @@ async function loadFinance(){
       console.error('Não foi possível atualizar as opções do Plano de Contas:',chartsError);
     }else{
       const charts=chartResponse?.data||[];
+      financeChartAccounts=charts;
       c.innerHTML='<option value="">Selecione / 選択</option>'+(charts||[]).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code)+' — '+esc(x.name_ja||'')+' / '+esc(x.name_pt||'')+(x.account_kind==='synthetic'?' [grupo]':'')+'</option>').join('');
       if((charts||[]).some(x=>String(x.id)===selectedChart))c.value=selectedChart;
     }
+    populateGeneralLedgerFilters();
     type.value=selectedType;
     u.onchange=function(){a.value='';target.value='';loadFinanceAccounts().catch(showFinanceError);};
     a.onchange=updateFinanceTargetAccounts;
@@ -741,7 +780,7 @@ async function fetchFinanceTransactions(){
   let offset=0;
   while(true){
     const {data,error}=await authClient.from('siga_financial_transactions')
-      .select('transaction_date,description,transaction_type,amount,unit_id,siga_units(code,name,japanese_name),created_at')
+      .select('transaction_date,description,transaction_type,amount,unit_id,chart_account_id,document_number,counterparty,siga_units(code,name,japanese_name),created_at')
       .order('transaction_date',{ascending:false})
       .order('created_at',{ascending:false})
       .range(offset,offset+pageSize-1);
@@ -811,6 +850,7 @@ async function renderFinance(forceRefresh=false){
         return '<tr><td>'+datePt+(dateJa?'<small class="finance-date-ja">'+dateJa+'</small>':'')+'</td><td>'+esc(unitLabel)+'</td><td>'+esc(x.description||'')+'</td><td class="'+typeClass+'">'+typeLabel+'</td><td class="'+typeClass+'">'+money(x.amount)+'</td></tr>';
       }).join('')||'<tr><td colspan="5">Nenhum lançamento / 取引はありません</td></tr>';
     }
+    renderGeneralLedger();
     return true;
   }catch(e){
     console.error(e);
@@ -818,6 +858,74 @@ async function renderFinance(forceRefresh=false){
     setFinanceRefreshStatus('Não foi possível atualizar. Verifique a conexão e tente novamente. / 更新できませんでした。接続を確認してください。','error');
     return false;
   }
+}
+
+
+function populateGeneralLedgerFilters(){
+  const accountSelect=document.getElementById('ledgerChartFilter');
+  const unitSelect=document.getElementById('ledgerUnitFilter');
+  if(accountSelect){
+    const current=accountSelect.value;
+    accountSelect.innerHTML='<option value="">Todas as contas / すべての勘定科目</option>'+financeChartAccounts.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||'')+' — '+esc(x.name_ja||'')+(x.name_pt?' / '+esc(x.name_pt):'')+'</option>').join('');
+    if(Array.from(accountSelect.options).some(o=>o.value===current))accountSelect.value=current;
+  }
+  if(unitSelect){
+    const current=unitSelect.value;
+    unitSelect.innerHTML='<option value="">Todas as unidades / 全拠点</option>'+financeUnitsForLedger.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||'')+' — '+esc(x.name||'')+(x.japanese_name?' / '+esc(x.japanese_name):'')+'</option>').join('');
+    if(Array.from(unitSelect.options).some(o=>o.value===current))unitSelect.value=current;
+  }
+}
+function renderGeneralLedger(){
+  const body=document.getElementById('generalLedgerBody');
+  if(!body)return;
+  const source=financeDataCache?.transactions||[];
+  const chartById=new Map(financeChartAccounts.map(x=>[String(x.id),x]));
+  const accountId=document.getElementById('ledgerChartFilter')?.value||'';
+  const unitId=document.getElementById('ledgerUnitFilter')?.value||'';
+  const from=document.getElementById('ledgerFrom')?.value||'';
+  const to=document.getElementById('ledgerTo')?.value||'';
+  const query=(document.getElementById('ledgerSearch')?.value||'').trim().toLocaleLowerCase();
+  const rows=source.filter(x=>{
+    if(!x.chart_account_id||!['entry','expense'].includes(x.transaction_type))return false;
+    if(accountId&&String(x.chart_account_id)!==accountId)return false;
+    if(unitId&&String(x.unit_id)!==unitId)return false;
+    const date=String(x.transaction_date||'').slice(0,10);
+    if(from&&date<from)return false;
+    if(to&&date>to)return false;
+    const account=chartById.get(String(x.chart_account_id))||{};
+    const unit=x.siga_units||{};
+    const searchable=[x.description,account.code,account.name_pt,account.name_ja,unit.code,unit.name,unit.japanese_name].filter(Boolean).join(' ').toLocaleLowerCase();
+    return !query||searchable.includes(query);
+  });
+  body.innerHTML=rows.map(x=>{
+    const account=chartById.get(String(x.chart_account_id))||{};
+    const unit=x.siga_units||{};
+    const date=String(x.transaction_date||'').slice(0,10);
+    const dateObj=/^\d{4}-\d{2}-\d{2}$/.test(date)?new Date(date+'T00:00:00'):null;
+    const datePt=dateObj&&!Number.isNaN(dateObj.getTime())?dateObj.toLocaleDateString('pt-BR'):'—';
+    const dateJa=/^\d{4}-\d{2}-\d{2}$/.test(date)?date.replace(/-/g,'/'):'';
+    const unitName=[unit.name,unit.japanese_name].filter(Boolean).join(' / ');
+    const unitLabel=[unit.code,unitName].filter(Boolean).join(' — ')||'—';
+    const typeClass=x.transaction_type==='entry'?'ok':'bad';
+    const typeLabel=x.transaction_type==='entry'?'Entrada / 入金':'Saída / 出金';
+    const accountName=[account.name_ja,account.name_pt].filter(Boolean).join(' / ')||'—';
+    return '<tr><td>'+datePt+(dateJa?'<small class="finance-date-ja">'+dateJa+'</small>':'')+'</td><td>'+esc(unitLabel)+'</td><td>'+esc(account.code||'—')+'</td><td>'+esc(accountName)+'</td><td>'+esc(x.description||'')+'</td><td class="'+typeClass+'">'+typeLabel+'</td><td class="'+typeClass+'">'+money(x.amount)+'</td></tr>';
+  }).join('')||'<tr><td colspan="7">Nenhum lançamento encontrado / 該当する取引はありません</td></tr>';
+  const count=document.getElementById('generalLedgerCount');
+  if(count)count.textContent=rows.length+' lançamento(s) / '+rows.length+'件';
+}
+function exportGeneralLedgerCsv(){
+  const rows=[['Data / 日付','Unidade / 拠点','Código / コード','Conta / 勘定科目','Descrição / 摘要','Tipo / 種類','Valor / 金額'],...Array.from(document.querySelectorAll('#generalLedgerBody tr')).filter(tr=>tr.cells.length===7).map(tr=>Array.from(tr.cells).map(td=>td.innerText))];
+  const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='SIGA_Razao_Geral.csv';a.click();URL.revokeObjectURL(a.href);
+}
+function printGeneralLedger(){
+  const meta=document.getElementById('generalLedgerPrintMeta');
+  if(meta){const now=new Date();meta.textContent='Impresso em '+now.toLocaleString('pt-BR')+' / 印刷日時：'+now.toLocaleString('ja-JP');}
+  const cleanup=()=>document.body.classList.remove('printing-ledger');
+  window.addEventListener('afterprint',cleanup,{once:true});
+  document.body.classList.add('printing-ledger');
+  window.print();
 }
 
 function money(v){return new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(Number(v)||0)}
