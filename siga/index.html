@@ -931,7 +931,7 @@ function renderGeneralLedger(){
     const typeClass=x.transaction_type==='entry'?'ok':'bad';
     const typeLabel=x.transaction_type==='entry'?'Entrada / 入金':'Saída / 出金';
     const accountName=[account.name_ja,account.name_pt].filter(Boolean).join(' / ')||'—';
-    return '<tr><td>'+datePt+(dateJa?'<small class="finance-date-ja">'+dateJa+'</small>':'')+'</td><td>'+esc(unitLabel)+'</td><td>'+esc(account.code||'—')+'</td><td>'+esc(accountName)+'</td><td>'+esc(x.description||'')+'</td><td class="'+typeClass+'">'+typeLabel+'</td><td class="'+typeClass+'">'+money(x.amount)+'</td></tr>';
+    return '<tr><td>'+datePt+(dateJa?'<small class="finance-date-ja">'+dateJa+'</small>':'')+'</td><td>'+esc(unitLabel)+'</td><td>'+esc(account.code||'—')+'</td><td>'+esc(accountName)+'</td><td>'+formatLedgerDescription(x.description)+'</td><td class="'+typeClass+'">'+typeLabel+'</td><td class="'+typeClass+'">'+money(x.amount)+'</td></tr>';
   }).join('')||'<tr><td colspan="7">Nenhum lançamento encontrado / 該当する取引はありません</td></tr>';
   const count=document.getElementById('generalLedgerCount');
   if(count)count.textContent=rows.length+' lançamento(s) / '+rows.length+'件';
