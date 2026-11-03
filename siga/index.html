@@ -972,11 +972,20 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
     const p=String(v).slice(0,10).split('-');
     return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : String(v);
   }
+  function escapeHtml(v){
+    return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
   async function loadLiveDashboard(){
     try{
       if(typeof authClient==='undefined')return;
-      const {data,error}=await authClient.from('siga_financial_transactions').select('transaction_date,transaction_type,amount,description,counterparty,created_at').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).limit(5000);
+      const [transactionsResult,chartResult]=await Promise.all([
+        authClient.from('siga_financial_transactions').select('transaction_date,transaction_type,amount,description,counterparty,created_at,chart_account_id').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).limit(5000),
+        authClient.from('siga_chart_of_accounts').select('id,name_pt,name_ja').order('code')
+      ]);
+      const {data,error}=transactionsResult;
       if(error)throw error;
+      if(chartResult.error)console.warn('Não foi possível carregar o Plano de Contas no painel:',chartResult.error);
+      const chartById=new Map((chartResult.data||[]).map(account=>[String(account.id),account]));
       const rows=data||[];
       let balance=0,entries=0,expenses=0;
       const now=new Date();
@@ -1011,7 +1020,13 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
           const cls=isExpense?'bad':(isTransfer?'':'ok');
           const label=isExpense?'Saída / 出金':(isTransfer?'Transferência / 振替':'Entrada / 入金');
           const cat=isExpense?'Despesas / 支出':(isTransfer?'Transferências / 振替':'Receitas / 収入');
-          return '<tr><td>'+fmtDate(r.transaction_date)+'</td><td>'+String(r.description||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))+'</td><td>'+cat+'</td><td class="'+cls+'">'+label+'</td><td class="'+cls+'">'+money(r.amount)+'</td></tr>';
+          const account=chartById.get(String(r.chart_account_id||''));
+          const nameJa=String(account?.name_ja||'').trim();
+          const namePt=String(account?.name_pt||'').trim();
+          const accountHtml=account?'<span>'+escapeHtml(nameJa||namePt||'—')+'</span>'+(nameJa&&namePt&&nameJa!==namePt?'<small class="finance-date-ja">'+escapeHtml(namePt)+'</small>':''):'';
+          const detailHtml=typeof formatLedgerDescription==='function'?formatLedgerDescription(r.description):'<span>'+escapeHtml(r.description||'—')+'</span>';
+          const descriptionHtml=account?accountHtml+(r.description?'<div><small>Detalhe / 詳細: </small>'+detailHtml+'</div>':''):detailHtml;
+          return '<tr><td>'+fmtDate(r.transaction_date)+'</td><td>'+descriptionHtml+'</td><td>'+cat+'</td><td class="'+cls+'">'+label+'</td><td class="'+cls+'">'+money(r.amount)+'</td></tr>';
         }).join('') || '<tr><td colspan="5">Nenhuma movimentação registrada / 取引はありません。</td></tr>';
       }
     }catch(e){console.error('Painel financeiro:',e);}
