@@ -1218,7 +1218,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
           const bank=a.bank_name||a.name||'Banco não informado';
           const branch=a.branch||'Agência não informada';
           const acct=a.account_number||'Conta não informada';
-          return '<div class="bank-item"><div class="bank-main"><b>🏦 '+esc4(bank)+'</b><small>Agência / 支店: '+esc4(branch)+' • Conta / 口座: '+esc4(acct)+'</small></div><div><small>Tipo / 種類</small><b>'+esc4(a.account_type||'bank')+'</b></div><div class="bank-currency"><small>Moeda / 通貨</small><b>'+esc4(a.currency_code||'—')+'</b></div><div class="bank-status"><small>Status</small><b>'+(a.is_active?'Ativa / 有効':'Inativa / 無効')+'</b></div></div>';
+          return '<div class="bank-item" data-account-id="'+esc4(a.id)+'"><div class="bank-main"><b>🏦 '+esc4(bank)+'</b><small>Agência / 支店: '+esc4(branch)+' • Conta / 口座: '+esc4(acct)+'</small></div><div><small>Tipo / 種類</small><b>'+esc4(a.account_type||'bank')+'</b></div><div class="bank-currency"><small>Moeda / 通貨</small><b>'+esc4(a.currency_code||'—')+'</b></div><div class="bank-status"><small>Status</small><b>'+(a.is_active?'Ativa / 有効':'Inativa / 無効')+'</b></div></div>';
         }).join('');
         return '<tr class="bank-group-row"><td colspan="7"><div class="bank-group"><div class="bank-group-title"><span class="bank-group-code">'+esc4(u.code||'')+'</span>'+esc4(u.name||u.japanese_name||'Unidade sem nome')+'</div>'+items+'</div></td></tr>';
       }).join('');
@@ -1400,4 +1400,51 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
 })();
 </script>
 
+
+<script id="siga-bank-balance-auto-v1">
+(function(){
+  const original=window.loadBankAccounts;
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  async function decorate(){
+    const items=[...document.querySelectorAll('#bank .bank-item[data-account-id]')];
+    if(!items.length||typeof authClient==='undefined')return;
+    items.forEach(el=>{let b=el.querySelector('.bank-balance');if(!b){b=document.createElement('div');b.className='bank-balance';b.innerHTML='<small>Saldo no Banco / 銀行残高</small><b>Calculando…</b>';el.insertBefore(b,el.querySelector('.bank-status'));}});
+    try{
+      const ids=items.map(el=>el.dataset.accountId);
+      const [{data:accounts,error:ae},{data:transactions,error:te}]=await Promise.all([
+        authClient.from('siga_financial_accounts').select('id,initial_balance,currency_code').in('id',ids),
+        authClient.from('siga_financial_transactions').select('financial_account_id,transfer_target_account_id,transaction_type,amount').limit(10000)
+      ]);
+      if(ae)throw ae;if(te)throw te;
+      const txByAccount=new Map();
+      (transactions||[]).forEach(t=>{
+        const amount=Number(t.amount)||0;
+        if(t.transaction_type==='transfer'){
+          if(t.financial_account_id){const x=txByAccount.get(t.financial_account_id)||0;txByAccount.set(t.financial_account_id,x-amount);}
+          if(t.transfer_target_account_id){const x=txByAccount.get(t.transfer_target_account_id)||0;txByAccount.set(t.transfer_target_account_id,x+amount);}
+        }else if(t.financial_account_id){const x=txByAccount.get(t.financial_account_id)||0;txByAccount.set(t.financial_account_id,x+(t.transaction_type==='expense'?-amount:amount));}
+      });
+      const byId=new Map((accounts||[]).map(a=>[a.id,a]));
+      items.forEach(el=>{
+        const a=byId.get(el.dataset.accountId);const b=el.querySelector('.bank-balance');if(!b)return;
+        if(!a){b.querySelector('b').textContent='Indisponível';return;}
+        const balance=Number(a.initial_balance||0)+(txByAccount.get(a.id)||0);
+        const currency=(a.currency_code||'JPY').toUpperCase();
+        let formatted;
+        try{formatted=new Intl.NumberFormat('ja-JP',{style:'currency',currency,maximumFractionDigits:2}).format(balance);}catch(_){formatted=currency+' '+balance.toLocaleString('ja-JP');}
+        b.querySelector('b').textContent=formatted;
+        b.dataset.balance=String(balance);
+      });
+    }catch(e){console.error('SIGA saldo bancário:',e);items.forEach(el=>{const b=el.querySelector('.bank-balance b');if(b)b.textContent='Não foi possível calcular';});}
+  }
+  if(typeof original==='function')window.loadBankAccounts=async function(){const result=await original.apply(this,arguments);await decorate();return result;};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(decorate,500));else setTimeout(decorate,500);
+})();
+</script>
+<style id="siga-bank-balance-auto-style-v1">
+#bank .bank-item{grid-template-columns:1.4fr 1fr 1fr 1fr 90px}
+#bank .bank-balance small{display:block;color:var(--muted);font-size:11px}
+#bank .bank-balance b{display:block;font-size:15px;color:var(--ok,#16845b);font-weight:800;overflow-wrap:anywhere}
+@media(max-width:700px){#bank .bank-item{grid-template-columns:1fr 1fr}#bank .bank-balance{grid-column:1}.bank-item .bank-status{grid-column:2;text-align:right}}
+</style>
 </body></html>
