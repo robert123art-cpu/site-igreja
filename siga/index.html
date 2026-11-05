@@ -1447,4 +1447,69 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
 #bank .bank-balance b{display:block;font-size:15px;color:var(--ok,#16845b);font-weight:800;overflow-wrap:anywhere}
 @media(max-width:700px){#bank .bank-item{grid-template-columns:1fr 1fr}#bank .bank-balance{grid-column:1}.bank-item .bank-status{grid-column:2;text-align:right}}
 </style>
+
+<script id="siga-chart-code-autofill-v1">
+(function(){
+  function applyChartCodeMode(){
+    const select=document.getElementById('fChart');
+    if(!select)return;
+    const rows=Array.isArray(window.financeChartAccounts)?window.financeChartAccounts:[];
+    if(!rows.length)return;
+    const byId=new Map(rows.map(x=>[String(x.id),x]));
+    Array.from(select.options).forEach(option=>{
+      if(!option.value)return;
+      const account=byId.get(String(option.value));
+      if(account){
+        option.textContent=String(account.code||'');
+        option.dataset.accountCode=String(account.code||'');
+      }
+    });
+    if(select.dataset.codeModeBound!=='1'){
+      select.dataset.codeModeBound='1';
+      select.addEventListener('change',function(){
+        const account=byId.get(String(select.value));
+        if(!account)return;
+        const description=document.getElementById('fDescription');
+        if(!description)return;
+        const previous=select.dataset.lastAutoDescription||'';
+        const current=description.value.trim();
+        if(!current||current===previous){
+          const bilingual=[account.name_ja,account.name_pt].filter(Boolean).join(' / ');
+          description.value=bilingual;
+          select.dataset.lastAutoDescription=bilingual;
+        }
+      });
+    }
+    const selected=byId.get(String(select.value));
+    if(selected){
+      const description=document.getElementById('fDescription');
+      const previous=select.dataset.lastAutoDescription||'';
+      if(description&&!description.value.trim()){
+        const bilingual=[selected.name_ja,selected.name_pt].filter(Boolean).join(' / ');
+        description.value=bilingual;
+        select.dataset.lastAutoDescription=bilingual;
+      }
+    }
+  }
+  const original=window.loadFinance;
+  if(typeof original==='function'){
+    window.loadFinance=async function(){
+      const result=await original.apply(this,arguments);
+      applyChartCodeMode();
+      return result;
+    };
+  }
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(applyChartCodeMode,700));
+  const select=document.getElementById('fChart');
+  if(select){
+    const observer=new MutationObserver(()=>applyChartCodeMode());
+    observer.observe(select,{childList:true});
+  }
+  window.sigaApplyChartCodeMode=applyChartCodeMode;
+})();
+</script>
+<style id="siga-chart-code-autofill-style-v1">
+#fChart{font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:.03em}
+#fDescription{min-height:42px}
+</style>
 </body></html>
