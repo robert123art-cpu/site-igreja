@@ -1300,7 +1300,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
       '<p class="small-note">As transferências internas aparecem como entrada no banco de destino e saída na conta de origem, sem duplicar receitas ou despesas. / 内部振替は振替元の出金・振替先の入金として表示し、収入・支出には二重計上しません。</p>'+
       '<div class="toolbar" style="margin-top:12px"><select id="bankLedgerAccount" aria-label="Selecionar conta bancária" style="width:100%;max-width:520px;padding:10px;border:1px solid var(--line);border-radius:7px;background:#fff"></select><button class="btn secondary" type="button" id="bankLedgerRefresh">↻ Atualizar / 更新</button></div>'+
       '<div id="bankLedgerStatus" class="small-note" role="status" aria-live="polite"></div>'+
-      '<div class="tablewrap" style="overflow:auto;-webkit-overflow-scrolling:touch"><table style="min-width:720px"><thead><tr><th>Data / 日付</th><th>Descrição / 摘要</th><th>Contrapartida / 相手口座</th><th>Movimento / 取引</th><th>Valor / 金額</th></tr></thead><tbody id="bankLedgerRows"><tr><td colspan="5">Selecione uma conta bancária. / 銀行口座を選択してください。</td></tr></tbody></table></div>';
+      '<style>#bankTransferLedgerPanel .bank-ledger-list{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}#bankTransferLedgerPanel .bank-ledger-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:14px;min-width:0}#bankTransferLedgerPanel .bank-ledger-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:9px}#bankTransferLedgerPanel .bank-ledger-date{font-weight:700;color:var(--txt);font-size:14px}#bankTransferLedgerPanel .bank-ledger-type{font-size:12px;font-weight:700;padding:5px 8px;border-radius:7px;background:#edf2f4;max-width:100%;overflow-wrap:anywhere}#bankTransferLedgerPanel .bank-ledger-desc{font-weight:700;font-size:15px;overflow-wrap:anywhere;margin:5px 0 10px}#bankTransferLedgerPanel .bank-ledger-meta{font-size:13px;color:var(--muted);line-height:1.5;overflow-wrap:anywhere}#bankTransferLedgerPanel .bank-ledger-amount{font-size:19px;font-weight:800;text-align:right;margin-top:10px;white-space:nowrap}#bankTransferLedgerPanel .bank-ledger-empty{padding:16px 4px;color:var(--muted)}@media(min-width:760px){#bankTransferLedgerPanel .bank-ledger-list{grid-template-columns:repeat(2,minmax(0,1fr))}}</style><div id="bankLedgerRows" class="bank-ledger-list"><div class="bank-ledger-empty">Selecione uma conta bancária. / 銀行口座を選択してください。</div></div>';
     bank.appendChild(panel);
     panel.querySelector('#bankLedgerRefresh').addEventListener('click',loadMovements);
     panel.querySelector('#bankLedgerAccount').addEventListener('change',loadMovements);
@@ -1329,7 +1329,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
       else if(accounts.length)select.value=accounts[0].id;
       status.textContent=accounts.length+' conta(s) bancária(s) disponível(is). / 銀行口座 '+accounts.length+'件。';
       if(select.value)await loadMovements();
-      else panel.querySelector('#bankLedgerRows').innerHTML='<tr><td colspan="5">Nenhuma conta bancária ativa encontrada. / 有効な銀行口座がありません。</td></tr>';
+      else panel.querySelector('#bankLedgerRows').innerHTML='<div class="bank-ledger-empty">Nenhuma conta bancária ativa encontrada. / 有効な銀行口座がありません。</div>';
     }catch(e){
       console.error('SIGA movimentações bancárias:',e);
       status.textContent='Não foi possível carregar as contas: '+(e.message||e);
@@ -1341,8 +1341,8 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
     const id=select.value;
     const body=panel.querySelector('#bankLedgerRows');
     const status=panel.querySelector('#bankLedgerStatus');
-    if(!id){body.innerHTML='<tr><td colspan="5">Selecione uma conta bancária. / 銀行口座を選択してください。</td></tr>';return;}
-    body.innerHTML='<tr><td colspan="5">Carregando movimentações… / 取引を読み込み中…</td></tr>';
+    if(!id){body.innerHTML='<div class="bank-ledger-empty">Selecione uma conta bancária. / 銀行口座を選択してください。</div>';return;}
+    body.innerHTML='<div class="bank-ledger-empty">Carregando movimentações… / 取引を読み込み中…</div>';
     try{
       const {data:rows,error}=await authClient.from('siga_financial_transactions')
         .select('id,unit_id,financial_account_id,transfer_target_account_id,transaction_date,transaction_type,amount,description,document_number,counterparty,created_at')
@@ -1374,14 +1374,14 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
         else if(r.transaction_type==='expense'){label='Saída / 出金';desc=r.description||'Despesa';cls='bad';}
         else{label='Entrada / 入金';desc=r.description||'Entrada';cls='ok';}
         const detail=r.description&&isTransfer?' • '+r.description:'';
-        return '<tr><td>'+fmtDate(r.transaction_date)+'</td><td><b>'+esc(desc)+'</b>'+(r.document_number?'<br><small>Doc.: '+esc(r.document_number)+'</small>':'')+(detail?'<br><small>'+esc(detail.slice(3))+'</small>':'')+'</td><td>'+esc(otherName)+'</td><td class="'+cls+'">'+label+'</td><td class="'+cls+'" style="font-weight:bold;white-space:nowrap">'+money(r.amount)+'</td></tr>';
+        return '<article class="bank-ledger-card"><div class="bank-ledger-top"><span class="bank-ledger-date">'+fmtDate(r.transaction_date)+'</span><span class="bank-ledger-type '+cls+'">'+label+'</span></div><div class="bank-ledger-desc">'+esc(desc)+'</div>'+(detail?'<div class="bank-ledger-meta">'+esc(detail.slice(3))+'</div>':'')+(r.document_number?'<div class="bank-ledger-meta">Doc.: '+esc(r.document_number)+'</div>':'')+'<div class="bank-ledger-meta">Contrapartida / 相手口座: '+esc(otherName)+'</div><div class="bank-ledger-amount '+cls+'">'+money(r.amount)+'</div></article>';
       }).join('');
-      body.innerHTML=html||'<tr><td colspan="5">Nenhuma movimentação encontrada para esta conta. / この口座の取引はありません。</td></tr>';
+      body.innerHTML=html||'<div class="bank-ledger-empty">Nenhuma movimentação encontrada para esta conta. / この口座の取引はありません。</div>';
       const transfers=(rows||[]).filter(r=>r.transaction_type==='transfer').length;
       status.textContent=(rows||[]).length+' movimentação(ões) • '+transfers+' transferência(s) interna(s). / '+(rows||[]).length+'件の取引・内部振替 '+transfers+'件。';
     }catch(e){
       console.error('SIGA extrato bancário:',e);
-      body.innerHTML='<tr><td colspan="5">Erro ao carregar movimentações: '+esc(e.message||e)+'</td></tr>';
+      body.innerHTML='<div class="bank-ledger-empty">Erro ao carregar movimentações: '+esc(e.message||e)+'</div>';
       status.textContent='Verifique sua conexão e tente atualizar. / 接続を確認して再度更新してください。';
     }
   }
