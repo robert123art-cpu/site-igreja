@@ -191,7 +191,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 </div>
 <div class="panel" id="trialBalancePanel" style="margin-top:17px">
   <h2>Balancete gerencial por localidade / 拠点別収支集計</h2>
-  <p class="small-note">Resumo informativo das entradas e saídas por conta oficial e localidade. A diferença é entradas menos saídas. Como o sistema ainda não registra débitos e créditos em partidas dobradas, este relatório não substitui um balancete contábil completo; transferências internas não são incluídas. / 公式勘定科目と拠点ごとの入出金の参考集計です。差額は入金から出金を差し引いた金額です。現在は複式仕訳を記録していないため、正式な試算表ではありません。口座間振替は含みません。</p>
+  <p class="small-note">Resumo das entradas e saídas do período por conta oficial e localidade. A diferença é entradas menos saídas e não inclui saldos iniciais. Lançamentos cadastrados como transferência são excluídos. Como o sistema ainda não registra débitos e créditos em partidas dobradas, este é um resumo gerencial, não um balancete contábil completo. / 公式勘定科目と拠点ごとの期間中の入出金の集計です。差額は入金から出金を差し引いた金額で、初期残高は含みません。振替として登録された取引は除外します。現在は複式仕訳を記録していないため、正式な試算表ではなく、管理用の集計です。</p>
   <div class="toolbar" style="flex-wrap:wrap;margin-top:12px">
     <select id="trialBalanceUnit" aria-label="Filtrar por localidade / 拠点で絞り込む" onchange="renderTrialBalance()"><option value="">Todas as localidades / すべての拠点</option></select>
     <label class="small-note">De / 開始日<input id="trialBalanceFrom" type="date" onchange="renderTrialBalance()"></label>
@@ -620,6 +620,7 @@ let financeAccountRequestId=0;
 let financeDataCache=null;
 let financeChartAccounts=[];
 let financeUnitsForLedger=[];
+let financeLocalitiesForTrialBalance=[];
 let financeLoadRequestId=0;
 async function loadFinance(){
   const requestId=++financeLoadRequestId;
@@ -650,7 +651,8 @@ async function loadFinance(){
       console.error('Não foi possível atualizar as unidades do formulário:',unitsError);
     }else{
       const units=unitResponse?.data||[];
-      financeUnitsForLedger=units.filter(x=>x.unit_type==='Localidade/Igreja');
+      financeUnitsForLedger=units;
+      financeLocalitiesForTrialBalance=units.filter(x=>x.unit_type==='Localidade/Igreja');
       u.innerHTML='<option value="">Selecione / 選択</option>'+(units||[]).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||'')+' — '+esc(x.name||'')+(x.japanese_name?' / '+esc(x.japanese_name):'')+'</option>').join('');
       if((units||[]).some(x=>String(x.id)===selectedUnit))u.value=selectedUnit;
     }
@@ -918,7 +920,7 @@ function populateTrialBalanceFilters(){
   const select=document.getElementById('trialBalanceUnit');
   if(!select)return;
   const current=select.value;
-  select.innerHTML='<option value="">Todas as localidades / すべての拠点</option>'+financeUnitsForLedger.map(unit=>'<option value="'+esc(unit.id)+'">'+esc(unit.code||'')+' — '+esc(unit.name||'')+(unit.japanese_name?' / '+esc(unit.japanese_name):'')+'</option>').join('');
+  select.innerHTML='<option value="">Todas as localidades / すべての拠点</option>'+financeLocalitiesForTrialBalance.map(unit=>'<option value="'+esc(unit.id)+'">'+esc(unit.code||'')+' — '+esc(unit.name||'')+(unit.japanese_name?' / '+esc(unit.japanese_name):'')+'</option>').join('');
   if(Array.from(select.options).some(option=>option.value===current))select.value=current;
 }
 const LEDGER_DESCRIPTION_JA={
@@ -989,7 +991,7 @@ function renderTrialBalance(){
   const unitId=document.getElementById('trialBalanceUnit')?.value||'';
   const from=document.getElementById('trialBalanceFrom')?.value||'';
   const to=document.getElementById('trialBalanceTo')?.value||'';
-  const unitById=new Map(financeUnitsForLedger.map(unit=>[String(unit.id),unit]));
+  const unitById=new Map(financeLocalitiesForTrialBalance.map(unit=>[String(unit.id),unit]));
   const chartById=new Map(financeChartAccounts.map(account=>[String(account.id),account]));
   const grouped=new Map();
   source.forEach(transaction=>{
