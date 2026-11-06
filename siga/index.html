@@ -1453,7 +1453,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
   function applyChartCodeMode(){
     const select=document.getElementById('fChart');
     if(!select)return;
-    const rows=Array.isArray(window.financeChartAccounts)?window.financeChartAccounts:[];
+    const rows=Array.isArray(financeChartAccounts)?financeChartAccounts:[];
     if(!rows.length)return;
     const byId=new Map(rows.map(x=>[String(x.id),x]));
     Array.from(select.options).forEach(option=>{
