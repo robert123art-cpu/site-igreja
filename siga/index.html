@@ -1460,7 +1460,6 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
       if(!option.value)return;
       const account=byId.get(String(option.value));
       if(account){
-        option.textContent=String(account.code||'');
         option.dataset.accountCode=String(account.code||'');
       }
     });
