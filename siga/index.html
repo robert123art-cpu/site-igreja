@@ -199,6 +199,21 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
   <div id="bankAccountsMsg" class="small-note" style="margin:8px 0"></div>
   <div class="tablewrap"><table><thead><tr><th>Código</th><th>Unidade / 拠点</th><th>Banco / 銀行</th><th>Agência / 支店</th><th>Conta / 口座</th><th>Moeda</th><th>Status</th></tr></thead><tbody id="bankAccountsTable"><tr><td colspan="7">Carregando / 読み込み中...</td></tr></tbody></table></div>
 </div>
+
+<div class="panel hidden" id="openingBalancesPanel" style="margin-top:17px">
+  <h2>Saldo inicial / 初期残高 — Caixa e bancos / 現金・銀行</h2>
+  <p class="small-note">Defina o saldo de partida de cada conta. Esse valor compõe o saldo exibido e não cria uma movimentação. Faça a configuração antes de registrar novos movimentos; alterar depois ajusta o saldo calculado.</p>
+  <div class="toolbar" style="margin-top:12px">
+    <select id="openingBalanceUnitFilter" aria-label="Filtrar saldos iniciais por unidade / 拠点で絞り込む" onchange="loadOpeningBalances()"><option value="">Todas as unidades / 全拠点</option></select>
+    <button type="button" class="btn secondary" onclick="loadOpeningBalances()">↻ Atualizar / 更新</button>
+  </div>
+  <p id="openingBalancesMsg" class="small-note" role="status" aria-live="polite"></p>
+  <div class="tablewrap"><table id="openingBalancesTable">
+    <thead><tr><th>Unidade / 拠点</th><th>Conta / 口座</th><th>Tipo / 種類</th><th>Moeda</th><th>Saldo inicial / 初期残高</th><th>Ação / 操作</th></tr></thead>
+    <tbody><tr><td colspan="6">Abra esta seção como administrador para carregar as contas / 管理者として開いてください。</td></tr></tbody>
+  </table></div>
+</div>
+
 </div>
 <div id="assets" class="module hidden"><div class="title"><div><h1>🏛️ Patrimônio</h1><p>Controle patrimonial bilíngue</p></div></div><div class="panel"><h2>Controle patrimonial / 固定資産管理</h2><p class="small-note">O módulo será conectado à planilha patrimonial bilíngue e aos relatórios A4.</p></div></div>
 <div id="agenda" class="module hidden"><div class="title"><div><h1>📅 Agenda</h1><p>Compromissos e reuniões</p></div></div><div class="panel"><h2>Agenda / 予定</h2><div class="formgrid"><label>Data<input type="date"></label><label>Horário<input type="time"></label><label>Evento<input></label><label>Responsável<input></label></div></div></div>
@@ -1511,4 +1526,114 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
 #fChart{font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:.03em}
 #fDescription{min-height:42px}
 </style>
+<script id="siga-opening-balances-v1">
+(function(){
+  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  function formatAmount(amount,currency){
+    try{return new Intl.NumberFormat('pt-BR',{style:'currency',currency:currency,maximumFractionDigits:2}).format(amount);}
+    catch(_){return currency+' '+Number(amount).toLocaleString('pt-BR',{maximumFractionDigits:2});}
+  }
+  window.openingBalanceAccounts=[];
+  window.loadOpeningBalances=async function(){
+    const panel=document.getElementById('openingBalancesPanel');
+    const table=document.getElementById('openingBalancesTable');
+    const message=document.getElementById('openingBalancesMsg');
+    const unitFilter=document.getElementById('openingBalanceUnitFilter');
+    if(!panel||!table)return;
+    if(typeof isSigaAdmin!=='function'||!isSigaAdmin()){panel.classList.add('hidden');return;}
+    panel.classList.remove('hidden');
+    if(message)message.textContent='Carregando contas... / 口座を読み込み中...';
+    table.querySelector('tbody').innerHTML='<tr><td colspan="6">Carregando... / 読み込み中...</td></tr>';
+    try{
+      const [{data:units,error:unitError},{data:accounts,error:accountError}]=await Promise.all([
+        authClient.from('siga_units').select('id,code,name,japanese_name').eq('is_active',true).order('code'),
+        authClient.from('siga_financial_accounts').select('id,unit_id,name,account_type,bank_name,currency_code,initial_balance,is_active').in('account_type',['cash','bank']).eq('is_active',true).order('account_type').order('name')
+      ]);
+      if(unitError)throw unitError;
+      if(accountError)throw accountError;
+      const activeUnits=units||[];
+      const previousUnit=unitFilter?.value||'';
+      if(unitFilter){
+        unitFilter.innerHTML='<option value="">Todas as unidades / 全拠点</option>'+activeUnits.map(unit=>'<option value="'+escapeHtml(unit.id)+'">'+escapeHtml([unit.code,unit.name||unit.japanese_name].filter(Boolean).join(' — ')||'Unidade')+'</option>').join('');
+        if(previousUnit&&activeUnits.some(unit=>String(unit.id)===String(previousUnit)))unitFilter.value=previousUnit;
+      }
+      const unitMap=new Map(activeUnits.map(unit=>[String(unit.id),unit]));
+      const selectedUnit=unitFilter?.value||'';
+      const rows=(accounts||[]).filter(account=>!selectedUnit||String(account.unit_id)===String(selectedUnit));
+      window.openingBalanceAccounts=rows;
+      if(!rows.length){
+        table.querySelector('tbody').innerHTML='<tr><td colspan="6">Nenhuma conta ativa de Caixa ou Banco nesta unidade / この拠点に有効な現金・銀行口座はありません。</td></tr>';
+        if(message)message.textContent='';
+        return;
+      }
+      table.querySelector('tbody').innerHTML=rows.map(account=>{
+        const unit=unitMap.get(String(account.unit_id))||{};
+        const unitLabel=[unit.code,unit.name||unit.japanese_name].filter(Boolean).join(' — ')||'—';
+        const accountName=account.account_type==='bank'?(account.bank_name||account.name||'Conta bancária'):account.name||'Caixa';
+        const typeLabel=account.account_type==='cash'?'Caixa / 現金':'Banco / 銀行';
+        const currency=String(account.currency_code||'JPY').toUpperCase();
+        const initialBalance=Number(account.initial_balance??0);
+        return '<tr><td>'+escapeHtml(unitLabel)+'</td><td>'+escapeHtml(accountName)+'</td><td>'+typeLabel+'</td><td>'+escapeHtml(currency)+'</td><td><input class="opening-balance-input" type="number" step="any" inputmode="decimal" value="'+escapeHtml(Number.isFinite(initialBalance)?initialBalance:0)+'" aria-label="Saldo inicial de '+escapeHtml(accountName)+'"></td><td><button type="button" class="btn secondary opening-balance-save" data-opening-save="'+escapeHtml(account.id)+'">Salvar / 保存</button> <span class="small-note opening-balance-row-status" role="status" aria-live="polite"></span></td></tr>';
+      }).join('');
+      if(message)message.textContent=rows.length+' conta(s) ativa(s) de Caixa e Banco / 現金・銀行口座 '+rows.length+'件';
+    }catch(error){
+      console.error('SIGA saldo inicial:',error);
+      window.openingBalanceAccounts=[];
+      if(message)message.textContent='Não foi possível carregar os saldos iniciais / 初期残高を読み込めませんでした: '+(error?.message||error);
+      table.querySelector('tbody').innerHTML='<tr><td colspan="6">Erro ao carregar as contas / 口座の読み込みエラー</td></tr>';
+    }
+  };
+  async function saveOpeningBalance(accountId,button){
+    const message=document.getElementById('openingBalancesMsg');
+    if(typeof isSigaAdmin!=='function'||!isSigaAdmin()){
+      if(message)message.textContent='Somente administradores podem alterar o saldo inicial / 初期残高を変更できるのは管理者のみです。';
+      return;
+    }
+    const account=(window.openingBalanceAccounts||[]).find(item=>String(item.id)===String(accountId));
+    const row=button?.closest('tr');
+    const input=row?.querySelector('.opening-balance-input');
+    const rowStatus=row?.querySelector('.opening-balance-row-status');
+    if(!account||!input){if(rowStatus)rowStatus.textContent='Atualize a lista e tente novamente / 一覧を更新して再試行してください。';return;}
+    if(input.value.trim()===''){if(rowStatus)rowStatus.textContent='Informe um valor / 金額を入力してください。';return;}
+    const amount=Number(input.value);
+    if(!Number.isFinite(amount)){if(rowStatus)rowStatus.textContent='Valor inválido / 無効な金額です。';return;}
+    const currency=String(account.currency_code||'JPY').toUpperCase();
+    const amountLabel=formatAmount(amount,currency);
+    const accountName=account.account_type==='bank'?(account.bank_name||account.name||'Conta bancária'):account.name||'Caixa';
+    if(Number(account.initial_balance??0)===amount){if(rowStatus)rowStatus.textContent='Sem alterações / 変更はありません。';return;}
+    if(!window.confirm('Salvar saldo inicial de '+amountLabel+' para '+accountName+'? Isso altera o saldo exibido, mas não cria uma movimentação. / '+accountName+' の初期残高を保存しますか？取引は作成されません。'))return;
+    if(button)button.disabled=true;
+    if(rowStatus)rowStatus.textContent='Salvando... / 保存中...';
+    try{
+      const {data,error}=await authClient.from('siga_financial_accounts').update({initial_balance:amount}).eq('id',account.id).select('id,initial_balance').maybeSingle();
+      if(error)throw error;
+      if(!data)throw new Error('Nenhuma conta foi atualizada. Verifique a sessão e as permissões.');
+      if(typeof window.loadBankAccounts==='function')await window.loadBankAccounts();
+      if(typeof window.loadFinance==='function')await window.loadFinance();
+      if(message)message.textContent='Saldo inicial salvo para '+accountName+' / '+accountName+' の初期残高を保存しました。';
+    }catch(error){
+      console.error('SIGA salvar saldo inicial:',error);
+      if(rowStatus)rowStatus.textContent='Falha ao salvar / 保存できませんでした。';
+      if(message)message.textContent='Não foi possível salvar o saldo inicial / 初期残高を保存できませんでした: '+(error?.message||error);
+    }finally{
+      if(button&&button.isConnected)button.disabled=false;
+    }
+  }
+  const table=document.getElementById('openingBalancesTable');
+  if(table)table.addEventListener('click',event=>{
+    const button=event.target?.closest?.('[data-opening-save]');
+    if(button)saveOpeningBalance(button.dataset.openingSave,button);
+  });
+  const originalLoadBankAccounts=window.loadBankAccounts;
+  if(typeof originalLoadBankAccounts==='function'){
+    window.loadBankAccounts=async function(){
+      const result=await originalLoadBankAccounts.apply(this,arguments);
+      const bank=document.getElementById('bank');
+      if(bank&&!bank.classList.contains('hidden'))await window.loadOpeningBalances();
+      return result;
+    };
+  }
+})();
+</script>
+
 </body></html>
