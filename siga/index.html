@@ -189,6 +189,22 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
     <tbody id="generalLedgerBody"><tr><td colspan="7">Atualize o Financeiro para carregar o Razão. / 財務を更新して元帳を読み込んでください。</td></tr></tbody>
   </table></div>
 </div>
+<div class="panel" id="trialBalancePanel" style="margin-top:17px">
+  <h2>Balancete gerencial por localidade / 拠点別収支集計</h2>
+  <p class="small-note">Resumo informativo das entradas e saídas por conta oficial e localidade. A diferença é entradas menos saídas. Como o sistema ainda não registra débitos e créditos em partidas dobradas, este relatório não substitui um balancete contábil completo; transferências internas não são incluídas. / 公式勘定科目と拠点ごとの入出金の参考集計です。差額は入金から出金を差し引いた金額です。現在は複式仕訳を記録していないため、正式な試算表ではありません。口座間振替は含みません。</p>
+  <div class="toolbar" style="flex-wrap:wrap;margin-top:12px">
+    <select id="trialBalanceUnit" aria-label="Filtrar por localidade / 拠点で絞り込む" onchange="renderTrialBalance()"><option value="">Todas as localidades / すべての拠点</option></select>
+    <label class="small-note">De / 開始日<input id="trialBalanceFrom" type="date" onchange="renderTrialBalance()"></label>
+    <label class="small-note">Até / 終了日<input id="trialBalanceTo" type="date" onchange="renderTrialBalance()"></label>
+    <button class="btn secondary" type="button" onclick="exportTrialBalanceCsv()">Exportar CSV / CSV出力</button>
+  </div>
+  <p id="trialBalanceCount" class="small-note" role="status" aria-live="polite"></p>
+  <div class="tablewrap"><table id="trialBalanceTable">
+    <thead><tr><th>Localidade / 拠点</th><th>Código / コード</th><th>Conta / 勘定科目</th><th>Entradas / 入金</th><th>Saídas / 出金</th><th>Diferença / 差額</th></tr></thead>
+    <tbody id="trialBalanceBody"><tr><td colspan="6">Atualize o Financeiro para carregar o relatório. / 財務を更新してレポートを読み込んでください。</td></tr></tbody>
+    <tfoot><tr><th colspan="3">Total / 合計</th><th id="trialBalanceEntries">¥0</th><th id="trialBalanceExpenses">¥0</th><th id="trialBalanceNet">¥0</th></tr></tfoot>
+  </table></div>
+</div>
 </div>
 <div id="bank" class="module hidden">
 <div class="title"><div><h1>🏦 Contas Bancárias</h1><p>Contas, saldos e conciliação</p></div><button class="btn secondary" type="button" onclick="loadBankAccounts()">↻ Atualizar / 更新</button></div>
@@ -618,7 +634,7 @@ async function loadFinance(){
       return false;
     }
     const [unitResult,chartResult]=await Promise.allSettled([
-      authClient.from('siga_units').select('id,code,name,japanese_name').eq('is_active',true).order('code'),
+      authClient.from('siga_units').select('id,code,name,japanese_name,unit_type').eq('is_active',true).order('code'),
       authClient.from('siga_chart_of_accounts').select('id,code,name_pt,name_ja,account_kind').order('code')
     ]);
     if(requestId!==financeLoadRequestId)return false;
@@ -634,7 +650,7 @@ async function loadFinance(){
       console.error('Não foi possível atualizar as unidades do formulário:',unitsError);
     }else{
       const units=unitResponse?.data||[];
-      financeUnitsForLedger=units;
+      financeUnitsForLedger=units.filter(x=>x.unit_type==='Localidade/Igreja');
       u.innerHTML='<option value="">Selecione / 選択</option>'+(units||[]).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||'')+' — '+esc(x.name||'')+(x.japanese_name?' / '+esc(x.japanese_name):'')+'</option>').join('');
       if((units||[]).some(x=>String(x.id)===selectedUnit))u.value=selectedUnit;
     }
@@ -650,6 +666,7 @@ async function loadFinance(){
       if((charts||[]).some(x=>String(x.id)===selectedChart))c.value=selectedChart;
     }
     populateGeneralLedgerFilters();
+    populateTrialBalanceFilters();
     type.value=selectedType;
     u.onchange=function(){a.value='';target.value='';loadFinanceAccounts().catch(showFinanceError);};
     a.onchange=updateFinanceTargetAccounts;
@@ -872,6 +889,7 @@ async function renderFinance(forceRefresh=false){
       }).join('')||'<tr><td colspan="5">Nenhum lançamento / 取引はありません</td></tr>';
     }
     renderGeneralLedger();
+    renderTrialBalance();
     return true;
   }catch(e){
     console.error(e);
@@ -895,6 +913,13 @@ function populateGeneralLedgerFilters(){
     unitSelect.innerHTML='<option value="">Todas as unidades / 全拠点</option>'+financeUnitsForLedger.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||'')+' — '+esc(x.name||'')+(x.japanese_name?' / '+esc(x.japanese_name):'')+'</option>').join('');
     if(Array.from(unitSelect.options).some(o=>o.value===current))unitSelect.value=current;
   }
+}
+function populateTrialBalanceFilters(){
+  const select=document.getElementById('trialBalanceUnit');
+  if(!select)return;
+  const current=select.value;
+  select.innerHTML='<option value="">Todas as localidades / すべての拠点</option>'+financeUnitsForLedger.map(unit=>'<option value="'+esc(unit.id)+'">'+esc(unit.code||'')+' — '+esc(unit.name||'')+(unit.japanese_name?' / '+esc(unit.japanese_name):'')+'</option>').join('');
+  if(Array.from(select.options).some(option=>option.value===current))select.value=current;
 }
 const LEDGER_DESCRIPTION_JA={
   'coleta':'献金','coleta de oferta':'献金','coleta de ofertas':'献金','coleta para manutencao':'維持献金',
@@ -956,6 +981,66 @@ function renderGeneralLedger(){
   }).join('')||'<tr><td colspan="7">Nenhum lançamento encontrado / 該当する取引はありません</td></tr>';
   const count=document.getElementById('generalLedgerCount');
   if(count)count.textContent=rows.length+' lançamento(s) / '+rows.length+'件';
+}
+function renderTrialBalance(){
+  const body=document.getElementById('trialBalanceBody');
+  if(!body)return;
+  const source=financeDataCache?.transactions||[];
+  const unitId=document.getElementById('trialBalanceUnit')?.value||'';
+  const from=document.getElementById('trialBalanceFrom')?.value||'';
+  const to=document.getElementById('trialBalanceTo')?.value||'';
+  const unitById=new Map(financeUnitsForLedger.map(unit=>[String(unit.id),unit]));
+  const chartById=new Map(financeChartAccounts.map(account=>[String(account.id),account]));
+  const grouped=new Map();
+  source.forEach(transaction=>{
+    if(!['entry','expense'].includes(transaction.transaction_type)||!transaction.chart_account_id)return;
+    const unit=unitById.get(String(transaction.unit_id));
+    const account=chartById.get(String(transaction.chart_account_id));
+    if(!unit||!account||(unitId&&String(transaction.unit_id)!==unitId))return;
+    const date=String(transaction.transaction_date||'').slice(0,10);
+    if(from&&date<from)return;
+    if(to&&date>to)return;
+    const key=String(transaction.unit_id)+'|'+String(transaction.chart_account_id);
+    let item=grouped.get(key);
+    if(!item){item={unit,account,entries:0,expenses:0};grouped.set(key,item);}
+    const amount=Number(transaction.amount)||0;
+    if(transaction.transaction_type==='entry')item.entries+=amount;
+    else item.expenses+=amount;
+  });
+  const rows=Array.from(grouped.values()).sort((a,b)=>
+    String(a.unit.code||a.unit.name||'').localeCompare(String(b.unit.code||b.unit.name||''),'pt-BR',{numeric:true})||
+    String(a.account.code||'').localeCompare(String(b.account.code||''),'pt-BR',{numeric:true})
+  );
+  let totalEntries=0,totalExpenses=0;
+  body.innerHTML=rows.map(item=>{
+    totalEntries+=item.entries;
+    totalExpenses+=item.expenses;
+    const unitLabel=[item.unit.code,item.unit.name].filter(Boolean).join(' — ')+(item.unit.japanese_name?' / '+item.unit.japanese_name:'');
+    const accountLabel=[item.account.name_ja,item.account.name_pt].filter(Boolean).join(' / ')||'—';
+    const net=item.entries-item.expenses;
+    const netClass=net<0?'bad':'ok';
+    return '<tr><td>'+esc(unitLabel||'—')+'</td><td>'+esc(item.account.code||'—')+'</td><td>'+esc(accountLabel)+'</td><td class="ok">'+money(item.entries)+'</td><td class="bad">'+money(item.expenses)+'</td><td class="'+netClass+'">'+money(net)+'</td></tr>';
+  }).join('')||'<tr><td colspan="6">Nenhum lançamento de entrada ou saída encontrado / 入金・出金はありません</td></tr>';
+  const netTotal=totalEntries-totalExpenses;
+  const count=document.getElementById('trialBalanceCount');
+  if(count)count.textContent=rows.length+' linha(s) em '+new Set(rows.map(item=>String(item.unit.id))).size+' localidade(s) / '+rows.length+'件・拠点別';
+  const entriesEl=document.getElementById('trialBalanceEntries');
+  const expensesEl=document.getElementById('trialBalanceExpenses');
+  const netEl=document.getElementById('trialBalanceNet');
+  if(entriesEl)entriesEl.textContent=money(totalEntries);
+  if(expensesEl)expensesEl.textContent=money(totalExpenses);
+  if(netEl){netEl.textContent=money(netTotal);netEl.className=netTotal<0?'bad':'ok';}
+}
+function exportTrialBalanceCsv(){
+  const table=document.getElementById('trialBalanceTable');
+  if(!table)return;
+  const rows=Array.from(table.querySelectorAll('tr')).map(tr=>Array.from(tr.cells).map(cell=>cell.innerText));
+  const csv=String.fromCharCode(65279)+rows.map(row=>row.map(value=>'"'+String(value).replace(/"/g,'""')+'"').join(',')).join(String.fromCharCode(10));
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  link.download='SIGA_Balancete_por_Localidade.csv';
+  link.click();
+  URL.revokeObjectURL(link.href);
 }
 function exportGeneralLedgerCsv(){
   const rows=[['Data / 日付','Unidade / 拠点','Código / コード','Conta / 勘定科目','Descrição / 摘要','Tipo / 種類','Valor / 金額'],...Array.from(document.querySelectorAll('#generalLedgerBody tr')).filter(tr=>tr.cells.length===7).map(tr=>Array.from(tr.cells).map(td=>td.innerText))];
