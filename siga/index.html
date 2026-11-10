@@ -321,12 +321,23 @@ function saveSettings(){const data={country:document.getElementById('setCountry'
 function loadSettings(){const d=getSettings();document.getElementById('setName').value=d.name||'';document.getElementById('setNameJp').value=d.nameJp||'';document.getElementById('setCountry').value=d.country||'JP';document.getElementById('setCity').value=d.city||'';document.getElementById('setAddress').value=d.address||'';document.getElementById('setPhone').value=d.phone||'';document.getElementById('setEmail').value=d.email||'';document.getElementById('setLanguage').value=d.language||'pt-ja';countryChanged()}
 function applySettings(){const d=getSettings(),c=countryMap[d.country]||countryMap.JP,name=typeof d.name==='string'?d.name.trim():'',orgName=name&&name.toLowerCase()!=='undefined'?name:'Minha Organização / Igreja';document.querySelector('.org').childNodes[0].nodeValue=orgName+' ';document.querySelector('.org small').textContent=c.name+' • Moeda oficial: '+c.symbol+' '+c.currency;document.querySelector('.currency').textContent=c.flag+' '+c.symbol+' '+c.currency+' — '+c.name;document.querySelectorAll('.value').forEach(el=>{const n=Number(el.dataset.amount);if(!Number.isNaN(n))el.textContent=new Intl.NumberFormat(c.locale,{style:'currency',currency:c.currency,maximumFractionDigits:0}).format(n)})}
 function isSigaAdmin(){return sigaSession?.user?.app_metadata?.role==='admin'}
+const SIGA_MEMBER_MANAGER_IDS=['09ce87fb-ee13-44a5-9975-b32542169527','2795f0ac-e6fa-4990-a275-b0e28767f5fb','9ecd0144-fb9e-440b-94b1-0248f7be6e2f'];
+function canManageMembers(){return !!sigaSession&&SIGA_MEMBER_MANAGER_IDS.includes(sigaSession.user.id)}
+function applyMemberPermissions(){
+ const allowed=canManageMembers();
+ const form=document.getElementById('memberForm');
+ if(form)form.classList.toggle('hidden',!allowed);
+ const add=document.querySelector('#members .title button');
+ if(add)add.classList.toggle('hidden',!allowed);
+ const exp=document.querySelector('#members .toolbar button');
+ if(exp)exp.classList.toggle('hidden',!allowed);
+}
 function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeout(loadFinance,0);
  try{
   const admin=isSigaAdmin();
   if(!sigaSession&&id!=='dashboard'&&id!=='admin'){openLogin();return false}
-  if(sigaSession&&!admin&&!['dashboard','admin','units'].includes(id)){alert('O acesso a este módulo ainda não foi liberado para sua conta.');return false}
-  if(id==='units'&&!admin&&!sigaUnitReadAccess){alert('O administrador ainda não vinculou unidades a esta conta.');return false}
+  if(sigaSession&&!admin&&!['dashboard','admin','units','members','attendance'].includes(id)){alert('O acesso a este módulo ainda não foi liberado para sua conta.');return false}
+  if(id==='members'&&!sigaSession){openLogin();return false}\n  if(id==='units'&&!admin&&!sigaUnitReadAccess){alert('O administrador ainda não vinculou unidades a esta conta.');return false}
   document.querySelectorAll('.module').forEach(x=>x.classList.add('hidden'));
   const target=document.getElementById(id);if(!target)return false;
   target.classList.remove('hidden');
@@ -335,7 +346,7 @@ function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeou
   const menu=document.getElementById('side');if(menu&&window.innerWidth<=900)menu.classList.remove('open');
   window.scrollTo(0,0);
   if(id==='settings'&&typeof loadSettings==='function')loadSettings();
-  if(id==='units')loadUnits();
+  if(id==='units')loadUnits();\n  if(id==='members')applyMemberPermissions();
   if(id==='admin'&&admin)renderUsers();
   return false;
  }catch(e){console.error(e);return false}
@@ -577,10 +588,10 @@ async function renderUsers(){
 let members=JSON.parse(localStorage.getItem('siga_members')||'[]');
 function openMemberForm(){document.getElementById('memberForm').scrollIntoView({behavior:'smooth'});document.getElementById('mNome').focus()}
 function clearMemberForm(){document.getElementById('memberForm').reset();document.getElementById('memberId').value=''}
-function saveMember(e){e.preventDefault();const id=document.getElementById('memberId').value||Date.now().toString();const m={id,nome:mNome.value.trim(),nomeJp:mNomeJp.value.trim(),nasc:mNasc.value,tel:mTel.value.trim(),email:mEmail.value.trim(),end:mEnd.value.trim(),cargo:mCargo.value,status:mStatus.value,entrada:mEntrada.value,obs:mObs.value.trim()};const i=members.findIndex(x=>x.id===id);if(i>=0)members[i]=m;else members.push(m);localStorage.setItem('siga_members',JSON.stringify(members));clearMemberForm();renderMembers();alert('Membro salvo / メンバーを保存しました')}
-function renderMembers(){const q=(document.getElementById('memberSearch')?.value||'').toLowerCase();const rows=members.filter(m=>(m.nome+' '+m.nomeJp+' '+m.cargo+' '+m.tel).toLowerCase().includes(q));document.getElementById('memberTable').innerHTML=rows.map(m=>`<tr><td><b>${esc(m.nome)}</b><br><small>${esc(m.nomeJp||'')}</small></td><td>${esc(m.cargo)}</td><td>${esc(m.tel)}</td><td>${m.entrada||'-'}</td><td>${esc(m.status)}</td><td><button class="btnsm" onclick="editMember('${m.id}')">Editar</button> <button class="btnsm" onclick="deleteMember('${m.id}')">Excluir</button></td></tr>`).join('')||'<tr><td colspan="6">Nenhum membro cadastrado.</td></tr>';document.getElementById('memberTotal').textContent=members.length;document.getElementById('memberActive').textContent=members.filter(m=>m.status.startsWith('Ativo')).length;document.getElementById('memberInactive').textContent=members.filter(m=>!m.status.startsWith('Ativo')).length}
-function editMember(id){const m=members.find(x=>x.id===id);if(!m)return;memberId.value=m.id;mNome.value=m.nome;mNomeJp.value=m.nomeJp;mNasc.value=m.nasc;mTel.value=m.tel;mEmail.value=m.email;mEnd.value=m.end;mCargo.value=m.cargo;mStatus.value=m.status;mEntrada.value=m.entrada;mObs.value=m.obs;openMemberForm()}
-function deleteMember(id){if(!confirm('Excluir este membro? / このメンバーを削除しますか？'))return;members=members.filter(m=>m.id!==id);localStorage.setItem('siga_members',JSON.stringify(members));renderMembers()}
+function saveMember(e){e.preventDefault();if(!canManageMembers()){alert('Somente os três administradores autorizados podem cadastrar ou alterar membros.');return}const id=document.getElementById('memberId').value||Date.now().toString();const m={id,nome:mNome.value.trim(),nomeJp:mNomeJp.value.trim(),nasc:mNasc.value,tel:mTel.value.trim(),email:mEmail.value.trim(),end:mEnd.value.trim(),cargo:mCargo.value,status:mStatus.value,entrada:mEntrada.value,obs:mObs.value.trim()};const i=members.findIndex(x=>x.id===id);if(i>=0)members[i]=m;else members.push(m);localStorage.setItem('siga_members',JSON.stringify(members));clearMemberForm();renderMembers();alert('Membro salvo / メンバーを保存しました')}
+function renderMembers(){applyMemberPermissions();const q=(document.getElementById('memberSearch')?.value||'').toLowerCase();const rows=members.filter(m=>(m.nome+' '+m.nomeJp+' '+m.cargo+' '+m.tel).toLowerCase().includes(q));document.getElementById('memberTable').innerHTML=rows.map(m=>`<tr><td><b>${esc(m.nome)}</b><br><small>${esc(m.nomeJp||'')}</small></td><td>${esc(m.cargo)}</td><td>${esc(m.tel)}</td><td>${m.entrada||'-'}</td><td>${esc(m.status)}</td><td><button class="btnsm" onclick="editMember('${m.id}')">Editar</button> <button class="btnsm" onclick="deleteMember('${m.id}')">Excluir</button></td></tr>`).join('')||'<tr><td colspan="6">Nenhum membro cadastrado.</td></tr>';document.getElementById('memberTotal').textContent=members.length;document.getElementById('memberActive').textContent=members.filter(m=>m.status.startsWith('Ativo')).length;document.getElementById('memberInactive').textContent=members.filter(m=>!m.status.startsWith('Ativo')).length}
+function editMember(id){if(!canManageMembers())return;const m=members.find(x=>x.id===id);if(!m)return;memberId.value=m.id;mNome.value=m.nome;mNomeJp.value=m.nomeJp;mNasc.value=m.nasc;mTel.value=m.tel;mEmail.value=m.email;mEnd.value=m.end;mCargo.value=m.cargo;mStatus.value=m.status;mEntrada.value=m.entrada;mObs.value=m.obs;openMemberForm()}
+function deleteMember(id){if(!canManageMembers()){alert('Somente os três administradores autorizados podem excluir membros.');return}if(!confirm('Excluir este membro? / このメンバーを削除しますか？'))return;members=members.filter(m=>m.id!==id);localStorage.setItem('siga_members',JSON.stringify(members));renderMembers()}
 function exportMembers(){const head='Nome;Nome Japonês;Cargo;Telefone;Email;Endereço;Data Entrada;Situação\n';const body=members.map(m=>[m.nome,m.nomeJp,m.cargo,m.tel,m.email,m.end,m.entrada,m.status].map(v=>'"'+String(v||'').replaceAll('"','""')+'"').join(';')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+head+body],{type:'text/csv;charset=utf-8'}));a.download='SIGA_Membros.csv';a.click()}
 function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
