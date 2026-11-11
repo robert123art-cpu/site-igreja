@@ -144,8 +144,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div class="title"><div><h1>👥 Membros / メンバー</h1><p>Cadastro, situação, cargo e histórico dos membros</p></div><button class="primary" onclick="openMemberForm()">＋ Novo membro</button></div>
 <div class="grid2">
 <div class="panel"><h2>Cadastro do membro / メンバー登録</h2><form id="memberForm" onsubmit="saveMember(event)"><input type="hidden" id="memberId"><div class="formgrid">
-<label>Nome completo / 氏名<input id="mNome" required></label><label>Nome japonês / 日本語氏名<input id="mNomeJp"></label><label>Data de nascimento / 生年月日<input id="mNasc" type="date"></label><label>Telefone / 電話<input id="mTel"></label><label>E-mail<input id="mEmail" type="email"></label><label>Endereço / 住所<input id="mEnd"></label><label>Cargo / 役職<select id="mCargo"><option>Membro</option><option>Presidente</option><option>Vice-Presidente</option><option>Secretaria</option><option>Tesouraria</option><option>Patrimônio</option></select></label><label>Situação / 状況<select id="mStatus"><option>Ativo</option><option>Inativo</option><option>Transferido</option></select></label><label>Data de entrada / 入会日<input id="mEntrada" type="date"></label><label>Observações / 備考<input id="mObs"></label></div><div class="actions"><button class="btn primary" type="submit">Salvar / 保存</button><button class="btn secondary" type="button" onclick="clearMemberForm()">Limpar / クリア</button></div></form></div>
-<div class="panel"><div class="toolbar"><input id="memberSearch" placeholder="Pesquisar nome, cargo ou telefone..." oninput="renderMembers()"><button class="btn secondary" onclick="exportMembers()">Exportar CSV</button></div><div class="stats"><div><b id="memberTotal">0</b><small>Total</small></div><div><b id="memberActive">0</b><small>Ativos</small></div><div><b id="memberInactive">0</b><small>Inativos</small></div></div><div class="tablewrap"><table><thead><tr><th>Nome</th><th>Cargo</th><th>Telefone</th><th>Entrada</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="memberTable"></tbody></table></div></div></div>
+<label>Nome completo / 氏名<input id="mNome" required></label><label>Nome japonês / 日本語氏名<input id="mNomeJp"></label><label>E-mail<input id="mEmail" type="email"></label><label>Função / 役職<select id="mCargo"><option>Membro</option><option>Ancião</option><option>Diácono</option><option>Cooperador Ofício Ministerial</option><option>Cooperador de Jovens e Menores</option><option>Adm-Presidente</option><option>Adm-Tesoureiro</option><option>Adm-Secretário</option><option>Adm-Vice Secretário</option><option>Presidente</option><option>Vice-Presidente</option><option>Secretaria</option><option>Tesouraria</option><option>Patrimônio</option></select></label><label>Administração<input id="mAdministracao"></label><label>Localidade<input id="mLocalidade"></label><label>Cidade<input id="mCidade"></label><label>Data de nascimento / 生年月日<input id="mNasc" type="date"></label><label>Telefone / 電話<input id="mTel"></label><label>Endereço / 住所<input id="mEnd"></label><label>Situação / 状況<select id="mStatus"><option>Ativo</option><option>Inativo</option><option>Transferido</option></select></label><label>Data de entrada / 入会日<input id="mEntrada" type="date"></label><label>Observações / 備考<input id="mObs"></label></div><div class="actions"><button class="btn primary" type="submit">Salvar / 保存</button><button class="btn secondary" type="button" onclick="clearMemberForm()">Limpar / クリア</button></div></form></div>
+<div class="panel"><div class="toolbar"><input id="memberSearch" placeholder="Pesquisar nome, cargo ou telefone..." oninput="renderMembers()"><button class="btn secondary" onclick="exportMembers()">Exportar CSV</button></div><div class="stats"><div><b id="memberTotal">0</b><small>Total</small></div><div><b id="memberActive">0</b><small>Ativos</small></div><div><b id="memberInactive">0</b><small>Inativos</small></div></div><div class="tablewrap"><table><thead><tr><th>Nome</th><th>Função</th><th>Localidade</th><th>Cidade</th><th>E-mail</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="memberTable"></tbody></table></div></div></div>
 </div>
 <div id="attendance" class="module hidden"><div class="title"><div><h1>📝 Reuniões / Presença</h1><p>Registro de reuniões, frequência e ausência</p></div></div><div class="panel"><h2>Controle de presença / 出席管理</h2><div class="formgrid"><label>Tipo de reunião<select><option>Reunião administrativa</option><option>Culto</option><option>Assembleia</option><option>Reunião de liderança</option></select></label><label>Data<input type="date"></label><label>Horário de início da portaria<input type="time"></label><label>Horário de início da reunião<input type="time"></label></div><div class="small-note" style="margin-top:14px">Nesta etapa a estrutura da lista está preparada. A próxima fase ligará a presença ao cadastro de membros e aos relatórios.</div></div></div>
 <div id="finance" class="module hidden">
@@ -346,7 +346,7 @@ function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeou
   const menu=document.getElementById('side');if(menu&&window.innerWidth<=900)menu.classList.remove('open');
   window.scrollTo(0,0);
   if(id==='settings'&&typeof loadSettings==='function')loadSettings();
-  if(id==='units')loadUnits();\n  if(id==='members')applyMemberPermissions();
+  if(id==='units')loadUnits();\n  if(id==='members'){applyMemberPermissions();loadMembers();}
   if(id==='admin'&&admin)renderUsers();
   return false;
  }catch(e){console.error(e);return false}
@@ -585,14 +585,71 @@ async function renderUsers(){
  }
 }
 
-let members=JSON.parse(localStorage.getItem('siga_members')||'[]');
+let members=[];
+function memberMeta(value){try{return value?JSON.parse(value):{}}catch(_){return {obs:value||''}}}
+function memberDbStatus(value){return value==='Inativo'?'Inativo / 非アクティブ':value==='Transferido'?'Transferido / 転籍':'Ativo / 有効'}
+function memberUiStatus(value){return String(value||'').startsWith('Inativo')?'Inativo':String(value||'').startsWith('Transferido')?'Transferido':'Ativo'}
+async function loadMembers(){
+ if(!sigaSession)return;
+ const body=document.getElementById('memberTable');if(body)body.innerHTML='<tr><td colspan="7">Carregando cadastros…</td></tr>';
+ try{
+  const {data,error}=await authClient.from('siga_members').select('id,full_name,japanese_name,birth_date,phone,email,address,role_name,status,join_date,notes').order('full_name',{ascending:true});
+  if(error)throw error;
+  members=(data||[]).map(row=>{
+   const meta=memberMeta(row.notes);
+   return {id:row.id,nome:row.full_name||'',nomeJp:row.japanese_name||'',nasc:row.birth_date||'',tel:row.phone||'',email:row.email||'',end:row.address||'',cargo:row.role_name||'Membro',status:memberUiStatus(row.status),entrada:row.join_date||'',obs:meta.obs||'',administracao:meta.administration||'',localidade:meta.locality||'',cidade:meta.city||''};
+  });
+  renderMembers();
+ }catch(error){
+  console.error('SIGA carregar membros:',error);
+  if(body)body.innerHTML='<tr><td colspan="7">Não foi possível carregar os membros do banco. Verifique a conexão e as permissões.</td></tr>';
+ }
+}
 function openMemberForm(){document.getElementById('memberForm').scrollIntoView({behavior:'smooth'});document.getElementById('mNome').focus()}
 function clearMemberForm(){document.getElementById('memberForm').reset();document.getElementById('memberId').value=''}
-function saveMember(e){e.preventDefault();if(!canManageMembers()){alert('Somente os três administradores autorizados podem cadastrar ou alterar membros.');return}const id=document.getElementById('memberId').value||Date.now().toString();const m={id,nome:mNome.value.trim(),nomeJp:mNomeJp.value.trim(),nasc:mNasc.value,tel:mTel.value.trim(),email:mEmail.value.trim(),end:mEnd.value.trim(),cargo:mCargo.value,status:mStatus.value,entrada:mEntrada.value,obs:mObs.value.trim()};const i=members.findIndex(x=>x.id===id);if(i>=0)members[i]=m;else members.push(m);localStorage.setItem('siga_members',JSON.stringify(members));clearMemberForm();renderMembers();alert('Membro salvo / メンバーを保存しました')}
-function renderMembers(){applyMemberPermissions();const q=(document.getElementById('memberSearch')?.value||'').toLowerCase();const rows=members.filter(m=>(m.nome+' '+m.nomeJp+' '+m.cargo+' '+m.tel).toLowerCase().includes(q));document.getElementById('memberTable').innerHTML=rows.map(m=>`<tr><td><b>${esc(m.nome)}</b><br><small>${esc(m.nomeJp||'')}</small></td><td>${esc(m.cargo)}</td><td>${esc(m.tel)}</td><td>${m.entrada||'-'}</td><td>${esc(m.status)}</td><td><button class="btnsm" onclick="editMember('${m.id}')">Editar</button> <button class="btnsm" onclick="deleteMember('${m.id}')">Excluir</button></td></tr>`).join('')||'<tr><td colspan="6">Nenhum membro cadastrado.</td></tr>';document.getElementById('memberTotal').textContent=members.length;document.getElementById('memberActive').textContent=members.filter(m=>m.status.startsWith('Ativo')).length;document.getElementById('memberInactive').textContent=members.filter(m=>!m.status.startsWith('Ativo')).length}
-function editMember(id){if(!canManageMembers())return;const m=members.find(x=>x.id===id);if(!m)return;memberId.value=m.id;mNome.value=m.nome;mNomeJp.value=m.nomeJp;mNasc.value=m.nasc;mTel.value=m.tel;mEmail.value=m.email;mEnd.value=m.end;mCargo.value=m.cargo;mStatus.value=m.status;mEntrada.value=m.entrada;mObs.value=m.obs;openMemberForm()}
-function deleteMember(id){if(!canManageMembers()){alert('Somente os três administradores autorizados podem excluir membros.');return}if(!confirm('Excluir este membro? / このメンバーを削除しますか？'))return;members=members.filter(m=>m.id!==id);localStorage.setItem('siga_members',JSON.stringify(members));renderMembers()}
-function exportMembers(){const head='Nome;Nome Japonês;Cargo;Telefone;Email;Endereço;Data Entrada;Situação\n';const body=members.map(m=>[m.nome,m.nomeJp,m.cargo,m.tel,m.email,m.end,m.entrada,m.status].map(v=>'"'+String(v||'').replaceAll('"','""')+'"').join(';')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+head+body],{type:'text/csv;charset=utf-8'}));a.download='SIGA_Membros.csv';a.click()}
+async function saveMember(e){
+ e.preventDefault();
+ if(!canManageMembers()){alert('Somente os três administradores autorizados podem cadastrar ou alterar membros.');return}
+ const id=document.getElementById('memberId').value;
+ const payload={
+  full_name:mNome.value.trim(),japanese_name:mNomeJp.value.trim()||null,
+  birth_date:mNasc.value||null,phone:mTel.value.trim()||null,email:mEmail.value.trim()||null,
+  address:mEnd.value.trim()||null,role_name:mCargo.value||'Membro',
+  status:memberDbStatus(mStatus.value),join_date:mEntrada.value||null,
+  notes:JSON.stringify({administration:mAdministracao.value.trim()||null,locality:mLocalidade.value.trim()||null,city:mCidade.value.trim()||null,obs:mObs.value.trim()||null})
+ };
+ try{
+  const result=id?await authClient.from('siga_members').update(payload).eq('id',id).select('id').single():await authClient.from('siga_members').insert(payload).select('id').single();
+  if(result.error)throw result.error;
+  clearMemberForm();await loadMembers();alert('Membro salvo no banco de dados / メンバーを保存しました');
+ }catch(error){console.error('SIGA salvar membro:',error);alert('Não foi possível salvar o membro. Verifique sua conexão e se sua conta está autorizada.')}
+}
+function renderMembers(){
+ applyMemberPermissions();
+ const q=(document.getElementById('memberSearch')?.value||'').toLowerCase();
+ const rows=members.filter(m=>(m.nome+' '+m.nomeJp+' '+m.cargo+' '+m.tel+' '+m.email+' '+m.localidade+' '+m.cidade).toLowerCase().includes(q));
+ document.getElementById('memberTable').innerHTML=rows.map(m=>`<tr><td><b>${esc(m.nome)}</b><br><small>${esc(m.nomeJp||'')}</small></td><td>${esc(m.cargo)}</td><td>${esc(m.localidade||'—')}</td><td>${esc(m.cidade||'—')}</td><td>${esc(m.email||'—')}</td><td>${esc(m.status)}</td><td><button class="btnsm" onclick="editMember('${m.id}')">Editar</button> <button class="btnsm" onclick="deleteMember('${m.id}')">Excluir</button></td></tr>`).join('')||'<tr><td colspan="7">Nenhum membro cadastrado.</td></tr>';
+ document.getElementById('memberTotal').textContent=members.length;
+ document.getElementById('memberActive').textContent=members.filter(m=>m.status==='Ativo').length;
+ document.getElementById('memberInactive').textContent=members.filter(m=>m.status!=='Ativo').length;
+}
+function editMember(id){
+ if(!canManageMembers())return;const m=members.find(x=>x.id===id);if(!m)return;
+ memberId.value=m.id;mNome.value=m.nome;mNomeJp.value=m.nomeJp;mNasc.value=m.nasc;mTel.value=m.tel;mEmail.value=m.email;mEnd.value=m.end;
+ mCargo.value=m.cargo;mStatus.value=m.status;mEntrada.value=m.entrada;mObs.value=m.obs;
+ mAdministracao.value=m.administracao;mLocalidade.value=m.localidade;mCidade.value=m.cidade;openMemberForm();
+}
+async function deleteMember(id){
+ if(!canManageMembers()){alert('Somente os três administradores autorizados podem excluir membros.');return}
+ if(!confirm('Excluir este membro? / このメンバーを削除しますか？'))return;
+ try{const {error}=await authClient.from('siga_members').delete().eq('id',id);if(error)throw error;await loadMembers();}
+ catch(error){console.error('SIGA excluir membro:',error);alert('Não foi possível excluir o membro. Verifique sua conexão e suas permissões.')}
+}
+function exportMembers(){
+ const head='Nome;Nome Japonês;Cargo;Administração;Localidade;Cidade;Telefone;Email;Endereço;Data Entrada;Situação\n';
+ const body=members.map(m=>[m.nome,m.nomeJp,m.cargo,m.administracao,m.localidade,m.cidade,m.tel,m.email,m.end,m.entrada,m.status].map(v=>'"'+String(v||'').replaceAll('"','""')+'"').join(';')).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+head+body],{type:'text/csv;charset=utf-8'}));a.download='SIGA_Membros.csv';a.click();
+}
 function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 let sigaUnits=[];
