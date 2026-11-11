@@ -337,7 +337,8 @@ function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeou
   const admin=isSigaAdmin();
   if(!sigaSession&&id!=='dashboard'&&id!=='admin'){openLogin();return false}
   if(sigaSession&&!admin&&!['dashboard','admin','units','members','attendance'].includes(id)){alert('O acesso a este módulo ainda não foi liberado para sua conta.');return false}
-  if(id==='members'&&!sigaSession){openLogin();return false}\n  if(id==='units'&&!admin&&!sigaUnitReadAccess){alert('O administrador ainda não vinculou unidades a esta conta.');return false}
+  if(id==='members'&&!sigaSession){openLogin();return false}
+  if(id==='units'&&!admin&&!sigaUnitReadAccess){alert('O administrador ainda não vinculou unidades a esta conta.');return false}
   document.querySelectorAll('.module').forEach(x=>x.classList.add('hidden'));
   const target=document.getElementById(id);if(!target)return false;
   target.classList.remove('hidden');
@@ -346,7 +347,8 @@ function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeou
   const menu=document.getElementById('side');if(menu&&window.innerWidth<=900)menu.classList.remove('open');
   window.scrollTo(0,0);
   if(id==='settings'&&typeof loadSettings==='function')loadSettings();
-  if(id==='units')loadUnits();\n  if(id==='members'){applyMemberPermissions();loadMembers();}
+  if(id==='units')loadUnits();
+  if(id==='members'){applyMemberPermissions();loadMembers();}
   if(id==='admin'&&admin)renderUsers();
   return false;
  }catch(e){console.error(e);return false}
