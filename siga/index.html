@@ -373,6 +373,8 @@ function applyMemberPermissions(){
  if(add)add.classList.toggle('hidden',!allowed);
  const exp=document.querySelector('#members .toolbar button');
  if(exp)exp.classList.toggle('hidden',!allowed);
+ const qr=document.getElementById('memberQrPanel');
+ if(qr)qr.classList.toggle('hidden',!allowed);
 }
 function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeout(loadFinance,0);
  try{
