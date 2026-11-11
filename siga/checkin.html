@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>CCJ — Registro de presença</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{font-family:Arial,sans-serif;color:#17212b;background:#f3f6f8}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:18px}
+main{width:min(480px,100%);background:#fff;border:1px solid #e1e7ec;border-radius:18px;padding:26px;box-shadow:0 12px 36px #123b5718}
+.brand{color:#174d6d;font-size:12px;letter-spacing:.08em;font-weight:700}
+h1{font-size:24px;margin:10px 0 6px}
+p{color:#687481;line-height:1.5}
+label{display:block;font-size:13px;font-weight:700;margin:22px 0 7px}
+select,button{width:100%;min-height:48px;border-radius:9px;font:inherit}
+select{border:1px solid #cfd8df;padding:10px;background:#fff}
+button{margin-top:16px;border:0;background:#1d587d;color:#fff;font-weight:700;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+#status{margin-top:16px;padding:13px;border-radius:9px;font-size:14px;line-height:1.5;display:none}
+#status.ok{display:block;background:#eaf7f0;color:#17643e}
+#status.err{display:block;background:#fff0ee;color:#9a2b22}
+#status.info{display:block;background:#edf5fb;color:#285b7e}
+.small{font-size:12px;color:#87919a;margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+<div class="brand">日本 クリスチャンコングレゲーション · CCJ</div>
+<h1>Registro de presença</h1>
+<p>Confirme a reunião para registrar sua chegada. Cada QR Code é individual e só pode registrar uma presença por reunião.</p>
+<label for="meeting">Selecione a reunião</label>
+<select id="meeting" disabled><option>Carregando reuniões…</option></select>
+<button id="submit" disabled>Confirmar presença</button>
+<div id="status" role="status" aria-live="polite"></div>
+<div class="small">Se houver algum problema, procure a administração da reunião.</div>
+</main>
+<script>
+const SUPABASE_URL="https://uoapmjwdwtpltnxvmniy.supabase.co";
+const SUPABASE_KEY="sb_publishable_10fUBHTtp6sev9kXjMIDJg_CFBkeT8D";
+const token=new URLSearchParams(location.search).get("t")||"";
+const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+const meetingSelect=document.getElementById("meeting");
+const submit=document.getElementById("submit");
+const statusBox=document.getElementById("status");
+function showStatus(message,type){statusBox.textContent=message;statusBox.className=type;}
+function tokyoDate(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
+function shiftDate(day,amount){const d=new Date(day+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+amount);return d.toISOString().slice(0,10);}
+function fmtDate(value){const p=String(value||"").split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:value;}
+function labelMeeting(m){return fmtDate(m.meeting_date)+" — "+(m.meeting_type||"Reunião")+(m.locality?" — "+m.locality:"");}
+async function loadMeetings(){
+ if(!/^[A-Za-z0-9_-]{40,50}$/.test(token)){showStatus("Este QR Code está incompleto ou inválido. Apresente-o à administração.", "err");return;}
+ const today=tokyoDate();
+ const {data,error}=await client.from("meetings").select("id,meeting_date,meeting_type,locality")
+   .gte("meeting_date",shiftDate(today,-30)).lte("meeting_date",shiftDate(today,1))
+   .order("meeting_date",{ascending:false}).order("id",{ascending:false}).limit(50);
+ if(error){showStatus("Não foi possível carregar as reuniões. Verifique a conexão e tente novamente.", "err");return;}
+ if(!data||!data.length){meetingSelect.innerHTML="<option value=''>Nenhuma reunião disponível para registro</option>";showStatus("Não há reuniões disponíveis no período. Peça à administração para cadastrar a reunião.", "info");return;}
+ meetingSelect.innerHTML=data.map(m=>"<option value='"+Number(m.id)+"'>"+labelMeeting(m).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))+"</option>").join("");
+ meetingSelect.disabled=false;submit.disabled=false;
+}
+submit.addEventListener("click",async()=>{
+ if(!meetingSelect.value)return;
+ submit.disabled=true;submit.textContent="Registrando…";statusBox.className="";
+ try{
+  const response=await fetch(SUPABASE_URL+"/functions/v1/siga-member-qr",{
+   method:"POST",
+   headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY},
+   body:JSON.stringify({action:"checkin",token,meeting_id:Number(meetingSelect.value)})
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(result.error||"Não foi possível registrar a presença.");
+  showStatus("Presença registrada com sucesso para "+result.member+". Obrigado!", "ok");
+  meetingSelect.disabled=true;submit.textContent="Presença confirmada";
+ }catch(error){
+  showStatus(error.message||"Falha ao registrar a presença.", "err");
+  submit.disabled=false;submit.textContent="Tentar novamente";
+ }
+});
+loadMeetings();
+</script>
+</body>
+</html>
