@@ -1859,8 +1859,18 @@ async function issueMemberQRCards(){
    const qrHolder=card.querySelector('.qr-code-holder');
    new QRCode(qrHolder,{text:url.href,width:320,height:320,correctLevel:QRCode.CorrectLevel.M});
    const qrImage=qrHolder.querySelector('img');
-   if(!qrImage||!qrImage.src)throw new Error('A biblioteca não conseguiu criar o QR Code para '+member.full_name+'.');
-   qrImage.alt='QR Code individual de presença';
+   const qrCanvas=qrHolder.querySelector('canvas');
+   if(qrImage&&qrImage.src){
+    qrImage.alt='QR Code individual de presença';
+   }else if(qrCanvas){
+    const renderedImage=document.createElement('img');
+    renderedImage.alt='QR Code individual de presença';
+    renderedImage.src=qrCanvas.toDataURL('image/png');
+    qrHolder.innerHTML='';
+    qrHolder.appendChild(renderedImage);
+   }else{
+    throw new Error('A biblioteca não conseguiu criar o QR Code para '+member.full_name+'.');
+   }
    grid.appendChild(card);
   }
   status.textContent=data.cards.length+' cartões digitais gerados. A versão impressa está no tamanho 85,6 × 54 mm. Guarde ou imprima esta página; uma nova emissão invalida os códigos anteriores.';
