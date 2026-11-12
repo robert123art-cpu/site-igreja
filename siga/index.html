@@ -119,7 +119,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
  body.printing-member-qr .qr-card:nth-child(9n+1):not(:first-child){break-before:page!important}
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 </head>
 <body>
@@ -1854,10 +1854,13 @@ async function issueMemberQRCards(){
   const checkinUrl=new URL('checkin.html',window.location.href);
   for(const member of data.cards){
    const url=new URL(checkinUrl.href);url.searchParams.set('t',member.token);
-   const qr=await QRCode.toDataURL(url.href,{width:320,margin:1,errorCorrectionLevel:'M'});
    const card=document.createElement('article');card.className='qr-card';
-   card.innerHTML='<div><div class="qr-card-brand">日本 クリスチャンコングレゲーション · CCJ</div><div class="qr-card-name">'+esc(member.full_name)+'</div><div class="qr-card-role">'+esc(member.role||'Membro')+'</div><div class="qr-card-label">CARTÃO INDIVIDUAL DE PRESENÇA</div></div><div><img alt="QR Code individual de presença"><div class="qr-card-id">CCJ · SIGA</div></div>';
-   card.querySelector('img').src=qr;
+   card.innerHTML='<div><div class="qr-card-brand">日本 クリスチャンコングレゲーション · CCJ</div><div class="qr-card-name">'+esc(member.full_name)+'</div><div class="qr-card-role">'+esc(member.role||'Membro')+'</div><div class="qr-card-label">CARTÃO INDIVIDUAL DE PRESENÇA</div></div><div><div class="qr-code-holder"></div><div class="qr-card-id">CCJ · SIGA</div></div>';
+   const qrHolder=card.querySelector('.qr-code-holder');
+   new QRCode(qrHolder,{text:url.href,width:320,height:320,correctLevel:QRCode.CorrectLevel.M});
+   const qrImage=qrHolder.querySelector('img');
+   if(!qrImage||!qrImage.src)throw new Error('A biblioteca não conseguiu criar o QR Code para '+member.full_name+'.');
+   qrImage.alt='QR Code individual de presença';
    grid.appendChild(card);
   }
   status.textContent=data.cards.length+' cartões digitais gerados. A versão impressa está no tamanho 85,6 × 54 mm. Guarde ou imprima esta página; uma nova emissão invalida os códigos anteriores.';
