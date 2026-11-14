@@ -34,28 +34,18 @@ button:disabled{opacity:.6}
 <header><div class="brand">日本クリスチャンコングレゲーション</div><div class="logo">CCJ Digital</div><div class="jp">Área exclusiva dos membros</div><div class="sub">Conectando nossa comunidade</div></header>
 <main><section class="card" aria-live="polite">
 <div id="authView">
-<div class="tabs"><button id="loginTab" class="active" type="button">Entrar</button><button id="registerTab" type="button">Primeiro acesso</button></div>
-<div id="loginForm">
-<h1>Bem-vindo de volta</h1><p class="help">Entre usando seu ID e sua senha.</p>
-<label for="loginId">Seu ID</label><input id="loginId" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Digite seu ID">
+<h1>Entrar no CCJ Digital</h1><p class="help">Use o ID provisório e a senha temporária enviados ao seu e-mail cadastrado. No primeiro acesso, o sistema pedirá que escolha seu ID definitivo e uma nova senha.</p>
+<label for="loginId">ID de acesso</label><input id="loginId" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Digite seu ID">
 <label for="loginPassword">Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha">
 <button id="loginButton" class="primary" type="button">Entrar</button>
 </div>
-<div id="registerForm" class="hidden">
-<h1>Ativar meu acesso</h1><p class="help">Use o código individual fornecido pela administração. Depois, escolha seu próprio ID e senha.</p>
-<label for="regCode">Código de autorização</label><input id="regCode" autocomplete="off" autocapitalize="none" placeholder="Código individual">
-<label for="regId">Escolha seu ID</label><input id="regId" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="30" placeholder="Ex.: joao.silva">
-<label for="regPassword">Crie sua senha</label><input id="regPassword" type="password" autocomplete="new-password" minlength="10" placeholder="Mínimo de 10 caracteres">
-<label for="regConfirm">Confirme sua senha</label><input id="regConfirm" type="password" autocomplete="new-password" minlength="10" placeholder="Digite a senha novamente">
-<button id="registerButton" class="primary" type="button">Criar meu acesso</button>
-<p class="note">O código é individual, de uso único e tem validade limitada. Não compartilhe sua senha.</p>
-</div>
-</div>
 <div id="changeView" class="hidden">
-<h1>Alterar senha</h1><p class="help">Defina uma nova senha para continuar.</p>
-<label for="newPassword">Nova senha</label><input id="newPassword" type="password" autocomplete="new-password" minlength="10">
-<label for="newConfirm">Confirme a nova senha</label><input id="newConfirm" type="password" autocomplete="new-password" minlength="10">
-<button id="changeButton" class="primary" type="button">Salvar nova senha</button>
+<h1>Defina seu acesso pessoal</h1><p class="help">Escolha seu próprio ID e uma nova senha. Depois de salvar, você usará esses dados nos próximos acessos.</p>
+<label for="newUsername">Seu novo ID</label><input id="newUsername" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="30" placeholder="Ex.: joao.silva">
+<p class="note">Use de 3 a 30 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado.</p>
+<label for="newPassword">Nova senha</label><input id="newPassword" type="password" autocomplete="new-password" minlength="10" placeholder="Mínimo de 10 caracteres">
+<label for="newConfirm">Confirme a nova senha</label><input id="newConfirm" type="password" autocomplete="new-password" minlength="10" placeholder="Digite a senha novamente">
+<button id="changeButton" class="primary" type="button">Salvar meu ID e senha</button>
 </div>
 <div id="welcomeView" class="hidden">
 <h1>Acesso realizado</h1><p class="help">Sua autenticação no CCJ Digital foi concluída.</p>
@@ -72,15 +62,60 @@ let session=null,member=null;
 const $=id=>document.getElementById(id);
 function status(message,type=''){const el=$('status');el.textContent=message;el.className='status '+type}
 function busy(button,on,label){button.disabled=on;if(on){button.dataset.old=button.textContent;button.textContent=label||'Aguarde...'}else{button.textContent=button.dataset.old||button.textContent}}
-async function request(action,data={},token=''){const headers={'Content-Type':'application/json'};if(token)headers.Authorization='Bearer '+token;const response=await fetch(API,{method:'POST',headers,body:JSON.stringify({action,...data})});const result=await response.json().catch(()=>({error:'Resposta inválida do servidor.'}));if(!response.ok)throw new Error(result.error||'Não foi possível concluir a operação.');return result}
+async function request(action,data={},token=''){
+ const headers={'Content-Type':'application/json','apikey':'sb_publishable_10fUBHTtp6sev9kXjMIDJg_CFBkeT8D'};
+ if(token)headers.Authorization='Bearer '+token;
+ const response=await fetch(API,{method:'POST',headers,body:JSON.stringify({action,...data})});
+ const result=await response.json().catch(()=>({error:'Resposta inválida do servidor.'}));
+ if(!response.ok)throw new Error(result.error||'Não foi possível concluir a operação.');
+ return result;
+}
 function show(view){['authView','changeView','welcomeView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));status('')}
-function tab(which){const login=which==='login';$('loginForm').classList.toggle('hidden',!login);$('registerForm').classList.toggle('hidden',login);$('loginTab').classList.toggle('active',login);$('registerTab').classList.toggle('active',!login);status('')}
-function finish(data){session=data.session;member=data.user||{};$('memberName').textContent=member.full_name||'Membro';$('memberId').textContent='ID: '+(member.username||'');if(data.must_change_password){show('changeView')}else{show('welcomeView')}}
-async function doLogin(){const b=$('loginButton');busy(b,true,'Entrando...');status('Verificando seu acesso...');try{const data=await request('login',{username:$('loginId').value,password:$('loginPassword').value});finish(data)}catch(e){status(e.message,'error')}finally{busy(b,false)}}
-async function doRegister(){const b=$('registerButton');const p=$('regPassword').value;if(p!==$('regConfirm').value){status('As senhas não coincidem.','error');return}busy(b,true,'Criando acesso...');status('Validando o código individual...');try{const data=await request('register',{registration_code:$('regCode').value,username:$('regId').value,password:p});if(data.session)finish(data);else{tab('login');$('loginId').value=$('regId').value;status(data.message||'Cadastro concluído. Entre com seu ID e senha.','success')}}catch(e){status(e.message,'error')}finally{busy(b,false)}}
-async function doChange(){const p=$('newPassword').value;if(p.length<10){status('A senha deve ter pelo menos 10 caracteres.','error');return}if(p!==$('newConfirm').value){status('As senhas não coincidem.','error');return}const b=$('changeButton');busy(b,true,'Salvando...');try{await request('change_password',{new_password:p},session.access_token);show('welcomeView');status('Senha alterada com sucesso.','success')}catch(e){status(e.message,'error')}finally{busy(b,false)}}
-$('loginTab').addEventListener('click',()=>tab('login'));$('registerTab').addEventListener('click',()=>tab('register'));$('loginButton').addEventListener('click',doLogin);$('registerButton').addEventListener('click',doRegister);$('changeButton').addEventListener('click',doChange);$('logoutButton').addEventListener('click',()=>{session=null;member=null;$('loginPassword').value='';show('authView');tab('login')});
-$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});$('regConfirm').addEventListener('keydown',e=>{if(e.key==='Enter')doRegister()});$('newConfirm').addEventListener('keydown',e=>{if(e.key==='Enter')doChange()});
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+function finish(data){
+ session=data.session;
+ member=data.user||{};
+ $('memberName').textContent=member.full_name||'Membro';
+ $('memberId').textContent='ID: '+(member.username||'');
+ if(data.must_change_password){show('changeView');$('newUsername').focus()}
+ else show('welcomeView');
+}
+async function doLogin(){
+ const b=$('loginButton');
+ if(!$('loginId').value.trim()||!$('loginPassword').value){status('Informe seu ID e sua senha.','error');return}
+ busy(b,true,'Entrando...');
+ status('Verificando seu acesso...');
+ try{
+  const data=await request('login',{username:$('loginId').value,password:$('loginPassword').value});
+  finish(data);
+ }catch(e){status(e.message,'error')}
+ finally{busy(b,false)}
+}
+async function doChange(){
+ const username=$('newUsername').value.trim().toLowerCase();
+ const password=$('newPassword').value;
+ if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(username)){status('Escolha um ID de 3 a 30 caracteres, usando letras minúsculas, números, ponto, hífen ou sublinhado.','error');return}
+ if(password.length<10){status('A senha deve ter pelo menos 10 caracteres.','error');return}
+ if(password!==$('newConfirm').value){status('As senhas não coincidem.','error');return}
+ const b=$('changeButton');busy(b,true,'Salvando...');
+ try{
+  const data=await request('change_password',{new_username:username,new_password:password},session.access_token);
+  member.username=data.username||username;
+  $('memberId').textContent='ID: '+member.username;
+  $('newPassword').value='';$('newConfirm').value='';
+  show('welcomeView');
+  status('Seu ID e sua senha foram atualizados.','success');
+ }catch(e){status(e.message,'error')}
+ finally{busy(b,false)}
+}
+function logout(){
+ session=null;member=null;
+ $('loginPassword').value='';$('newPassword').value='';$('newConfirm').value='';$('newUsername').value='';
+ show('authView');$('loginId').focus();
+}
+$('loginButton').addEventListener('click',doLogin);
+$('changeButton').addEventListener('click',doChange);
+$('logoutButton').addEventListener('click',logout);
+$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+$('newConfirm').addEventListener('keydown',e=>{if(e.key==='Enter')doChange()});
 </script>
 </body></html>
