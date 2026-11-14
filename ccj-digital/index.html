@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#173f59">
+<meta name="description" content="Acesso dos membros da 日本クリスチャンコングレゲーション">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>CCJ Digital</title>
+<style>
+:root{--navy:#173f59;--blue:#245f7c;--bg:#f2f5f7;--line:#dce4e9;--muted:#647582;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#17232b;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans",Arial,sans-serif;min-height:100vh}
+header{background:linear-gradient(135deg,var(--navy),#28647c);color:#fff;padding:30px 20px 54px;text-align:center}
+.brand{font-size:13px;letter-spacing:.06em;opacity:.9}.logo{font-size:35px;font-weight:800;margin:8px 0 2px}.jp{font-size:16px;opacity:.9}.sub{font-size:14px;opacity:.8;margin-top:10px}
+main{width:min(100% - 28px,480px);margin:-30px auto 40px;position:relative}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:23px;box-shadow:0 10px 30px #183c5012}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#edf2f5;border-radius:12px;padding:5px;margin-bottom:20px}
+.tabs button{border:0;background:transparent;border-radius:9px;padding:11px 8px;font-weight:700;color:#536675;font-size:14px}
+.tabs button.active{background:#fff;color:var(--navy);box-shadow:0 2px 8px #00000012}
+h1{font-size:22px;margin:0 0 6px;color:var(--navy)}.help{font-size:14px;color:var(--muted);margin:0 0 20px;line-height:1.5}
+label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px;color:#334956}
+input{display:block;width:100%;min-height:48px;border:1px solid #cbd7df;border-radius:10px;padding:12px 13px;font:inherit;font-size:16px;background:#fff;color:#17232b;outline:none}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #245f7c20}
+button.primary{width:100%;border:0;border-radius:10px;background:var(--navy);color:#fff;min-height:49px;padding:12px 16px;font-size:16px;font-weight:700;margin-top:20px}
+button:disabled{opacity:.6}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
+.status{min-height:24px;font-size:14px;line-height:1.5;margin-top:14px;color:#425766;overflow-wrap:anywhere}.status.error{color:#b42318}.status.success{color:#137547}
+.hidden{display:none!important}.footer{text-align:center;color:#72818b;font-size:12px;padding:4px 18px 28px}
+.userbox{background:#f2f7f9;border-radius:12px;padding:16px;margin-top:16px}.userbox strong{display:block;color:var(--navy);font-size:18px}
+@media(min-width:600px){header{padding-top:42px;padding-bottom:65px}.card{padding:28px}}
+</style>
+</head>
+<body>
+<header><div class="brand">日本クリスチャンコングレゲーション</div><div class="logo">CCJ Digital</div><div class="jp">Área exclusiva dos membros</div><div class="sub">Conectando nossa comunidade</div></header>
+<main><section class="card" aria-live="polite">
+<div id="authView">
+<div class="tabs"><button id="loginTab" class="active" type="button">Entrar</button><button id="registerTab" type="button">Primeiro acesso</button></div>
+<div id="loginForm">
+<h1>Bem-vindo de volta</h1><p class="help">Entre usando seu ID e sua senha.</p>
+<label for="loginId">Seu ID</label><input id="loginId" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Digite seu ID">
+<label for="loginPassword">Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha">
+<button id="loginButton" class="primary" type="button">Entrar</button>
+</div>
+<div id="registerForm" class="hidden">
+<h1>Ativar meu acesso</h1><p class="help">Use o código individual fornecido pela administração. Depois, escolha seu próprio ID e senha.</p>
+<label for="regCode">Código de autorização</label><input id="regCode" autocomplete="off" autocapitalize="none" placeholder="Código individual">
+<label for="regId">Escolha seu ID</label><input id="regId" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="30" placeholder="Ex.: joao.silva">
+<label for="regPassword">Crie sua senha</label><input id="regPassword" type="password" autocomplete="new-password" minlength="10" placeholder="Mínimo de 10 caracteres">
+<label for="regConfirm">Confirme sua senha</label><input id="regConfirm" type="password" autocomplete="new-password" minlength="10" placeholder="Digite a senha novamente">
+<button id="registerButton" class="primary" type="button">Criar meu acesso</button>
+<p class="note">O código é individual, de uso único e tem validade limitada. Não compartilhe sua senha.</p>
+</div>
+</div>
+<div id="changeView" class="hidden">
+<h1>Alterar senha</h1><p class="help">Defina uma nova senha para continuar.</p>
+<label for="newPassword">Nova senha</label><input id="newPassword" type="password" autocomplete="new-password" minlength="10">
+<label for="newConfirm">Confirme a nova senha</label><input id="newConfirm" type="password" autocomplete="new-password" minlength="10">
+<button id="changeButton" class="primary" type="button">Salvar nova senha</button>
+</div>
+<div id="welcomeView" class="hidden">
+<h1>Acesso realizado</h1><p class="help">Sua autenticação no CCJ Digital foi concluída.</p>
+<div class="userbox"><strong id="memberName">Membro</strong><span id="memberId"></span></div>
+<p class="note">Esta é a área inicial do CCJ Digital. Os demais serviços serão habilitados nas próximas etapas.</p>
+<button id="logoutButton" class="primary" type="button">Sair</button>
+</div>
+<div id="status" class="status" role="status"></div>
+</section></main>
+<div class="footer">日本クリスチャンコングレゲーション · CCJ Digital</div>
+<script>
+const API='https://uoapmjwdwtpltnxvmniy.supabase.co/functions/v1/ccj-member-auth';
+let session=null,member=null;
+const $=id=>document.getElementById(id);
+function status(message,type=''){const el=$('status');el.textContent=message;el.className='status '+type}
+function busy(button,on,label){button.disabled=on;if(on){button.dataset.old=button.textContent;button.textContent=label||'Aguarde...'}else{button.textContent=button.dataset.old||button.textContent}}
+async function request(action,data={},token=''){const headers={'Content-Type':'application/json'};if(token)headers.Authorization='Bearer '+token;const response=await fetch(API,{method:'POST',headers,body:JSON.stringify({action,...data})});const result=await response.json().catch(()=>({error:'Resposta inválida do servidor.'}));if(!response.ok)throw new Error(result.error||'Não foi possível concluir a operação.');return result}
+function show(view){['authView','changeView','welcomeView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));status('')}
+function tab(which){const login=which==='login';$('loginForm').classList.toggle('hidden',!login);$('registerForm').classList.toggle('hidden',login);$('loginTab').classList.toggle('active',login);$('registerTab').classList.toggle('active',!login);status('')}
+function finish(data){session=data.session;member=data.user||{};$('memberName').textContent=member.full_name||'Membro';$('memberId').textContent='ID: '+(member.username||'');if(data.must_change_password){show('changeView')}else{show('welcomeView')}}
+async function doLogin(){const b=$('loginButton');busy(b,true,'Entrando...');status('Verificando seu acesso...');try{const data=await request('login',{username:$('loginId').value,password:$('loginPassword').value});finish(data)}catch(e){status(e.message,'error')}finally{busy(b,false)}}
+async function doRegister(){const b=$('registerButton');const p=$('regPassword').value;if(p!==$('regConfirm').value){status('As senhas não coincidem.','error');return}busy(b,true,'Criando acesso...');status('Validando o código individual...');try{const data=await request('register',{registration_code:$('regCode').value,username:$('regId').value,password:p});if(data.session)finish(data);else{tab('login');$('loginId').value=$('regId').value;status(data.message||'Cadastro concluído. Entre com seu ID e senha.','success')}}catch(e){status(e.message,'error')}finally{busy(b,false)}}
+async function doChange(){const p=$('newPassword').value;if(p.length<10){status('A senha deve ter pelo menos 10 caracteres.','error');return}if(p!==$('newConfirm').value){status('As senhas não coincidem.','error');return}const b=$('changeButton');busy(b,true,'Salvando...');try{await request('change_password',{new_password:p},session.access_token);show('welcomeView');status('Senha alterada com sucesso.','success')}catch(e){status(e.message,'error')}finally{busy(b,false)}}
+$('loginTab').addEventListener('click',()=>tab('login'));$('registerTab').addEventListener('click',()=>tab('register'));$('loginButton').addEventListener('click',doLogin);$('registerButton').addEventListener('click',doRegister);$('changeButton').addEventListener('click',doChange);$('logoutButton').addEventListener('click',()=>{session=null;member=null;$('loginPassword').value='';show('authView');tab('login')});
+$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});$('regConfirm').addEventListener('keydown',e=>{if(e.key==='Enter')doRegister()});$('newConfirm').addEventListener('keydown',e=>{if(e.key==='Enter')doChange()});
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body></html>
