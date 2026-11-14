@@ -318,6 +318,17 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div id="adminAccessNotice" class="panel hidden"><h2>🔒 Acesso administrativo</h2><p id="adminAccessText" class="small-note">Somente administradores podem cadastrar contas e definir permissões.</p></div>
 </div>
 <div id="adminTools" class="hidden">
+<div id="ccjProvisionPanel" class="panel" style="margin-bottom:17px">
+<h2>🔐 Acesso dos membros — CCJ Digital</h2>
+<p class="small-note">Prepare uma conta provisória para cada membro ativo com e-mail cadastrado. O membro receberá um ID provisório e uma senha temporária no e-mail registrado. No primeiro acesso, escolherá seu próprio ID definitivo e uma nova senha.</p>
+<p class="small-note"><b>Privacidade:</b> cada credencial é individual. Nenhum membro terá acesso à caixa de e-mail da Administração Central. As senhas serão exibidas somente nesta tela após a criação; baixe a lista e envie cada credencial ao respectivo endereço.</p>
+<div class="actions">
+<button id="ccjProvisionButton" type="button" class="btn primary" onclick="provisionCcjMembers()">Preparar contas dos membros</button>
+<button id="ccjProvisionCsvButton" type="button" class="btn secondary hidden" onclick="downloadCcjCredentials()">Baixar lista de credenciais (CSV)</button>
+</div>
+<div id="ccjProvisionMessage" class="admin-message" role="status" aria-live="polite"></div>
+<div class="tablewrap"><table><thead><tr><th>Membro</th><th>E-mail cadastrado</th><th>ID provisório</th><th>Senha temporária</th></tr></thead><tbody id="ccjProvisionTable"><tr><td colspan="4">As contas ainda não foram preparadas.</td></tr></tbody></table></div>
+</div>
 <div class="admin-manager-grid">
 <div class="panel">
 <h2>👥 Contas de usuário</h2>
@@ -519,6 +530,55 @@ function closeLogin(){document.getElementById('loginModal')?.classList.add('hidd
 async function signOutSIGA(){await authClient.auth.signOut();sigaSession=null;updateSessionUI();openLogin('Sessão encerrada. Entre novamente para acessar o SIGA.')}
 authClient.auth.onAuthStateChange((event,session)=>{sigaSession=session;updateSessionUI();setTimeout(()=>refreshSigaUnitAccess(),0);if(event==='PASSWORD_RECOVERY')showPasswordRecovery();else if(session)document.getElementById('loginModal')?.classList.add('hidden')});
 
+let ccjProvisionCredentials=[];
+function setCcjProvisionMessage(message,isError=false){
+ const box=document.getElementById('ccjProvisionMessage');if(!box)return;
+ box.className='admin-message '+(message?(isError?'error':'success'):'');
+ box.textContent=message||'';
+}
+async function provisionCcjMembers(){
+ if(!isSigaAdmin()||!sigaSession){setCcjProvisionMessage('Entre com uma conta de administrador para continuar.',true);return}
+ const ok=confirm('Preparar as contas provisórias dos 48 membros com e-mail cadastrado? Contas existentes serão preservadas. As senhas serão exibidas somente uma vez.');
+ if(!ok)return;
+ const button=document.getElementById('ccjProvisionButton');
+ const table=document.getElementById('ccjProvisionTable');
+ const csvButton=document.getElementById('ccjProvisionCsvButton');
+ button.disabled=true;button.textContent='Preparando contas...';
+ if(table)table.innerHTML='<tr><td colspan="4">Criando as contas provisórias com segurança...</td></tr>';
+ setCcjProvisionMessage('Aguarde. Nenhuma senha será enviada automaticamente nesta etapa.');
+ try{
+  const response=await fetch(SUPABASE_URL+'/functions/v1/ccj-member-auth',{
+   method:'POST',
+   headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+sigaSession.access_token},
+   body:JSON.stringify({action:'provision_member_accounts'})
+  });
+  const data=await response.json().catch(()=>({error:'Resposta inválida do servidor.'}));
+  if(!response.ok)throw new Error(data.error||'Não foi possível preparar as contas.');
+  ccjProvisionCredentials=Array.isArray(data.credentials)?data.credentials:[];
+  if(table){
+   table.innerHTML=ccjProvisionCredentials.map(row=>'<tr><td><b>'+esc(row.full_name||'')+'</b></td><td>'+esc(row.email||'')+'</td><td><code>'+esc(row.provisional_username||'')+'</code></td><td><code>'+esc(row.temporary_password||'')+'</code></td></tr>').join('')||'<tr><td colspan="4">Nenhuma conta nova foi criada nesta operação.</td></tr>';
+  }
+  if(csvButton)csvButton.classList.toggle('hidden',ccjProvisionCredentials.length===0);
+  const parts=[data.created_count+' conta(s) criada(s)',data.skipped_existing_count+' já existente(s)',data.skipped_missing_or_ambiguous_email_count+' sem e-mail único confirmado',data.failed_count+' falha(s)'];
+  setCcjProvisionMessage(parts.join(' · ')+(ccjProvisionCredentials.length?' — baixe a lista e envie cada credencial ao e-mail correspondente.':''));
+ }catch(error){
+  console.error('CCJ member provisioning failed:',error);
+  if(table)table.innerHTML='<tr><td colspan="4">Não foi possível preparar as contas.</td></tr>';
+  setCcjProvisionMessage(error.message||'Falha ao preparar as contas.',true);
+ }finally{
+  button.disabled=false;button.textContent='Preparar contas dos membros';
+ }
+}
+function downloadCcjCredentials(){
+ if(!isSigaAdmin()||!ccjProvisionCredentials.length)return;
+ const headers=['Nome','E-mail cadastrado','ID provisório','Senha temporária'];
+ const rows=ccjProvisionCredentials.map(x=>[x.full_name,x.email,x.provisional_username,x.temporary_password]);
+ const csv=[headers,...rows].map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+ const blob=new Blob(['\\ufeff',csv],{type:'text/csv;charset=utf-8'});
+ const url=URL.createObjectURL(blob);
+ const link=document.createElement('a');link.href=url;link.download='CCJ_Digital_credenciais_provisorias.csv';
+ document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+}
 let sigaAdminUsers=[];
 let sigaAdminUnits=[];
 let sigaAssignments=[];
