@@ -131,14 +131,14 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div class="brand"><b>SIGA</b><small>Sistema Integrado de Gestão Administrativa / 統合管理システム</small></div>
 <nav>
 <button class="active" onclick="go('dashboard',this)">🏠 Painel / ダッシュボード</button>
-<button onclick="go('members',this)">👥 Membros / メンバー</button>
-<button onclick="go('attendance',this)">📝 Reuniões / Presença・会議 / 出席</button>
-<button onclick="go('finance',this)">💰 Financeiro / 財務</button>
-<button onclick="go('bank',this)">🏦 Contas Bancárias / 銀行口座</button>
-<button onclick="go('assets',this)">🏛️ Patrimônio / 資産</button>
-<button onclick="go('agenda',this)">📅 Agenda / 予定</button>
-<button onclick="go('reports',this)">📄 Documentos / Relatórios・文書 / レポート</button>
-<button onclick="go('settings',this)">⚙️ Configurações / 設定</button>
+<button data-siga-module-access="members" onclick="go('members',this)">👥 Membros / メンバー</button>
+<button data-siga-module-access="meetings" onclick="go('attendance',this)">📝 Reuniões / Presença・会議 / 出席</button>
+<button data-siga-module-access="finance" onclick="go('finance',this)">💰 Financeiro / 財務</button>
+<button data-siga-module-access="bank_accounts" onclick="go('bank',this)">🏦 Contas Bancárias / 銀行口座</button>
+<button data-siga-module-access="assets" onclick="go('assets',this)">🏛️ Patrimônio / 資産</button>
+<button data-siga-module-access="agenda" onclick="go('agenda',this)">📅 Agenda / 予定</button>
+<button data-siga-module-access="reports" onclick="go('reports',this)">📄 Documentos / Relatórios・文書 / レポート</button>
+<button id="settingsNav" onclick="go('settings',this)">⚙️ Configurações / 設定</button>
 <button onclick="go('admin',this)">🔐 Administração / 管理</button>
 <button id="unitsNav" class="hidden" onclick="go('units',this)">🏢 Unidades / 拠点</button>
 </nav>
@@ -148,7 +148,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <section class="content">
 <div id="dashboard" class="module">
 <div class="title"><div><h1>Painel Administrativo / 管理ダッシュボード</h1><p>Visão geral da organização / 組織の概要</p></div><div class="currency">🇯🇵 ¥ JPY — Japão / 日本</div></div>
-<div class="cards">
+<div class="cards" data-siga-module-access="finance">
 <div class="card"><div class="label">Saldo atual / 現在残高</div><div class="value ok">¥ 1.250.000</div><div class="sub">Caixa + bancos / 現金＋銀行</div></div>
 <div class="card"><div class="label">Receitas do mês / 今月の収入</div><div class="value ok">¥ 480.000</div><div class="sub">Entradas registradas / 登録済み入金</div></div>
 <div class="card"><div class="label">Despesas do mês / 今月の支出</div><div class="value bad">¥ 315.000</div><div class="sub">Saídas registradas / 登録済み出金</div></div>
@@ -156,26 +156,26 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 </div>
 <div class="grid">
 <div class="panel"><h2>Acessos rápidos / クイックアクセス</h2><div class="quick">
-<button onclick="go('finance')">💰<b>Nova movimentação / 新規取引</b><small>Receita ou despesa / 収入または支出</small></button>
-<button onclick="go('attendance')">📝<b>Nova reunião / 新しい会議</b><small>Registrar presença / 出席を登録</small></button>
-<button onclick="go('members')">👥<b>Novo membro / 新しい会員</b><small>Adicionar cadastro / 会員を追加</small></button>
-<button onclick="go('assets')">🏛️<b>Novo patrimônio / 新規資産</b><small>Cadastrar bem / 資産を登録</small></button>
-<button onclick="go('agenda')">📅<b>Novo compromisso / 新しい予定</b><small>Adicionar à agenda / 予定に追加</small></button>
-<button onclick="go('reports')">📄<b>Relatórios / レポート</b><small>Consultar e imprimir / 閲覧・印刷</small></button>
+<button data-siga-module-access="finance" onclick="go('finance')">💰<b>Nova movimentação / 新規取引</b><small>Receita ou despesa / 収入または支出</small></button>
+<button data-siga-module-access="meetings" onclick="go('attendance')">📝<b>Nova reunião / 新しい会議</b><small>Registrar presença / 出席を登録</small></button>
+<button data-siga-module-access="members" onclick="go('members')">👥<b>Novo membro / 新しい会員</b><small>Adicionar cadastro / 会員を追加</small></button>
+<button data-siga-module-access="assets" onclick="go('assets')">🏛️<b>Novo patrimônio / 新規資産</b><small>Cadastrar bem / 資産を登録</small></button>
+<button data-siga-module-access="agenda" onclick="go('agenda')">📅<b>Novo compromisso / 新しい予定</b><small>Adicionar à agenda / 予定に追加</small></button>
+<button data-siga-module-access="reports" onclick="go('reports')">📄<b>Relatórios / レポート</b><small>Consultar e imprimir / 閲覧・印刷</small></button>
 </div></div>
 <div class="panel"><h2>Pendências e avisos / 未処理事項・お知らせ</h2>
-<div class="notice">2 documentos aguardando revisão / 2件の書類が確認待ち <span class="badge">Atenção / 要確認</span></div>
-<div class="notice">Próxima reunião administrativa / 次回の管理会議 <span class="badge">Agenda / 予定</span></div>
-<div class="notice">3 patrimônios próximos da revisão / 3件の資産が点検時期 <span class="badge">Patrimônio / 資産</span></div>
-<div class="notice">Backup do sistema / システムのバックアップ <span class="badge">Admin / 管理</span></div>
+<div class="notice" data-siga-module-access="reports">2 documentos aguardando revisão / 2件の書類が確認待ち <span class="badge">Atenção / 要確認</span></div>
+<div class="notice" data-siga-module-access="agenda">Próxima reunião administrativa / 次回の管理会議 <span class="badge">Agenda / 予定</span></div>
+<div class="notice" data-siga-module-access="assets">3 patrimônios próximos da revisão / 3件の資産が点検時期 <span class="badge">Patrimônio / 資産</span></div>
+<div class="notice" data-siga-module-access="admin">Backup do sistema / システムのバックアップ <span class="badge">Admin / 管理</span></div>
 </div></div>
-<div class="panel" style="margin-top:17px"><h2>Últimas movimentações / 最近の取引</h2>
+<div class="panel" data-siga-module-access="finance" style="margin-top:17px"><h2>Últimas movimentações / 最近の取引</h2>
 <table><tr><th>Data / 日付</th><th>Descrição / 摘要</th><th>Categoria / 区分</th><th>Tipo / 種類</th><th>Valor / 金額</th></tr>
 <tr><td>14/10/2026</td><td>Contribuição / 献金</td><td>Receitas / 収入</td><td class="ok">Entrada / 入金</td><td class="ok">¥ 50.000</td></tr>
 <tr><td>13/10/2026</td><td>Energia elétrica / 電気料金</td><td>Despesas / 支出</td><td class="bad">Saída / 出金</td><td class="bad">¥ 18.500</td></tr>
 <tr><td>12/10/2026</td><td>Material administrativo / 事務用品</td><td>Despesas / 支出</td><td class="bad">Saída / 出金</td><td class="bad">¥ 7.800</td></tr></table></div>
 </div>
-<div id="members" class="module hidden">
+<div id="members" class="module hidden" data-siga-module-section="members">
 <div class="title"><div><h1>👥 Membros / メンバー</h1><p>Cadastro, situação, cargo e histórico dos membros</p></div><button class="primary" onclick="openMemberForm()">＋ Novo membro</button></div>
 <div class="grid2">
 <div class="panel"><h2>Cadastro do membro / メンバー登録</h2><form id="memberForm" onsubmit="saveMember(event)"><input type="hidden" id="memberId"><div class="formgrid">
@@ -192,8 +192,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
  <div id="memberQrGrid" class="qr-card-grid"></div>
 </div>
 </div>
-<div id="attendance" class="module hidden"><div class="title"><div><h1>📝 Reuniões / Presença</h1><p>Registro de reuniões, frequência e ausência</p></div></div><div class="panel"><h2>Controle de presença / 出席管理</h2><div class="formgrid"><label>Tipo de reunião<select><option>Reunião administrativa</option><option>Culto</option><option>Assembleia</option><option>Reunião de liderança</option></select></label><label>Data<input type="date"></label><label>Horário de início da portaria<input type="time"></label><label>Horário de início da reunião<input type="time"></label></div><div class="small-note" style="margin-top:14px">Nesta etapa a estrutura da lista está preparada. A próxima fase ligará a presença ao cadastro de membros e aos relatórios.</div></div></div>
-<div id="finance" class="module hidden">
+<div id="attendance" class="module hidden" data-siga-module-section="meetings"><div class="title"><div><h1>📝 Reuniões / Presença</h1><p>Registro de reuniões, frequência e ausência</p></div></div><div class="panel"><h2>Controle de presença / 出席管理</h2><div class="formgrid"><label>Tipo de reunião<select><option>Reunião administrativa</option><option>Culto</option><option>Assembleia</option><option>Reunião de liderança</option></select></label><label>Data<input type="date"></label><label>Horário de início da portaria<input type="time"></label><label>Horário de início da reunião<input type="time"></label></div><div class="small-note" style="margin-top:14px">Nesta etapa a estrutura da lista está preparada. A próxima fase ligará a presença ao cadastro de membros e aos relatórios.</div></div></div>
+<div id="finance" class="module hidden" data-siga-module-section="finance">
 <div class="title"><div><h1>💰 Financeiro / 財務</h1><p>Livro Caixa, lançamentos e saldo automático / 現金出納帳・取引・自動残高</p></div><div class="finance-refresh-controls"><button class="btn secondary" type="button" onclick="document.getElementById('generalLedgerPanel').scrollIntoView({behavior:'smooth'})">Razão Geral / 総勘定元帳</button><button id="financeRefreshButton" class="btn primary" type="button" onclick="loadFinance()" aria-describedby="financeRefreshStatus">↻ Atualizar / 更新</button><span id="financeRefreshStatus" role="status" aria-live="polite"></span></div></div>
 <div id="financePrintMeta" class="finance-print-meta"></div><div class="cards" id="financeCards"><div class="card"><div class="label">Saldo atual / 現在残高</div><div class="value" id="finBalance">¥ 0</div><div class="sub">Saldo das contas financeiras / 金融口座残高</div></div><div class="card"><div class="label">Entradas do mês / 今月の入金</div><div class="value ok" id="finEntries">¥ 0</div><div class="sub">Receitas / 収入</div></div><div class="card"><div class="label">Saídas do mês / 今月の出金</div><div class="value bad" id="finExpenses">¥ 0</div><div class="sub">Despesas / 支出</div></div><div class="card"><div class="label">Resultado / 収支</div><div class="value" id="finResult">¥ 0</div><div class="sub">Entradas − saídas / 入金 − 出金</div></div></div>
 <div class="grid2">
@@ -251,7 +251,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
   </table></div>
 </div>
 </div>
-<div id="bank" class="module hidden">
+<div id="bank" class="module hidden" data-siga-module-section="bank_accounts">
 <div class="title"><div><h1>🏦 Contas Bancárias</h1><p>Contas, saldos e conciliação</p></div><button class="btn secondary" type="button" onclick="loadBankAccounts()">↻ Atualizar / 更新</button></div>
 <div class="panel">
   <h2>Contas bancárias / 銀行口座</h2>
@@ -276,9 +276,9 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 </div>
 
 </div>
-<div id="assets" class="module hidden"><div class="title"><div><h1>🏛️ Patrimônio</h1><p>Controle patrimonial bilíngue</p></div></div><div class="panel"><h2>Controle patrimonial / 固定資産管理</h2><p class="small-note">O módulo será conectado à planilha patrimonial bilíngue e aos relatórios A4.</p></div></div>
-<div id="agenda" class="module hidden"><div class="title"><div><h1>📅 Agenda</h1><p>Compromissos e reuniões</p></div></div><div class="panel"><h2>Agenda / 予定</h2><div class="formgrid"><label>Data<input type="date"></label><label>Horário<input type="time"></label><label>Evento<input></label><label>Responsável<input></label></div></div></div>
-<div id="reports" class="module hidden"><div class="title"><div><h1>📄 Documentos / Relatórios</h1><p>Consultas e impressão</p></div></div><div class="panel"><h2>Relatórios / レポート</h2><p class="small-note">Preparado para relatórios financeiros, presença, patrimônio e documentos em A4.</p></div></div>
+<div id="assets" class="module hidden" data-siga-module-section="assets"><div class="title"><div><h1>🏛️ Patrimônio</h1><p>Controle patrimonial bilíngue</p></div></div><div class="panel"><h2>Controle patrimonial / 固定資産管理</h2><p class="small-note">O módulo será conectado à planilha patrimonial bilíngue e aos relatórios A4.</p></div></div>
+<div id="agenda" class="module hidden" data-siga-module-section="agenda"><div class="title"><div><h1>📅 Agenda</h1><p>Compromissos e reuniões</p></div></div><div class="panel"><h2>Agenda / 予定</h2><div class="formgrid"><label>Data<input type="date"></label><label>Horário<input type="time"></label><label>Evento<input></label><label>Responsável<input></label></div></div></div>
+<div id="reports" class="module hidden" data-siga-module-section="reports"><div class="title"><div><h1>📄 Documentos / Relatórios</h1><p>Consultas e impressão</p></div></div><div class="panel"><h2>Relatórios / レポート</h2><p class="small-note">Preparado para relatórios financeiros, presença, patrimônio e documentos em A4.</p></div></div>
 <div id="settings" class="module hidden"><div class="title"><div><h1>⚙️ Configurações</h1><p>Organização, país, moeda e idioma</p></div></div><div class="panel"><h2>Dados da organização</h2><div class="formgrid"><label>Nome / 名称<input id="setName"></label><label>Nome japonês / 日本語名<input id="setNameJp"></label><label>País / 国<select id="setCountry" onchange="countryChanged()"><option value="JP">Japão</option><option value="BR">Brasil</option><option value="US">Estados Unidos</option><option value="PT">Portugal</option><option value="AO">Angola</option></select></label><label>Cidade / 市<input id="setCity"></label><label>Endereço / 住所<input id="setAddress"></label><label>Telefone / 電話<input id="setPhone"></label><label>E-mail<input id="setEmail"></label><label>Idioma / 言語<select id="setLanguage"><option value="pt-ja">Português + Japonês</option><option value="pt">Português</option><option value="ja">Japonês</option></select></label></div><div class="actions"><button class="btn primary" onclick="saveSettings()">Salvar / 保存</button><span id="savedMsg"></span></div></div></div>
 <div id="units" class="module hidden">
 <div class="title"><div><h1>🏢 Unidades</h1><p>Administrações, departamentos e localidades/igrejas</p></div><button id="unitCreateButton" type="button" class="btn primary hidden" onclick="openUnitForm()">＋ Nova unidade</button></div>
@@ -346,6 +346,22 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 </form>
 <h2 style="margin-top:24px">Usuários cadastrados</h2>
 <div class="tablewrap"><table><thead><tr><th>Nome / e-mail</th><th>Perfil</th><th>Cadastro</th><th>Ação</th></tr></thead><tbody id="sigaUserTable"><tr><td colspan="4">Entre como administrador para carregar.</td></tr></tbody></table></div>
+<h2 style="margin-top:24px">🧩 Módulos por usuário</h2>
+<p class="small-note">Libere os módulos necessários para cada usuário. Administradores têm acesso completo automaticamente. O acesso financeiro também continua limitado pelas permissões finance.read e finance.write por unidade. Contas administrativas, a conta legada e usuários do CCJ Digital são preservados e não podem ser alterados aqui.</p>
+<form id="sigaModulePermissionForm" onsubmit="saveSigaModulePermissions(event)">
+<label>Usuário<select id="sigaModulePermissionUser" required onchange="selectSigaModuleUser()"><option value="">Selecione um usuário</option></select></label>
+<div class="siga-module-permission-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:12px 0">
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" class="sigaModulePermission" value="members"> Membros / メンバー</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" class="sigaModulePermission" value="meetings"> Reuniões / 会議</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" class="sigaModulePermission" value="finance"> Financeiro / 財務</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" class="sigaModulePermission" value="bank_accounts"> Contas Bancárias / 銀行口座</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" class="sigaModulePermission" value="assets"> Patrimônio / 資産</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" class="sigaModulePermission" value="agenda"> Agenda / 予定</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" class="sigaModulePermission" value="reports"> Relatórios / レポート</label>
+</div>
+<div class="actions"><button id="sigaModulePermissionSaveButton" type="submit" class="btn primary" disabled>Salvar módulos</button></div>
+<div id="sigaModulePermissionMessage" class="admin-message" role="status" aria-live="polite"></div>
+</form>
 </div>
 <div class="panel">
 <h2>🏢 Usuário → Unidade → Permissões</h2>
@@ -354,7 +370,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div class="admin-form-grid">
 <label>Usuário<select id="sigaGrantUser" required><option value="">Selecione um usuário</option></select></label>
 <label>Unidade<select id="sigaGrantUnit" required><option value="">Selecione uma unidade</option></select></label>
-<div class="full admin-small">A permissão disponível nesta etapa permite consultar os dados cadastrais da unidade. O acesso financeiro e aos demais módulos depende de vincular esses módulos às permissões por unidade.</div>
+<div class="full admin-small">Este vínculo controla a consulta da unidade. O acesso aos módulos é configurado separadamente em “Módulos por usuário”. As permissões financeiras existentes finance.read e finance.write continuam sendo aplicadas por unidade.</div>
 </div>
 <div class="actions"><button id="sigaGrantButton" type="submit" class="btn primary">Vincular unidade</button></div>
 <div id="sigaGrantMessage" class="admin-message" role="status"></div>
@@ -378,9 +394,29 @@ function loadSettings(){const d=getSettings();document.getElementById('setName')
 function applySettings(){const d=getSettings(),c=countryMap[d.country]||countryMap.JP,name=typeof d.name==='string'?d.name.trim():'',orgName=name&&name.toLowerCase()!=='undefined'?name:'Minha Organização / Igreja';document.querySelector('.org').childNodes[0].nodeValue=orgName+' ';document.querySelector('.org small').textContent=c.name+' • Moeda oficial: '+c.symbol+' '+c.currency;document.querySelector('.currency').textContent=c.flag+' '+c.symbol+' '+c.currency+' — '+c.name;document.querySelectorAll('.value').forEach(el=>{const n=Number(el.dataset.amount);if(!Number.isNaN(n))el.textContent=new Intl.NumberFormat(c.locale,{style:'currency',currency:c.currency,maximumFractionDigits:0}).format(n)})}
 function isSigaAdmin(){return sigaSession?.user?.app_metadata?.role==='admin'}
 const SIGA_MEMBER_MANAGER_IDS=['09ce87fb-ee13-44a5-9975-b32542169527','2795f0ac-e6fa-4990-a275-b0e28767f5fb','9ecd0144-fb9e-440b-94b1-0248f7be6e2f'];
+const SIGA_MODULE_KEYS=['members','meetings','finance','bank_accounts','assets','agenda','reports'];
+const SIGA_SECTION_MODULES={members:'members',attendance:'meetings',finance:'finance',bank:'bank_accounts',assets:'assets',agenda:'agenda',reports:'reports'};
+let sigaModuleAccess={};
+let sigaModuleAccessLoaded=false;
+function hasSigaModuleAccess(moduleKey){return isSigaAdmin()||(sigaModuleAccessLoaded&&sigaModuleAccess?.[moduleKey]===true)}
+function applySigaModuleVisibility(){
+ document.querySelectorAll('[data-siga-module-access]').forEach(el=>{
+  const key=el.dataset.sigaModuleAccess;
+  el.classList.toggle('hidden',key==='admin'?!isSigaAdmin():!hasSigaModuleAccess(key));
+ });
+ document.querySelectorAll('[data-siga-module-section]').forEach(el=>{
+  if(!hasSigaModuleAccess(el.dataset.sigaModuleSection))el.classList.add('hidden');
+ });
+ const active=document.querySelector('.module:not(.hidden)[data-siga-module-section]');
+ if(active&&!hasSigaModuleAccess(active.dataset.sigaModuleSection)){
+  active.classList.add('hidden');
+  document.getElementById('dashboard')?.classList.remove('hidden');
+  document.querySelectorAll('nav button').forEach(button=>button.classList.toggle('active',button.textContent.includes('Painel')));
+ }
+}
 function canManageMembers(){return !!sigaSession&&SIGA_MEMBER_MANAGER_IDS.includes(sigaSession.user.id)}
 function applyMemberPermissions(){
- const allowed=canManageMembers();
+ const allowed=hasSigaModuleAccess('members');
  const form=document.getElementById('memberForm');
  if(form)form.classList.toggle('hidden',!allowed);
  const add=document.querySelector('#members .title button');
@@ -388,13 +424,15 @@ function applyMemberPermissions(){
  const exp=document.querySelector('#members .toolbar button');
  if(exp)exp.classList.toggle('hidden',!allowed);
  const qr=document.getElementById('memberQrPanel');
- if(qr)qr.classList.toggle('hidden',!allowed);
+ if(qr)qr.classList.toggle('hidden',!canManageMembers());
 }
-function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeout(loadFinance,0);
+function go(id,btn){
  try{
   const admin=isSigaAdmin();
   if(!sigaSession&&id!=='dashboard'&&id!=='admin'){openLogin();return false}
-  if(sigaSession&&!admin&&!['dashboard','admin','units','members','attendance'].includes(id)){alert('O acesso a este módulo ainda não foi liberado para sua conta.');return false}
+  const requiredModule=SIGA_SECTION_MODULES[id];
+  if(sigaSession&&requiredModule&&!hasSigaModuleAccess(requiredModule)){alert('O acesso a este módulo ainda não foi liberado para sua conta.');return false}
+  if(id==='settings'&&!admin){alert('Somente administradores podem acessar as configurações.');return false}
   if(id==='members'&&!sigaSession){openLogin();return false}
   if(id==='units'&&!admin&&!sigaUnitReadAccess){alert('O administrador ainda não vinculou unidades a esta conta.');return false}
   document.querySelectorAll('.module').forEach(x=>x.classList.add('hidden'));
@@ -404,7 +442,8 @@ function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeou
   if(btn)btn.classList.add('active');
   const menu=document.getElementById('side');if(menu&&window.innerWidth<=900)menu.classList.remove('open');
   window.scrollTo(0,0);
-  if(id==='settings'&&typeof loadSettings==='function')loadSettings();
+  if(id==='finance'&&typeof loadFinance==='function')setTimeout(loadFinance,0);
+    if(id==='settings'&&typeof loadSettings==='function')loadSettings();
   if(id==='units')loadUnits();
   if(id==='members'){applyMemberPermissions();loadMembers();}
   if(id==='admin'&&admin)renderUsers();
@@ -421,11 +460,14 @@ let sigaUnitReadAccess=false;
 function updateSessionUI(){
  const email=document.getElementById('sessionEmail'),status=document.getElementById('sessionStatus');
  const admin=isSigaAdmin();
+ if(!sigaSession){sigaUnitReadAccess=false;sigaModuleAccess={};sigaModuleAccessLoaded=false}
  if(email)email.value=sigaSession?.user?.email||'';
  if(status)status.value=sigaSession?'Autenticado':'Não autenticado';
  setUserHeader(sigaSession?.user||null);
  const unitsNav=document.getElementById('unitsNav');
  if(unitsNav)unitsNav.classList.toggle('hidden',!admin&&!sigaUnitReadAccess);
+ const settingsNav=document.getElementById('settingsNav');
+ if(settingsNav)settingsNav.classList.toggle('hidden',!admin);
  const createUnit=document.getElementById('unitCreateButton');
  if(createUnit)createUnit.classList.toggle('hidden',!admin);
  const unitForm=document.getElementById('unitFormPanel');
@@ -436,15 +478,29 @@ function updateSessionUI(){
  if(notice)notice.classList.toggle('hidden',!sigaSession||admin);
  const loginButton=document.getElementById('adminLoginButton');
  if(loginButton)loginButton.classList.toggle('hidden',!!sigaSession);
- if(!sigaSession)sigaUnitReadAccess=false;
+ applySigaModuleVisibility();
 }
 async function refreshSigaUnitAccess(){
- if(!sigaSession){sigaUnitReadAccess=false;updateSessionUI();return}
- if(isSigaAdmin()){sigaUnitReadAccess=true;updateSessionUI();return}
- try{
-  const {data,error}=await authClient.from('siga_user_unit_permissions').select('permissions').eq('user_id',sigaSession.user.id);
-  sigaUnitReadAccess=!error&&(data||[]).some(row=>row.permissions?.['units.read']===true);
- }catch(error){console.error(error);sigaUnitReadAccess=false}
+ if(!sigaSession){sigaUnitReadAccess=false;sigaModuleAccess={};sigaModuleAccessLoaded=false;updateSessionUI();return}
+ if(isSigaAdmin()){
+  sigaUnitReadAccess=true;
+  sigaModuleAccess=Object.fromEntries(SIGA_MODULE_KEYS.map(key=>[key,true]));
+  sigaModuleAccessLoaded=true;
+  updateSessionUI();return;
+ }
+ const userId=sigaSession.user.id;
+ const [unitResult,moduleResult]=await Promise.allSettled([
+  authClient.from('siga_user_unit_permissions').select('permissions').eq('user_id',userId),
+  authClient.from('siga_user_module_permissions').select('modules').eq('user_id',userId).maybeSingle()
+ ]);
+ if(unitResult.status==='fulfilled'&&!unitResult.value.error){
+  sigaUnitReadAccess=(unitResult.value.data||[]).some(row=>row.permissions?.['units.read']===true);
+ }else{sigaUnitReadAccess=false;if(unitResult.status==='rejected')console.error(unitResult.reason);else console.error(unitResult.value.error)}
+ if(moduleResult.status==='fulfilled'&&!moduleResult.value.error){
+  const modules=moduleResult.value.data?.modules;
+  sigaModuleAccess=modules&&typeof modules==='object'&&!Array.isArray(modules)?modules:{};
+ }else{sigaModuleAccess={};if(moduleResult.status==='rejected')console.error(moduleResult.reason);else console.error(moduleResult.value.error)}
+ sigaModuleAccessLoaded=true;
  updateSessionUI();
 }
 async function requireSession(){try{const {data,error}=await authClient.auth.getSession();if(error)throw error;sigaSession=data.session;await refreshSigaUnitAccess();if(!sigaSession)openLogin();}catch(e){console.error(e);openLogin('Não foi possível verificar o acesso. Tente novamente.');}}
@@ -582,6 +638,7 @@ function downloadCcjCredentials(){
 let sigaAdminUsers=[];
 let sigaAdminUnits=[];
 let sigaAssignments=[];
+let sigaModulePermissions=[];
 function setAdminMessage(id,message,isError=false){
  const box=document.getElementById(id);if(!box)return;
  box.className='admin-message '+(message?(isError?'error':'success'):'');
@@ -603,7 +660,7 @@ function clearSigaUserForm(){
  setAdminMessage('sigaUserFormMessage','');
 }
 function editSigaUser(id){
- const user=sigaAdminUsers.find(item=>item.id===id);if(!user)return;
+ const user=sigaAdminUsers.find(item=>item.id===id);if(!user||user.protected)return;
  document.getElementById('sigaUserId').value=user.id;
  document.getElementById('sigaUserName').value=user.full_name||'';
  document.getElementById('sigaUserEmail').value=user.email||'';
@@ -652,6 +709,44 @@ async function grantSigaUnitAccess(event){
  }catch(error){console.error(error);setAdminMessage('sigaGrantMessage',error.message||'Não foi possível vincular a unidade.',true)}
  finally{button.disabled=false}
 }
+function selectSigaModuleUser(){
+ const select=document.getElementById('sigaModulePermissionUser');
+ const user=sigaAdminUsers.find(item=>item.id===select?.value);
+ const grant=sigaModulePermissions.find(item=>item.user_id===user?.id);
+ const canEdit=!!user&&user.role!=='admin'&&!user.protected;
+ document.querySelectorAll('.sigaModulePermission').forEach(input=>{
+  input.checked=canEdit&&grant?.modules?.[input.value]===true;
+  input.disabled=!canEdit;
+ });
+ const button=document.getElementById('sigaModulePermissionSaveButton');
+ if(button)button.disabled=!canEdit;
+ setAdminMessage('sigaModulePermissionMessage',user?'As permissões atuais estão selecionadas.':'Selecione um usuário para configurar os módulos.');
+}
+async function saveSigaModulePermissions(event){
+ event.preventDefault();
+ const userId=document.getElementById('sigaModulePermissionUser')?.value||'';
+ const user=sigaAdminUsers.find(item=>item.id===userId);
+ if(!isSigaAdmin()||!user||user.role==='admin'||user.protected){
+  setAdminMessage('sigaModulePermissionMessage','Esta conta não pode ter os módulos alterados.',true);return;
+ }
+ const modules=[...document.querySelectorAll('.sigaModulePermission:checked')].map(input=>input.value);
+ const button=document.getElementById('sigaModulePermissionSaveButton');
+ if(button)button.disabled=true;
+ setAdminMessage('sigaModulePermissionMessage','Salvando permissões...');
+ try{
+  await sigaAdminRequest({action:'set_module_permissions',userId,modules});
+  setAdminMessage('sigaModulePermissionMessage','Permissões dos módulos salvas.');
+  await renderUsers();
+  const select=document.getElementById('sigaModulePermissionUser');
+  if(select)select.value=userId;
+  selectSigaModuleUser();
+ }catch(error){
+  console.error(error);
+  setAdminMessage('sigaModulePermissionMessage',error.message||'Não foi possível salvar os módulos.',true);
+ }finally{
+  if(button)button.disabled=!userId;
+ }
+}
 async function revokeSigaUnitAccess(userId,unitId){
  if(!confirm('Remover o acesso deste usuário à unidade selecionada?'))return;
  try{
@@ -673,11 +768,20 @@ async function renderUsers(){
   sigaAdminUnits=unitResult.data||[];
   const assignmentResult=await sigaAdminRequest({action:'list_assignments'});
   sigaAssignments=assignmentResult.assignments||[];
+  const moduleResult=await sigaAdminRequest({action:'list_module_permissions'});
+  sigaModulePermissions=moduleResult.permissions||[];
   userTable.innerHTML=sigaAdminUsers.map(user=>{
    const role=user.role==='admin'?'Administrador':'Usuário';
    const created=user.created_at?new Intl.DateTimeFormat('pt-BR').format(new Date(user.created_at)):'—';
-   return '<tr><td><b>'+esc(user.full_name||'—')+'</b><br><small>'+esc(user.email||'')+'</small></td><td>'+role+'</td><td>'+created+'</td><td><button type="button" class="btnsm" onclick="editSigaUser(\''+esc(user.id)+'\')">Alterar</button></td></tr>'
+   const action=user.protected?'<button type="button" class="btnsm" disabled title="Conta protegida">Preservada</button>':'<button type="button" class="btnsm" onclick="editSigaUser(\''+esc(user.id)+'\')">Alterar</button>';
+   return '<tr><td><b>'+esc(user.full_name||'—')+'</b><br><small>'+esc(user.email||'')+'</small></td><td>'+role+'</td><td>'+created+'</td><td>'+action+'</td></tr>'
   }).join('')||'<tr><td colspan="4">Nenhuma conta cadastrada.</td></tr>';
+  const moduleUser=document.getElementById('sigaModulePermissionUser');
+  if(moduleUser){
+   const eligibleUsers=sigaAdminUsers.filter(user=>user.role!=='admin'&&!user.protected);
+   moduleUser.innerHTML='<option value="">Selecione um usuário</option>'+eligibleUsers.map(user=>'<option value="'+esc(user.id)+'">'+esc(user.full_name||user.email)+' — '+esc(user.email||'')+'</option>').join('');
+  }
+  selectSigaModuleUser();
   const grantUser=document.getElementById('sigaGrantUser');
   grantUser.innerHTML='<option value="">Selecione um usuário</option>'+sigaAdminUsers.filter(user=>user.role!=='admin').map(user=>'<option value="'+esc(user.id)+'">'+esc(user.full_name||user.email)+' — '+esc(user.email||'')+'</option>').join('');
   const grantUnit=document.getElementById('sigaGrantUnit');
@@ -691,6 +795,7 @@ async function renderUsers(){
   console.error(error);
   if(userTable)userTable.innerHTML='<tr><td colspan="4">Não foi possível carregar as contas. Confira a conexão e o acesso de administrador.</td></tr>';
   if(assignmentTable)assignmentTable.innerHTML='<tr><td colspan="4">Não foi possível carregar os vínculos.</td></tr>';
+  setAdminMessage('sigaModulePermissionMessage','Não foi possível carregar as permissões dos módulos.',true);
  }
 }
 
@@ -718,7 +823,7 @@ function openMemberForm(){document.getElementById('memberForm').scrollIntoView({
 function clearMemberForm(){document.getElementById('memberForm').reset();document.getElementById('memberId').value=''}
 async function saveMember(e){
  e.preventDefault();
- if(!canManageMembers()){alert('Somente os três administradores autorizados podem cadastrar ou alterar membros.');return}
+ if(!hasSigaModuleAccess('members')){alert('O módulo Membros não está liberado para esta conta.');return}
  const id=document.getElementById('memberId').value;
  const payload={
   full_name:mNome.value.trim(),japanese_name:mNomeJp.value.trim()||null,
@@ -743,13 +848,13 @@ function renderMembers(){
  document.getElementById('memberInactive').textContent=members.filter(m=>m.status!=='Ativo').length;
 }
 function editMember(id){
- if(!canManageMembers())return;const m=members.find(x=>x.id===id);if(!m)return;
+ if(!hasSigaModuleAccess('members'))return;const m=members.find(x=>x.id===id);if(!m)return;
  memberId.value=m.id;mNome.value=m.nome;mNomeJp.value=m.nomeJp;mNasc.value=m.nasc;mTel.value=m.tel;mEmail.value=m.email;mEnd.value=m.end;
  mCargo.value=m.cargo;mStatus.value=m.status;mEntrada.value=m.entrada;mObs.value=m.obs;
  mAdministracao.value=m.administracao;mLocalidade.value=m.localidade;mCidade.value=m.cidade;openMemberForm();
 }
 async function deleteMember(id){
- if(!canManageMembers()){alert('Somente os três administradores autorizados podem excluir membros.');return}
+ if(!hasSigaModuleAccess('members')){alert('O módulo Membros não está liberado para esta conta.');return}
  if(!confirm('Excluir este membro? / このメンバーを削除しますか？'))return;
  try{const {error}=await authClient.from('siga_members').delete().eq('id',id);if(error)throw error;await loadMembers();}
  catch(error){console.error('SIGA excluir membro:',error);alert('Não foi possível excluir o membro. Verifique sua conexão e suas permissões.')}
