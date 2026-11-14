@@ -1,0 +1,11 @@
+{
+  "name": "CCJ Digital",
+  "short_name": "CCJ Digital",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f5f7",
+  "theme_color": "#173f59",
+  "description": "Área exclusiva dos membros da 日本クリスチャンコングレゲーション"
+}
