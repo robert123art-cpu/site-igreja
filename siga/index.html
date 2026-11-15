@@ -2072,13 +2072,6 @@ function printMemberQRCards(){
     if(edit){event.preventDefault();event.stopPropagation();window.editFinanceTransaction(edit.dataset.sigaTxEdit);}
     if(del){event.preventDefault();event.stopPropagation();window.deleteFinanceTransaction(del.dataset.sigaTxDelete);}
   });
-  const panel=document.getElementById('bank');
-  if(panel){
-    panel.addEventListener('click',event=>{
-      const action=event.target?.closest?.('[data-siga-tx-edit],[data-siga-tx-delete]');
-      if(action)event.stopPropagation();
-    },true);
-  }
 })();
 </script>
 <style id="siga-finance-edit-delete-style-v1">
