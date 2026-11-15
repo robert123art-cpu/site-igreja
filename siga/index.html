@@ -2066,6 +2066,8 @@ function printMemberQRCards(){
     if(typeof window.loadBankAccounts==='function')await window.loadBankAccounts();
   };
 
+  const financeForm=document.getElementById('financeForm');
+  if(financeForm)financeForm.addEventListener('reset',()=>{window.sigaFinanceEditingId=null;setTimeout(()=>{const button=document.querySelector('#financeForm button[type="submit"]');if(button)button.textContent='Salvar / 保存';const title=document.querySelector('#financeForm')?.closest('.panel')?.querySelector('h2');if(title)title.textContent='Novo lançamento / 新規取引';},0);});
   document.addEventListener('click',event=>{
     const edit=event.target?.closest?.('[data-siga-tx-edit]');
     const del=event.target?.closest?.('[data-siga-tx-delete]');
