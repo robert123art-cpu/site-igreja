@@ -1665,7 +1665,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
         else if(r.transaction_type==='expense'){label='Saída / 出金';desc=r.description||'Despesa';cls='bad';}
         else{label='Entrada / 入金';desc=r.description||'Entrada';cls='ok';}
         const detail=r.description&&isTransfer?' • '+r.description:'';
-        return '<article class="bank-ledger-card" data-siga-bank-tx="'+esc(r.id)+'"><div class="bank-ledger-top"><span class="bank-ledger-date">'+fmtDate(r.transaction_date)+'</span><span class="bank-ledger-type '+cls+'">'+label+'</span></div><div class="bank-ledger-desc">'+esc(desc)+'</div>'+(detail?'<div class="bank-ledger-meta">'+esc(detail.slice(3))+'</div>':'')+(r.document_number?'<div class="bank-ledger-meta">Doc.: '+esc(r.document_number)+'</div>':'')+'<div class="bank-ledger-meta">Contrapartida / 相手口座: '+esc(otherName)+'</div><div class="bank-ledger-amount '+cls+'">'+money(r.amount)+'</div><div class="bank-ledger-actions"><button type="button" class="btn secondary" data-siga-tx-edit="'+esc(r.id)+'">Editar / 修正</button> <button type="button" class="btn secondary" data-siga-tx-delete="'+esc(r.id)+'">Excluir / 削除</button></div></article>';
+        return '<article class="bank-ledger-card" data-siga-bank-tx="'+esc(r.id)+'"><div class="bank-ledger-top"><span class="bank-ledger-date">'+fmtDate(r.transaction_date)+'</span><span class="bank-ledger-type '+cls+'">'+label+'</span></div><div class="bank-ledger-desc">'+esc(desc)+'</div>'+(detail?'<div class="bank-ledger-meta">'+esc(detail.slice(3))+'</div>':'')+(r.document_number?'<div class="bank-ledger-meta">Doc.: '+esc(r.document_number)+'</div>':'')+'<div class="bank-ledger-meta">Contrapartida / 相手口座: '+esc(otherName)+'</div><div class="bank-ledger-amount '+cls+'">'+money(r.amount)+'</div>'+(((typeof window.isSigaAdmin==='function'&&window.isSigaAdmin())||window.sigaFinanceWriteUnitIds?.has(String(r.unit_id)))?'<div class="bank-ledger-actions"><button type="button" class="btn secondary" data-siga-tx-edit="'+esc(r.id)+'">Editar / 修正</button> <button type="button" class="btn secondary" data-siga-tx-delete="'+esc(r.id)+'">Excluir / 削除</button></div>':'')+'</article>';
       }).join('');
       body.innerHTML=html||'<div class="bank-ledger-empty">Nenhuma movimentação encontrada para esta conta. / この口座の取引はありません。</div>';
       const transfers=(rows||[]).filter(r=>r.transaction_type==='transfer').length;
@@ -1973,9 +1973,9 @@ function printMemberQRCards(){
 
   async function loadWritePermissions(){
     window.sigaFinanceWriteUnitIds=new Set();
-    if(!window.sigaSession?.user?.id)return;
+    if(!sigaSession?.user?.id)return;
     if(typeof window.isSigaAdmin==='function'&&window.isSigaAdmin())return;
-    const {data,error}=await authClient.from('siga_user_unit_permissions').select('unit_id,permissions').eq('user_id',window.sigaSession.user.id);
+    const {data,error}=await authClient.from('siga_user_unit_permissions').select('unit_id,permissions').eq('user_id',sigaSession.user.id);
     if(error)throw error;
     (data||[]).forEach(row=>{if(row.permissions?.['finance.write']===true)window.sigaFinanceWriteUnitIds.add(String(row.unit_id));});
   }
@@ -1997,7 +1997,7 @@ function printMemberQRCards(){
         const th=document.createElement('th');th.dataset.sigaFinanceActionsHead='1';th.textContent='Ações / 操作';head.appendChild(th);
       }
       const query=(document.getElementById('financeSearch')?.value||'').toLowerCase();
-      const rows=(window.financeDataCache?.transactions||[]).filter(x=>(x.description||'').toLowerCase().includes(query)).slice(0,500);
+      const rows=(financeDataCache?.transactions||[]).filter(x=>(x.description||'').toLowerCase().includes(query)).slice(0,500);
       const rendered=[...table.querySelectorAll('tr')].filter(tr=>tr.cells.length>1);
       rendered.forEach((tr,index)=>{
         const tx=rows[index];
@@ -2056,6 +2056,9 @@ function printMemberQRCards(){
     }catch(e){console.error(e);alert('Não foi possível excluir: '+(e.message||e));}
   };
 
+  window.loadSigaFinanceWritePermissions=loadWritePermissions;
+  const originalBankLedgerLoad=window.loadBankLedgerAccounts;
+  if(typeof originalBankLedgerLoad==='function')window.loadBankLedgerAccounts=async function(){try{await loadWritePermissions();}catch(e){console.warn(e);}return await originalBankLedgerLoad.apply(this,arguments);};
   window.refreshSigaFinancialViews=async function(){
     if(typeof window.renderFinance==='function')await window.renderFinance(true);
     if(typeof window.loadBankLedgerMovements==='function')await window.loadBankLedgerMovements();
