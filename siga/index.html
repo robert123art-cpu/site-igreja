@@ -569,15 +569,28 @@ async function provisionCcjMembers(){
   button.disabled=false;button.textContent='Preparar contas dos membros';
  }
 }
-function downloadCcjCredentials(){
+async function downloadCcjCredentials(){
  if(!isSigaAdmin()||!ccjProvisionCredentials.length)return;
  const headers=['Nome','E-mail cadastrado','ID provisório','Senha temporária'];
  const rows=ccjProvisionCredentials.map(x=>[x.full_name,x.email,x.provisional_username,x.temporary_password]);
  const csv=[headers,...rows].map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
- const blob=new Blob(['\\ufeff',csv],{type:'text/csv;charset=utf-8'});
+ const blob=new Blob(['\\uFEFF',csv],{type:'text/csv;charset=utf-8'});
+ const file=new File([blob],'CCJ_Digital_credenciais_provisorias.csv',{type:'text/csv;charset=utf-8'});
+ try{
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+   await navigator.share({files:[file],title:'Credenciais provisórias CCJ Digital',text:'Guarde este arquivo em local seguro. Ele contém senhas temporárias individuais.'});
+   setCcjProvisionMessage('Compartilhamento aberto. Escolha “Salvar em Arquivos” para guardar a lista com segurança.');
+   return;
+  }
+ }catch(error){
+  if(error&&error.name==='AbortError')return;
+  console.warn('Compartilhamento indisponível; usando download do navegador.',error);
+ }
  const url=URL.createObjectURL(blob);
- const link=document.createElement('a');link.href=url;link.download='CCJ_Digital_credenciais_provisorias.csv';
- document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+ const link=document.createElement('a');link.href=url;link.download='CCJ_Digital_credenciais_provisorias.csv';link.style.display='none';
+ document.body.appendChild(link);link.click();link.remove();
+ setCcjProvisionMessage('Download iniciado. No iPhone, procure o arquivo em Arquivos > Downloads.');
+ setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
 let sigaAdminUsers=[];
 let sigaAdminUnits=[];
