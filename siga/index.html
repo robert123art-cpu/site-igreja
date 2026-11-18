@@ -324,6 +324,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <p class="small-note"><b>Privacidade:</b> cada credencial é individual. Nenhum membro terá acesso à caixa de e-mail da Administração Central. As senhas serão exibidas somente nesta tela após a criação; baixe a lista e envie cada credencial ao respectivo endereço.</p>
 <div class="actions">
 <button id="ccjProvisionButton" type="button" class="btn primary" onclick="provisionCcjMembers()">Preparar contas dos membros</button>
+<button id="ccjRenewButton" type="button" class="btn secondary" onclick="renewCcjTemporaryCredentials()">Renovar senhas provisórias</button>
 <button id="ccjProvisionCsvButton" type="button" class="btn secondary hidden" onclick="downloadCcjCredentials()">Baixar lista de credenciais (CSV)</button>
 </div>
 <div id="ccjProvisionMessage" class="admin-message" role="status" aria-live="polite"></div>
@@ -568,6 +569,30 @@ async function provisionCcjMembers(){
  }finally{
   button.disabled=false;button.textContent='Preparar contas dos membros';
  }
+}
+async function renewCcjTemporaryCredentials(){
+ if(!isSigaAdmin()||!sigaSession){setCcjProvisionMessage('Entre com uma conta de administrador para continuar.',true);return}
+ if(!confirm('Renovar as senhas provisórias das contas ativas que ainda exigem troca no primeiro acesso? As senhas anteriores deixarão de funcionar.'))return;
+ const button=document.getElementById('ccjRenewButton'),table=document.getElementById('ccjProvisionTable'),csvButton=document.getElementById('ccjProvisionCsvButton');
+ button.disabled=true;button.textContent='Renovando senhas...';
+ setCcjProvisionMessage('Renovando as senhas. Não feche esta página.');
+ if(table)table.innerHTML='<tr><td colspan="4">Renovação em andamento...</td></tr>';
+ try{
+  const response=await fetch(SUPABASE_URL+'/functions/v1/ccj-member-auth',{
+   method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+sigaSession.access_token},
+   body:JSON.stringify({action:'renew_temporary_credentials'})
+  });
+  const data=await response.json().catch(()=>({error:'Resposta inválida do servidor.'}));
+  if(!response.ok)throw new Error(data.error||'Não foi possível renovar as senhas.');
+  ccjProvisionCredentials=Array.isArray(data.credentials)?data.credentials:[];
+  if(table)table.innerHTML=ccjProvisionCredentials.map(row=>'<tr><td><b>'+esc(row.full_name||'')+'</b></td><td>'+esc(row.email||'')+'</td><td><code>'+esc(row.provisional_username||'')+'</code></td><td><code>'+esc(row.temporary_password||'')+'</code></td></tr>').join('')||'<tr><td colspan="4">Nenhuma senha foi renovada.</td></tr>';
+  if(csvButton)csvButton.classList.toggle('hidden',ccjProvisionCredentials.length===0);
+  setCcjProvisionMessage(data.renewed_count+' senha(s) renovada(s) · '+data.failed_count+' falha(s) · '+data.skipped_count+' ignorada(s). Baixe a nova lista em seguida.');
+ }catch(error){
+  console.error('CCJ credential renewal failed:',error);
+  setCcjProvisionMessage(error.message||'Falha ao renovar as senhas.',true);
+  if(table)table.innerHTML='<tr><td colspan="4">Não foi possível renovar as senhas.</td></tr>';
+ }finally{button.disabled=false;button.textContent='Renovar senhas provisórias'}
 }
 async function downloadCcjCredentials(){
  if(!isSigaAdmin()||!ccjProvisionCredentials.length)return;
