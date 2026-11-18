@@ -753,7 +753,7 @@ function renderMembers(){
  const adminNames=['Atos Roberto Tosha','Fabio Tadashi Tuyama','Uriel Kouken Yano','Sanue Yoshioka de Oliveira','Samuel Mazikina','Vinicius Camargo Era'];
  const auxiliaryNames=['Fabio Haseyama','Nobuyuki Mikawa','Carlos Eduardo Arai'];
  const fiscalNames=['João Henrique Julio de Souza','Alex Sandro Silva Minami','Mario Sasaki'];
- const norm=s=>String(s||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().trim();
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
  const groupOf=m=>{
   const name=norm(m.nome),role=norm(m.cargo);
   if(fiscalNames.some(n=>norm(n)===name)||role.includes('conselho fiscal'))return 'Conselho Fiscal';
