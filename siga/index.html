@@ -276,7 +276,20 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 </div>
 
 </div>
-<div id="assets" class="module hidden"><div class="title"><div><h1>🏛️ Patrimônio</h1><p>Controle patrimonial bilíngue</p></div></div><div class="panel"><h2>Controle patrimonial / 固定資産管理</h2><p class="small-note">O módulo será conectado à planilha patrimonial bilíngue e aos relatórios A4.</p></div></div>
+<div id="assets" class="module hidden">
+<div class="title"><div><h1>🏛️ Patrimônio / 資産</h1><p>Cadastro e acompanhamento dos bens / 資産の登録・管理</p></div><button class="btn secondary" type="button" onclick="loadFixedAssets()">↻ Atualizar / 更新</button></div>
+<div class="panel"><h2 id="assetFormTitle">Cadastrar patrimônio / 資産登録</h2>
+<form id="fixedAssetForm" onsubmit="saveFixedAsset(event)"><input type="hidden" id="assetId"><div class="formgrid">
+<label>Unidade / 拠点<select id="assetUnit" required></select></label><label>Código patrimonial / 資産コード<input id="assetCode" required maxlength="80"></label>
+<label>Descrição em português / ポルトガル語名<input id="assetNamePt" required maxlength="240"></label><label>Nome em japonês / 日本語名<input id="assetNameJa" maxlength="240"></label>
+<label>Data de aquisição / 取得日<input id="assetDate" type="date"></label><label>Valor de aquisição (¥) / 取得価額<input id="assetCost" type="number" min="0" step="0.0001" inputmode="decimal"></label>
+<label>Fornecedor / 仕入先<input id="assetSupplier" maxlength="240"></label><label>Localização / 保管場所<input id="assetLocation" maxlength="240"></label>
+<label>Status / 状態<select id="assetStatus"><option value="active">Ativo / 使用中</option><option value="under_maintenance">Em manutenção / 修理中</option><option value="transferred">Transferido / 移管済み</option><option value="disposed">Baixado / 除却済み</option><option value="lost">Extraviado / 紛失</option></select></label>
+<label>Referência do comprovante / 証憑参照<input id="assetDocument" maxlength="500"></label><label class="full">Observações / 備考<textarea id="assetNotes" maxlength="3000"></textarea></label>
+</div><div class="actions"><button id="assetSaveButton" class="btn primary" type="submit">Salvar / 保存</button><button class="btn secondary" type="button" onclick="clearFixedAssetForm()">Limpar / クリア</button><span id="assetFormMessage" class="small-note" role="status" aria-live="polite"></span></div></form></div>
+<div class="panel" style="margin-top:17px"><div class="toolbar"><input id="assetSearch" type="search" placeholder="Pesquisar código, nome ou fornecedor" oninput="renderFixedAssets()"><select id="assetStatusFilter" onchange="renderFixedAssets()"><option value="">Todos os status / すべて</option><option value="active">Ativo / 使用中</option><option value="under_maintenance">Em manutenção / 修理中</option><option value="transferred">Transferido / 移管済み</option><option value="disposed">Baixado / 除却済み</option><option value="lost">Extraviado / 紛失</option></select></div>
+<p id="assetListMessage" class="small-note" role="status" aria-live="polite"></p><div class="tablewrap"><table><thead><tr><th>Código</th><th>Bem / 資産名</th><th>Unidade / 拠点</th><th>Aquisição</th><th>Valor / 取得価額</th><th>Status / 状態</th><th>Ações</th></tr></thead><tbody id="fixedAssetsTable"><tr><td colspan="7">Abra o módulo para carregar / 開いて読み込んでください。</td></tr></tbody></table></div>
+<p class="small-note">Os bens não são apagados: para registrar uma baixa, altere o status para “Baixado”. / 資産データは削除せず、除却時は状態を変更します。</p></div></div>
 <div id="agenda" class="module hidden"><div class="title"><div><h1>📅 Agenda</h1><p>Compromissos e reuniões</p></div></div><div class="panel"><h2>Agenda / 予定</h2><div class="formgrid"><label>Data<input type="date"></label><label>Horário<input type="time"></label><label>Evento<input></label><label>Responsável<input></label></div></div></div>
 <div id="reports" class="module hidden"><div class="title"><div><h1>📄 Documentos / Relatórios</h1><p>Consultas e impressão</p></div></div><div class="panel"><h2>Relatórios / レポート</h2><p class="small-note">Preparado para relatórios financeiros, presença, patrimônio e documentos em A4.</p></div></div>
 <div id="settings" class="module hidden"><div class="title"><div><h1>⚙️ Configurações</h1><p>Organização, país, moeda e idioma</p></div></div><div class="panel"><h2>Dados da organização</h2><div class="formgrid"><label>Nome / 名称<input id="setName"></label><label>Nome japonês / 日本語名<input id="setNameJp"></label><label>País / 国<select id="setCountry" onchange="countryChanged()"><option value="JP">Japão</option><option value="BR">Brasil</option><option value="US">Estados Unidos</option><option value="PT">Portugal</option><option value="AO">Angola</option></select></label><label>Cidade / 市<input id="setCity"></label><label>Endereço / 住所<input id="setAddress"></label><label>Telefone / 電話<input id="setPhone"></label><label>E-mail<input id="setEmail"></label><label>Idioma / 言語<select id="setLanguage"><option value="pt-ja">Português + Japonês</option><option value="pt">Português</option><option value="ja">Japonês</option></select></label></div><div class="actions"><button class="btn primary" onclick="saveSettings()">Salvar / 保存</button><span id="savedMsg"></span></div></div></div>
@@ -395,7 +408,7 @@ function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeou
  try{
   const admin=isSigaAdmin();
   if(!sigaSession&&id!=='dashboard'&&id!=='admin'){openLogin();return false}
-  if(sigaSession&&!admin&&!['dashboard','admin','units','members','attendance'].includes(id)){alert('O acesso a este módulo ainda não foi liberado para sua conta.');return false}
+  if(sigaSession&&!admin&&!['dashboard','admin','units','members','attendance','assets'].includes(id)){alert('O acesso a este módulo ainda não foi liberado para sua conta.');return false}
   if(id==='members'&&!sigaSession){openLogin();return false}
   if(id==='units'&&!admin&&!sigaUnitReadAccess){alert('O administrador ainda não vinculou unidades a esta conta.');return false}
   document.querySelectorAll('.module').forEach(x=>x.classList.add('hidden'));
@@ -408,6 +421,7 @@ function go(id,btn){if(id==='finance'&&typeof loadFinance==='function')setTimeou
   if(id==='settings'&&typeof loadSettings==='function')loadSettings();
   if(id==='units')loadUnits();
   if(id==='members'){applyMemberPermissions();loadMembers();}
+  if(id==='assets')loadFixedAssets();
   if(id==='admin'&&admin)renderUsers();
   return false;
  }catch(e){console.error(e);return false}
@@ -2181,4 +2195,30 @@ function printMemberQRCards(){
 #bankTransferLedgerPanel .bank-ledger-actions button{font-size:12px;padding:7px 10px}
 </style>
 
+
+<script id="siga-fixed-assets-v1">
+(function(){
+ const el=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const labels={active:'Ativo / 使用中',under_maintenance:'Em manutenção / 修理中',transferred:'Transferido / 移管済み',disposed:'Baixado / 除却済み',lost:'Extraviado / 紛失'};
+ let assets=[],units=[],writeUnits=new Set();
+ const admin=()=>typeof isSigaAdmin==='function'&&isSigaAdmin(), canWrite=id=>admin()||writeUnits.has(String(id));
+ function message(v,error){const x=el('assetListMessage');if(x){x.textContent=v;x.style.color=error?'#b42318':'';}}
+ async function permissions(){writeUnits=new Set();if(admin()||!sigaSession?.user?.id)return;const r=await authClient.from('siga_user_unit_permissions').select('unit_id,permissions').eq('user_id',sigaSession.user.id);if(r.error)throw r.error;(r.data||[]).forEach(x=>{if(x.permissions?.['assets.write']===true)writeUnits.add(String(x.unit_id));});}
+ window.loadFixedAssets=async function(){
+  const body=el('fixedAssetsTable');if(!sigaSession){message('Entre no SIGA para acessar / ログインしてください。',true);return;}if(body)body.innerHTML='<tr><td colspan="7">Carregando / 読み込み中...</td></tr>';message('Carregando patrimônio / 資産を読み込み中...');
+  try{await permissions();const [u,a]=await Promise.all([authClient.from('siga_units').select('id,code,name,japanese_name').eq('is_active',true).order('code'),authClient.from('siga_fixed_assets').select('id,unit_id,asset_code,name_pt,name_ja,acquisition_date,acquisition_cost,currency_code,supplier,location,asset_status,document_reference,notes').order('asset_code')]);if(u.error)throw u.error;if(a.error)throw a.error;units=u.data||[];assets=a.data||[];
+   const sel=el('assetUnit'),prev=sel.value;sel.innerHTML='<option value="">Selecione / 選択</option>'+units.map(x=>'<option value="'+esc(x.id)+'">'+esc([x.code,x.name||x.japanese_name].filter(Boolean).join(' — '))+'</option>').join('');if(units.some(x=>String(x.id)===prev))sel.value=prev;
+   renderFixedAssets();message(assets.length+' bem(ns) carregado(s) / 資産 '+assets.length+'件');
+  }catch(e){console.error('SIGA patrimônio:',e);if(body)body.innerHTML='<tr><td colspan="7">Não foi possível carregar. Verifique a permissão da unidade. / 読み込み・権限エラー</td></tr>';message('Erro: '+(e.message||e),true);}
+ };
+ window.renderFixedAssets=function(){const body=el('fixedAssetsTable');if(!body)return;const q=(el('assetSearch').value||'').trim().toLowerCase(),st=el('assetStatusFilter').value||'',map=new Map(units.map(x=>[String(x.id),x]));const rows=assets.filter(a=>(!st||a.asset_status===st)&&(!q||[a.asset_code,a.name_pt,a.name_ja,a.supplier,a.location].filter(Boolean).join(' ').toLowerCase().includes(q)));
+  body.innerHTML=rows.map(a=>{const u=map.get(String(a.unit_id))||{},name=[a.name_pt,a.name_ja].filter(Boolean).join(' / '),amount=a.acquisition_cost==null?'—':new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:2}).format(Number(a.acquisition_cost));return '<tr><td>'+esc(a.asset_code)+'</td><td><b>'+esc(name)+'</b><div class="small-note">'+esc(a.supplier||'')+'</div></td><td>'+esc([u.code,u.name||u.japanese_name].filter(Boolean).join(' — ')||'—')+'</td><td>'+esc(a.acquisition_date||'—')+'</td><td>'+esc(amount)+'</td><td>'+esc(labels[a.asset_status]||a.asset_status)+'</td><td>'+(canWrite(a.unit_id)?'<button type="button" class="btnsm" data-asset-edit="'+esc(a.id)+'">Editar / 編集</button>':'—')+'</td></tr>';}).join('')||'<tr><td colspan="7">Nenhum patrimônio encontrado / 資産がありません。</td></tr>';
+  const form=el('fixedAssetForm');if(form)form.classList.toggle('hidden',!admin()&&!writeUnits.size);if(form&&!admin()&&!writeUnits.size)el('assetFormMessage').textContent='Consulta permitida; cadastro/edição depende da permissão assets.write.';
+ };
+ window.clearFixedAssetForm=function(){el('fixedAssetForm').reset();el('assetId').value='';el('assetStatus').value='active';el('assetFormTitle').textContent='Cadastrar patrimônio / 資産登録';el('assetSaveButton').textContent='Salvar / 保存';el('assetFormMessage').textContent='';};
+ window.saveFixedAsset=async function(e){e.preventDefault();const msg=el('assetFormMessage'),btn=el('assetSaveButton');try{if(!sigaSession)throw Error('Sessão encerrada. Entre novamente.');const id=el('assetId').value||null,unitId=el('assetUnit').value;if(!unitId)throw Error('Selecione a unidade.');if(!canWrite(unitId))throw Error('Sem permissão assets.write para esta unidade.');const raw=el('assetCost').value,cost=raw===''?null:Number(raw);if(cost!==null&&(!Number.isFinite(cost)||cost<0))throw Error('Valor inválido.');const p={unit_id:unitId,asset_code:el('assetCode').value.trim(),name_pt:el('assetNamePt').value.trim(),name_ja:el('assetNameJa').value.trim()||null,acquisition_date:el('assetDate').value||null,acquisition_cost:cost,currency_code:'JPY',supplier:el('assetSupplier').value.trim()||null,location:el('assetLocation').value.trim()||null,asset_status:el('assetStatus').value,document_reference:el('assetDocument').value.trim()||null,notes:el('assetNotes').value.trim()||null,updated_by:sigaSession.user.id};if(!p.asset_code||!p.name_pt)throw Error('Informe código e descrição.');btn.disabled=true;msg.textContent='Salvando / 保存中...';const r=id?await authClient.from('siga_fixed_assets').update(p).eq('id',id).select('id').maybeSingle():await authClient.from('siga_fixed_assets').insert({...p,created_by:sigaSession.user.id}).select('id').maybeSingle();if(r.error)throw r.error;if(!r.data)throw Error('Nenhum registro salvo; verifique as permissões.');msg.textContent='Patrimônio salvo / 資産を保存しました。';clearFixedAssetForm();await loadFixedAssets();}catch(e){console.error(e);msg.textContent='Falha ao salvar: '+(e.message||e);}finally{btn.disabled=false;}};
+ window.editFixedAsset=function(id){const a=assets.find(x=>String(x.id)===String(id));if(!a||!canWrite(a.unit_id))return;el('assetId').value=a.id;el('assetUnit').value=a.unit_id;el('assetCode').value=a.asset_code||'';el('assetNamePt').value=a.name_pt||'';el('assetNameJa').value=a.name_ja||'';el('assetDate').value=a.acquisition_date||'';el('assetCost').value=a.acquisition_cost??'';el('assetSupplier').value=a.supplier||'';el('assetLocation').value=a.location||'';el('assetStatus').value=a.asset_status||'active';el('assetDocument').value=a.document_reference||'';el('assetNotes').value=a.notes||'';el('assetFormTitle').textContent='Editar patrimônio / 資産編集';el('assetSaveButton').textContent='Salvar alterações / 変更を保存';el('assetFormMessage').textContent='';el('fixedAssetForm').scrollIntoView({behavior:'smooth',block:'start'});};
+ document.addEventListener('click',e=>{const b=e.target?.closest?.('[data-asset-edit]');if(b){e.preventDefault();editFixedAsset(b.dataset.assetEdit);}});
+})();
+</script>
 </body></html>
