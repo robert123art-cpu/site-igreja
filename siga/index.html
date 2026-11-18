@@ -750,8 +750,8 @@ function renderMembers(){
  applyMemberPermissions();
  const q=(document.getElementById('memberSearch')?.value||'').toLowerCase();
  const rows=members.filter(m=>(m.nome+' '+m.nomeJp+' '+m.cargo+' '+m.tel+' '+m.email+' '+m.localidade+' '+m.cidade).toLowerCase().includes(q));
- const adminNames=['Atos Roberto Tosha','Fabio Tadashi Tuyama','Uriel Kouken Yano','Sanue Yoshioka de Oliveira','Samuel Mazikina','Vinicius Camargo Era'];
- const auxiliaryNames=['Fabio Haseyama','Nobuyuki Mikawa','Carlos Eduardo Arai'];
+ const adminNames=['Atos Roberto Tosha','Fabio Tadashi Tsuyama','Fabio Tadashi Tuyama','Uriel Kouken Yano','Sanue Yoshioka de Oliveira','Samuel Mazikina','Vinicius Camargo Era','Fabio Haseyama','Nobuyuki Mikawa','Carlos Eduardo Arai'];
+ const auxiliaryNames=[];
  const fiscalNames=['João Henrique Julio de Souza','Alex Sandro Silva Minami','Mario Sasaki'];
  const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
  const groupOf=m=>{
