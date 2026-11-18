@@ -996,6 +996,39 @@ function toggleFinanceType(){
   }
 }
 function setFinanceDate(){const d=document.getElementById('fDate');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
+async function getFinanceAccountAvailableBalance(accountId,unitId,excludeTransactionId){
+  const [{data:accounts,error:accountsError}] = await Promise.all([
+    authClient.from('siga_financial_accounts')
+      .select('id,initial_balance')
+      .eq('unit_id',unitId).eq('is_active',true)
+  ]);
+  if(accountsError)throw accountsError;
+  const account=(accounts||[]).find(x=>String(x.id)===String(accountId));
+  if(!account)throw new Error('Não foi possível localizar a conta financeira de origem.');
+  let transactions=[],offset=0;
+  const pageSize=500;
+  while(true){
+    const {data,error}=await authClient.from('siga_financial_transactions')
+      .select('id,transaction_type,amount,financial_account_id,transfer_target_account_id')
+      .eq('unit_id',unitId)
+      .range(offset,offset+pageSize-1);
+    if(error)throw error;
+    const page=data||[];
+    transactions.push(...page);
+    if(page.length<pageSize)break;
+    offset+=pageSize;
+  }
+  let balance=Number(account.initial_balance)||0;
+  transactions.forEach(tx=>{
+    if(excludeTransactionId&&String(tx.id)===String(excludeTransactionId))return;
+    const amount=Number(tx.amount)||0;
+    if(tx.transaction_type==='entry'&&String(tx.financial_account_id)===String(accountId))balance+=amount;
+    else if((tx.transaction_type==='expense'||tx.transaction_type==='transfer')&&String(tx.financial_account_id)===String(accountId))balance-=amount;
+    else if(tx.transaction_type==='transfer'&&String(tx.transfer_target_account_id)===String(accountId))balance+=amount;
+  });
+  return balance;
+}
+
 async function saveFinance(ev){
   ev.preventDefault();
   if(!sigaSession){openLogin('Sessão expirada. Entre novamente.');return;}
@@ -1019,6 +1052,18 @@ async function saveFinance(ev){
     if(!unitId||!payload.financial_account_id||!payload.transaction_date||!Number.isFinite(amount)||amount<=0||!description)throw new Error('Preencha todos os campos obrigatórios. / 必須項目を入力してください。');
     const sourceAccount=financeAccountsForUnit.find(x=>String(x.id)===String(payload.financial_account_id));
     if(!sourceAccount||String(sourceAccount.unit_id)!==String(unitId))throw new Error('A conta de origem não pertence à unidade selecionada. / 取引元口座は選択した拠点に属していません。');
+    if(type==='expense'||isTransfer){
+      const availableBalance=await getFinanceAccountAvailableBalance(
+        payload.financial_account_id,unitId,window.sigaFinanceEditingId||null
+      );
+      if(availableBalance<amount){
+        const accountLabel=sourceAccount.name||'conta de origem';
+        const currency=sourceAccount.currency_code||'JPY';
+        const formatAvailable=new Intl.NumberFormat('ja-JP',{style:'currency',currency,maximumFractionDigits:0}).format(availableBalance);
+        const formatRequested=new Intl.NumberFormat('ja-JP',{style:'currency',currency,maximumFractionDigits:0}).format(amount);
+        throw new Error('Lançamento bloqueado: saldo insuficiente em '+accountLabel+'. Saldo disponível: '+formatAvailable+'; valor solicitado: '+formatRequested+'. / 残高不足のため保存できません。');
+      }
+    }
     if(isTransfer){
       if(!payload.transfer_target_account_id)throw new Error('Selecione a conta de destino. / 振替先口座を選択してください。');
       const targetAccount=financeAccountsForUnit.find(x=>String(x.id)===String(payload.transfer_target_account_id));
