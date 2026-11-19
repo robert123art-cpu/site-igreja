@@ -87,6 +87,21 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
   body.printing-ledger #generalLedgerPanel th,body.printing-ledger #generalLedgerPanel td{padding:6px!important;border:1px solid #aaa!important}
   body.printing-ledger #generalLedgerPanel tr{break-inside:avoid}
 }
+@media print{
+  body.printing-trial-balance aside,body.printing-trial-balance .top,body.printing-trial-balance .module:not(#finance){display:none!important}
+  body.printing-trial-balance main{margin:0!important;width:100%!important}
+  body.printing-trial-balance .content{padding:0!important}
+  body.printing-trial-balance #finance{display:block!important}
+  body.printing-trial-balance #finance>:not(.title):not(#trialBalancePanel){display:none!important}
+  body.printing-trial-balance #trialBalancePanel{display:block!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}
+  body.printing-trial-balance #trialBalancePanel .toolbar{display:none!important}
+  body.printing-trial-balance #trialBalancePanel .tablewrap{overflow:visible!important}
+  body.printing-trial-balance #trialBalancePanel table{width:100%!important;font-size:9pt!important}
+  body.printing-trial-balance #trialBalancePanel th,body.printing-trial-balance #trialBalancePanel td{padding:6px!important;border:1px solid #aaa!important}
+  body.printing-trial-balance #trialBalancePanel tr{break-inside:avoid}
+  body.printing-trial-balance #trialBalancePrintMeta{display:block!important;margin:8px 0;color:#555;font-size:9pt}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -242,8 +257,10 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
     <label class="small-note">De / 開始日<input id="trialBalanceFrom" type="date" onchange="renderTrialBalance()"></label>
     <label class="small-note">Até / 終了日<input id="trialBalanceTo" type="date" onchange="renderTrialBalance()"></label>
     <button class="btn secondary" type="button" onclick="exportTrialBalanceCsv()">Exportar CSV / CSV出力</button>
+    <button class="btn secondary" type="button" onclick="printTrialBalance()">Imprimir / 印刷</button>
   </div>
   <p id="trialBalanceCount" class="small-note" role="status" aria-live="polite"></p>
+  <div id="trialBalancePrintMeta" class="finance-print-meta"></div>
   <div class="tablewrap"><table id="trialBalanceTable">
     <thead><tr><th>Localidade / 拠点</th><th>Código / コード</th><th>Conta / 勘定科目</th><th>Entradas / 入金</th><th>Saídas / 出金</th><th>Diferença / 差額</th></tr></thead>
     <tbody id="trialBalanceBody"><tr><td colspan="6">Atualize o Financeiro para carregar o relatório. / 財務を更新してレポートを読み込んでください。</td></tr></tbody>
@@ -1346,6 +1363,23 @@ function exportTrialBalanceCsv(){
   link.click();
   URL.revokeObjectURL(link.href);
 }
+
+function printTrialBalance(){
+  const meta=document.getElementById('trialBalancePrintMeta');
+  if(meta){
+    const unitSelect=document.getElementById('trialBalanceUnit');
+    const unitLabel=unitSelect?.selectedOptions?.[0]?.textContent?.trim()||'Todas as localidades / すべての拠点';
+    const from=document.getElementById('trialBalanceFrom')?.value||'—';
+    const to=document.getElementById('trialBalanceTo')?.value||'—';
+    const now=new Date();
+    meta.textContent='Localidade: '+unitLabel+' | Período: '+from+' a '+to+' | Impresso em '+now.toLocaleString('pt-BR')+' / 拠点・期間・印刷日時：'+now.toLocaleString('ja-JP');
+  }
+  const cleanup=()=>document.body.classList.remove('printing-trial-balance');
+  window.addEventListener('afterprint',cleanup,{once:true});
+  document.body.classList.add('printing-trial-balance');
+  window.print();
+}
+
 function exportGeneralLedgerCsv(){
   const rows=[['Data / 日付','Unidade / 拠点','Código / コード','Conta / 勘定科目','Descrição / 摘要','Tipo / 種類','Valor / 金額'],...Array.from(document.querySelectorAll('#generalLedgerBody tr')).filter(tr=>tr.cells.length===7).map(tr=>Array.from(tr.cells).map(td=>td.innerText))];
   const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');
