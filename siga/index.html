@@ -1437,27 +1437,31 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
     const requestId=++dashboardRequestId;
     try{
       if(typeof authClient==='undefined'||!authClient)return;
-      const [rows,chartResult]=await Promise.all([
+      const [rows,accountsResult,chartResult]=await Promise.all([
         fetchAllDashboardTransactions(),
+        authClient.from('siga_financial_accounts').select('id,initial_balance').eq('is_active',true),
         authClient.from('siga_chart_of_accounts').select('id,name_pt,name_ja').order('code')
       ]);
       if(requestId!==dashboardRequestId)return;
+      if(accountsResult.error)throw accountsResult.error;
       if(chartResult.error)throw chartResult.error;
       const chartById=new Map((chartResult.data||[]).map(account=>[String(account.id),account]));
-      let balance=0,entries=0,expenses=0;
+      const opening=(accountsResult.data||[]).reduce((sum,account)=>sum+Number(account.initial_balance||0),0);
+      let entriesAll=0,expensesAll=0,entries=0,expenses=0;
       const now=new Date();
       const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
       rows.forEach(r=>{
         const a=Number(r.amount)||0;
         if(r.transaction_type==='entry'){
-          balance+=a;
+          entriesAll+=a;
           if(String(r.transaction_date).slice(0,7)===ym)entries+=a;
         }else if(r.transaction_type==='expense'){
-          balance-=a;
+          expensesAll+=a;
           if(String(r.transaction_date).slice(0,7)===ym)expenses+=a;
         }
         // Transferências internas não alteram o saldo total.
       });
+      const balance=opening+entriesAll-expensesAll;
       const result=entries-expenses;
       const vals=document.querySelectorAll('#dashboard .cards .value');
       if(vals.length>=4){
