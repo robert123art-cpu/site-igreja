@@ -1401,6 +1401,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
 
 <script id="siga-dashboard-live-patch">
 (function(){
+  let dashboardRequestId=0;
   function money(v){
     const n=Number(v)||0;
     return new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(n);
@@ -1413,18 +1414,36 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
   function escapeHtml(v){
     return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
+  async function fetchAllDashboardTransactions(){
+    const pageSize=500;
+    const rows=[];
+    let offset=0;
+    while(true){
+      const {data,error}=await authClient
+        .from('siga_financial_transactions')
+        .select('transaction_date,transaction_type,amount,description,counterparty,created_at,chart_account_id')
+        .order('transaction_date',{ascending:false})
+        .order('created_at',{ascending:false})
+        .range(offset,offset+pageSize-1);
+      if(error)throw error;
+      const page=data||[];
+      rows.push(...page);
+      if(page.length<pageSize)break;
+      offset+=pageSize;
+    }
+    return rows;
+  }
   async function loadLiveDashboard(){
+    const requestId=++dashboardRequestId;
     try{
-      if(typeof authClient==='undefined')return;
-      const [transactionsResult,chartResult]=await Promise.all([
-        authClient.from('siga_financial_transactions').select('transaction_date,transaction_type,amount,description,counterparty,created_at,chart_account_id').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).limit(5000),
+      if(typeof authClient==='undefined'||!authClient)return;
+      const [rows,chartResult]=await Promise.all([
+        fetchAllDashboardTransactions(),
         authClient.from('siga_chart_of_accounts').select('id,name_pt,name_ja').order('code')
       ]);
-      const {data,error}=transactionsResult;
-      if(error)throw error;
-      if(chartResult.error)console.warn('Não foi possível carregar o Plano de Contas no painel:',chartResult.error);
+      if(requestId!==dashboardRequestId)return;
+      if(chartResult.error)throw chartResult.error;
       const chartById=new Map((chartResult.data||[]).map(account=>[String(account.id),account]));
-      const rows=data||[];
       let balance=0,entries=0,expenses=0;
       const now=new Date();
       const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
@@ -1437,7 +1456,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
           balance-=a;
           if(String(r.transaction_date).slice(0,7)===ym)expenses+=a;
         }
-        // transfer is internal and must not change the organization total.
+        // Transferências internas não alteram o saldo total.
       });
       const result=entries-expenses;
       const vals=document.querySelectorAll('#dashboard .cards .value');
@@ -1467,7 +1486,9 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
           return '<tr><td>'+fmtDate(r.transaction_date)+'</td><td>'+descriptionHtml+'</td><td>'+cat+'</td><td class="'+cls+'">'+label+'</td><td class="'+cls+'">'+money(r.amount)+'</td></tr>';
         }).join('') || '<tr><td colspan="5">Nenhuma movimentação registrada / 取引はありません。</td></tr>';
       }
-    }catch(e){console.error('Painel financeiro:',e);}
+    }catch(e){
+      if(requestId===dashboardRequestId)console.error('Painel financeiro: falha ao atualizar; os valores anteriores foram mantidos.',e);
+    }
   }
   window.loadLiveDashboard=loadLiveDashboard;
   function start(){loadLiveDashboard();setInterval(loadLiveDashboard,30000);}
