@@ -1201,7 +1201,22 @@ async function saveFinance(ev){
     const formTitle=document.querySelector('#financeForm')?.closest('.panel')?.querySelector('h2');
     if(formTitle)formTitle.textContent='Novo lançamento / 新規取引';
     alert(wasEditing?'Lançamento atualizado / 取引を更新しました':(isTransfer?'Transferência salva / 振替を保存しました':'Lançamento salvo / 取引を保存しました'));
-    document.getElementById('financeForm').reset();
+    const financeForm=document.getElementById('financeForm');
+    financeForm.reset();
+    ['fUnit','fAccount','fTargetAccount','fChart'].forEach(id=>{
+      const field=document.getElementById(id);
+      if(field)field.value='';
+    });
+    ['fAmount','fDoc','fCounterparty','fDescription'].forEach(id=>{
+      const field=document.getElementById(id);
+      if(field)field.value='';
+    });
+    const chartField=document.getElementById('fChart');
+    if(chartField)chartField.dataset.lastAutoDescription='';
+    const typeField=document.getElementById('fType');
+    if(typeField)typeField.value='entry';
+    const dateField=document.getElementById('fDate');
+    if(dateField)dateField.value='';
     await loadFinanceAccounts();
     toggleFinanceType();
     setFinanceDate();
