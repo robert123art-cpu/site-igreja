@@ -1995,45 +1995,38 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
 
 <script id="siga-chart-code-autofill-v1">
 (function(){
+  function getSelectedAccount(){
+    const select=document.getElementById('fChart');
+    const rows=Array.isArray(financeChartAccounts)?financeChartAccounts:[];
+    if(!select||!select.value)return null;
+    return rows.find(account=>String(account.id)===String(select.value))||null;
+  }
+  function fillDescription(){
+    const select=document.getElementById('fChart');
+    const description=document.getElementById('fDescription');
+    const account=getSelectedAccount();
+    if(!select||!description||!account)return;
+    const bilingual=[account.name_ja,account.name_pt].filter(Boolean).join(' / ');
+    if(!bilingual)return;
+    const previous=select.dataset.lastAutoDescription||'';
+    const current=description.value.trim();
+    if(!current||current===previous){
+      description.value=bilingual;
+      select.dataset.lastAutoDescription=bilingual;
+      description.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+  }
   function applyChartCodeMode(){
     const select=document.getElementById('fChart');
     if(!select)return;
     const rows=Array.isArray(financeChartAccounts)?financeChartAccounts:[];
-    if(!rows.length)return;
-    const byId=new Map(rows.map(x=>[String(x.id),x]));
+    const byId=new Map(rows.map(account=>[String(account.id),account]));
     Array.from(select.options).forEach(option=>{
       if(!option.value)return;
       const account=byId.get(String(option.value));
-      if(account){
-        option.dataset.accountCode=String(account.code||'');
-      }
+      if(account)option.dataset.accountCode=String(account.code||'');
     });
-    if(select.dataset.codeModeBound!=='1'){
-      select.dataset.codeModeBound='1';
-      select.addEventListener('change',function(){
-        const account=byId.get(String(select.value));
-        if(!account)return;
-        const description=document.getElementById('fDescription');
-        if(!description)return;
-        const previous=select.dataset.lastAutoDescription||'';
-        const current=description.value.trim();
-        if(!current||current===previous){
-          const bilingual=[account.name_ja,account.name_pt].filter(Boolean).join(' / ');
-          description.value=bilingual;
-          select.dataset.lastAutoDescription=bilingual;
-        }
-      });
-    }
-    const selected=byId.get(String(select.value));
-    if(selected){
-      const description=document.getElementById('fDescription');
-      const previous=select.dataset.lastAutoDescription||'';
-      if(description&&!description.value.trim()){
-        const bilingual=[selected.name_ja,selected.name_pt].filter(Boolean).join(' / ');
-        description.value=bilingual;
-        select.dataset.lastAutoDescription=bilingual;
-      }
-    }
+    fillDescription();
   }
   const original=window.loadFinance;
   if(typeof original==='function'){
@@ -2043,12 +2036,14 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
       return result;
     };
   }
+  document.addEventListener('change',event=>{
+    if(event.target&&event.target.id==='fChart')fillDescription();
+  },true);
+  const form=document.getElementById('financeForm');
+  if(form)form.addEventListener('reset',()=>setTimeout(applyChartCodeMode,0));
   document.addEventListener('DOMContentLoaded',()=>setTimeout(applyChartCodeMode,700));
   const select=document.getElementById('fChart');
-  if(select){
-    const observer=new MutationObserver(()=>applyChartCodeMode());
-    observer.observe(select,{childList:true});
-  }
+  if(select)new MutationObserver(applyChartCodeMode).observe(select,{childList:true});
   window.sigaApplyChartCodeMode=applyChartCodeMode;
 })();
 </script>
