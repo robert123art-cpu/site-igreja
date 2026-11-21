@@ -220,7 +220,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
       <label>Tipo / 種類<select id="fType" required><option value="entry">Entrada / 収入</option><option value="expense">Saída / 支出</option><option value="transfer">Transferência / 振替</option></select></label>
       <label id="fTransferField" class="hidden">Conta de destino / 振替先<select id="fTargetAccount"></select><small id="fTransferHint" class="small-note">Escolha uma unidade para carregar as contas de destino / 振替先口座を読み込む拠点を選択してください。</small></label>
       <label>Data / 日付<input id="fDate" type="date" required></label>
-      <label>Valor / 金額<input id="fAmount" type="number" min="0.01" step="0.01" required></label>
+      <label>Valor / 金額<input id="fAmount" type="text" inputmode="numeric" autocomplete="off" required><small id="fAmountHint" class="small-note">JPY: informe ienes inteiros, sem casas decimais. Separadores de milhar são aceitos. / JPY：小数なしの整数で入力してください。桁区切りを使用できます。</small></label>
       <label>Documento / 証憑<input id="fDoc"></label>
       <label>Favorecido / 相手先<input id="fCounterparty"></label>
       <label style="grid-column:1/-1">Descrição / 摘要<input id="fDescription" required></label>
@@ -299,7 +299,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <form id="fixedAssetForm" onsubmit="saveFixedAsset(event)"><input type="hidden" id="assetId"><div class="formgrid">
 <label>Unidade / 拠点<select id="assetUnit" required></select></label><label>Código patrimonial / 資産コード<input id="assetCode" required maxlength="80"></label>
 <label>Descrição em português / ポルトガル語名<input id="assetNamePt" required maxlength="240"></label><label>Nome em japonês / 日本語名<input id="assetNameJa" maxlength="240"></label>
-<label>Data de aquisição / 取得日<input id="assetDate" type="date"></label><label>Valor de aquisição (¥) / 取得価額<input id="assetCost" type="number" min="0" step="0.0001" inputmode="decimal"></label>
+<label>Data de aquisição / 取得日<input id="assetDate" type="date"></label><label>Valor de aquisição (¥) / 取得価額<input id="assetCost" type="text" inputmode="numeric" autocomplete="off"></label>
 <label>Fornecedor / 仕入先<input id="assetSupplier" maxlength="240"></label><label>Localização / 保管場所<input id="assetLocation" maxlength="240"></label>
 <label>Status / 状態<select id="assetStatus"><option value="active">Ativo / 使用中</option><option value="under_maintenance">Em manutenção / 修理中</option><option value="transferred">Transferido / 移管済み</option><option value="disposed">Baixado / 除却済み</option><option value="lost">Extraviado / 紛失</option></select></label>
 <label>Referência do comprovante / 証憑参照<input id="assetDocument" maxlength="500"></label><label class="full">Observações / 備考<textarea id="assetNotes" maxlength="3000"></textarea></label>
@@ -402,6 +402,68 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div id="passwordRecoveryModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="passwordRecoveryTitle"><div class="modal-box"><h2 id="passwordRecoveryTitle">🔑 Redefinir senha</h2><p class="small-note">Escolha uma nova senha com pelo menos 8 caracteres.</p><form onsubmit="saveRecoveredPassword(event)"><div class="field"><label for="recoveryPassword">Nova senha</label><input id="recoveryPassword" type="password" minlength="8" autocomplete="new-password" required></div><div class="field" style="margin-top:10px"><label for="recoveryPasswordConfirm">Confirme a nova senha</label><input id="recoveryPasswordConfirm" type="password" minlength="8" autocomplete="new-password" required></div><div class="actions"><button id="recoverySubmit" type="submit" class="btn primary">Salvar nova senha</button></div></form><div id="recoveryMsg" class="login-msg" role="status" aria-live="polite"></div><button type="button" class="btn secondary login-back" onclick="cancelPasswordRecovery()">← Voltar ao login</button></div></div>
 <script>
 const countryMap={JP:{name:'Japão',currency:'JPY',symbol:'¥',locale:'ja-JP',flag:'🇯🇵'},BR:{name:'Brasil',currency:'BRL',symbol:'R$',locale:'pt-BR',flag:'🇧🇷'},US:{name:'Estados Unidos',currency:'USD',symbol:'US$',locale:'en-US',flag:'🇺🇸'},PT:{name:'Portugal',currency:'EUR',symbol:'€',locale:'pt-PT',flag:'🇵🇹'},AO:{name:'Angola',currency:'AOA',symbol:'Kz',locale:'pt-AO',flag:'🇦🇴'}};
+const currencyLocaleByCode={JPY:'ja-JP',BRL:'pt-BR',USD:'en-US',EUR:'pt-PT',AOA:'pt-AO'};
+function currencyFractionDigits(currency){try{return new Intl.NumberFormat('en',{style:'currency',currency:String(currency||'JPY').toUpperCase()}).resolvedOptions().maximumFractionDigits}catch(_){return 2}}
+function currencyLocale(currency){return currencyLocaleByCode[String(currency||'JPY').toUpperCase()]||'en-US'}
+function formatCurrencyValue(value,currency='JPY',locale=currencyLocale(currency)){
+  const code=String(currency||'JPY').toUpperCase();
+  const safeAmount=normalizeStoredCurrencyAmount(value,code);
+  try{return new Intl.NumberFormat(locale,{style:'currency',currency:code}).format(safeAmount)}
+  catch(_){return code+' '+safeAmount.toLocaleString(locale,{maximumFractionDigits:currencyFractionDigits(code)})}
+}
+function parseCurrencyAmount(value,currency='JPY'){
+  const code=String(currency||'JPY').toUpperCase(),raw=String(value??'').trim().replace(/\u2212/g,'-');
+  if(!raw)return NaN;
+  const fractionDigits=currencyFractionDigits(code);
+  if(fractionDigits===0){
+    const plain=raw.replace(/[\s\u00a0\u202f]/g,'');
+    if(/^[+-]?\d+$/.test(plain)){const amount=Number(plain);return Number.isSafeInteger(amount)?amount:NaN;}
+    if(!/^[+-]?\d{1,3}(?:[,\.\s\u00a0\u202f]\d{3})+$/.test(raw))return NaN;
+    const amount=Number(raw.replace(/[,.\s\u00a0\u202f]/g,''));
+    return Number.isSafeInteger(amount)?amount:NaN;
+  }
+  const locale=currencyLocale(code),parts=new Intl.NumberFormat(locale).formatToParts(12345.6);
+  const groups=[...new Set(parts.filter(part=>part.type==='group').map(part=>part.value))];
+  const decimal=parts.find(part=>part.type==='decimal')?.value||'.';
+  let normalized=raw;
+  groups.forEach(group=>{normalized=normalized.split(group).join('')});
+  normalized=normalized.replace(/[\u00a0\u202f\s]/g,'');
+  if(decimal!=='.')normalized=normalized.split(decimal).join('.');
+  if(!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(normalized))return NaN;
+  const decimals=(normalized.split('.')[1]||'').length;
+  if(decimals>fractionDigits)return NaN;
+  const amount=Number(normalized);
+  return Number.isFinite(amount)?amount:NaN;
+}
+// Recover legacy JPY values where a localized thousands separator was saved as a decimal point (for example 61.878 -> 61,878).
+function legacyGroupedYen(value){
+  const raw=String(value??'').trim(),match=raw.match(/^([+-]?)(\d+)\.(\d{3})0*$/);
+  if(!match)return null;
+  const amount=Number(match[1]+match[2]+match[3]);
+  return Number.isSafeInteger(amount)?amount:null;
+}
+function normalizeStoredCurrencyAmount(value,currency='JPY'){
+  const code=String(currency||'JPY').toUpperCase(),amount=Number(value);
+  if(!Number.isFinite(amount))return 0;
+  if(currencyFractionDigits(code)!==0)return amount;
+  if(Number.isSafeInteger(amount))return amount;
+  const recovered=code==='JPY'?legacyGroupedYen(value):null;
+  return recovered===null?Math.round(amount):recovered;
+}
+function formatCurrencyInputValue(value,currency='JPY'){
+  const code=String(currency||'JPY').toUpperCase(),raw=Number(value);
+  if(currencyFractionDigits(code)===0){
+    const amount=normalizeStoredCurrencyAmount(value,code);
+    return new Intl.NumberFormat(currencyLocale(code),{useGrouping:true,maximumFractionDigits:0}).format(amount);
+  }
+  const amount=Number.isFinite(raw)?raw:0;
+  return new Intl.NumberFormat(currencyLocale(code),{useGrouping:false,maximumFractionDigits:currencyFractionDigits(code)}).format(amount);
+}
+function getSettings(){try{return JSON.parse(localStorage.getItem('sigaSettings'))||{}}catch(e){return {}}}
+function countryChanged(){const c=countryMap[document.getElementById('setCountry').value]||countryMap.JP;document.getElementById('setCountry').dataset.currency=c.currency}
+function saveSettings(){const data={country:document.getElementById('setCountry').value,name:document.getElementById('setName').value||'Minha Organização / Igreja',nameJp:document.getElementById('setNameJp').value,city:document.getElementById('setCity').value,address:document.getElementById('setAddress').value,phone:document.getElementById('setPhone').value,email:document.getElementById('setEmail').value,language:document.getElementById('setLanguage').value};localStorage.setItem('sigaSettings',JSON.stringify(data));applySettings();const m=document.getElementById('savedMsg');m.className='saved';m.textContent='✓ Configurações salvas';setTimeout(()=>m.textContent='',2500)}
+function loadSettings(){const d=getSettings();document.getElementById('setName').value=d.name||'';document.getElementById('setNameJp').value=d.nameJp||'';document.getElementById('setCountry').value=d.country||'JP';document.getElementById('setCity').value=d.city||'';document.getElementById('setAddress').value=d.address||'';document.getElementById('setPhone').value=d.phone||'';document.getElementById('setEmail').value=d.email||'';document.getElementById('setLanguage').value=d.language||'pt-ja';countryChanged()}
+
 function getSettings(){try{return JSON.parse(localStorage.getItem('sigaSettings'))||{}}catch(e){return {}}}
 function countryChanged(){const c=countryMap[document.getElementById('setCountry').value]||countryMap.JP;document.getElementById('setCountry').dataset.currency=c.currency}
 function saveSettings(){const data={country:document.getElementById('setCountry').value,name:document.getElementById('setName').value||'Minha Organização / Igreja',nameJp:document.getElementById('setNameJp').value,city:document.getElementById('setCity').value,address:document.getElementById('setAddress').value,phone:document.getElementById('setPhone').value,email:document.getElementById('setEmail').value,language:document.getElementById('setLanguage').value};localStorage.setItem('sigaSettings',JSON.stringify(data));applySettings();const m=document.getElementById('savedMsg');m.className='saved';m.textContent='✓ Configurações salvas';setTimeout(()=>m.textContent='',2500)}
@@ -994,6 +1056,7 @@ async function loadFinanceAccounts(){
   if(previousSource&&financeAccountsForUnit.some(x=>String(x.id)===previousSource))source.value=previousSource;
   updateFinanceTargetAccounts(previousTarget);
   source.disabled=financeAccountsForUnit.length===0;
+  updateFinanceAmountInputMode();
 }
 function updateFinanceTargetAccounts(preferredTarget){
   const unitId=document.getElementById('fUnit')?.value||'';
@@ -1009,6 +1072,19 @@ function updateFinanceTargetAccounts(preferredTarget){
     const count=accounts.length;
     hint.textContent=!unitId?'Selecione uma unidade para listar as contas de destino / 振替先口座を表示する拠点を選択してください。':count===1?'1 conta de destino disponível nesta unidade / この拠点で利用できる振替先口座は1件です。':count+' contas de destino disponíveis nesta unidade / この拠点で利用できる振替先口座：'+count+'件。';
   }
+}
+function updateFinanceAmountInputMode(){
+  const input=document.getElementById('fAmount');
+  if(!input)return;
+  const accountId=document.getElementById('fAccount')?.value||'';
+  const account=financeAccountsForUnit.find(item=>String(item.id)===String(accountId));
+  const currency=String(account?.currency_code||'JPY').toUpperCase();
+  const wholeYen=currencyFractionDigits(currency)===0;
+  input.inputMode=wholeYen?'numeric':'decimal';
+  const hint=document.getElementById('fAmountHint');
+  if(hint)hint.textContent=wholeYen
+    ?'JPY: informe ienes inteiros, sem casas decimais. Separadores de milhar são aceitos. / JPY：小数なしの整数で入力してください。桁区切りを使用できます。'
+    :'Informe o valor usando os separadores da moeda selecionada. / 選択した通貨の区切り記号で金額を入力してください。';
 }
 function toggleFinanceType(){
   const isTransfer=document.getElementById('fType')?.value==='transfer';
@@ -1027,10 +1103,11 @@ function toggleFinanceType(){
   }
 }
 function setFinanceDate(){const d=document.getElementById('fDate');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
+document.getElementById('fAccount')?.addEventListener('change',updateFinanceAmountInputMode);
 async function getFinanceAccountAvailableBalance(accountId,unitId,excludeTransactionId){
   const [{data:accounts,error:accountsError}] = await Promise.all([
     authClient.from('siga_financial_accounts')
-      .select('id,initial_balance')
+      .select('id,initial_balance,currency_code')
       .eq('unit_id',unitId).eq('is_active',true)
   ]);
   if(accountsError)throw accountsError;
@@ -1049,10 +1126,10 @@ async function getFinanceAccountAvailableBalance(accountId,unitId,excludeTransac
     if(page.length<pageSize)break;
     offset+=pageSize;
   }
-  let balance=Number(account.initial_balance)||0;
+  let balance=normalizeStoredCurrencyAmount(account.initial_balance,account.currency_code||'JPY');
   transactions.forEach(tx=>{
     if(excludeTransactionId&&String(tx.id)===String(excludeTransactionId))return;
-    const amount=Number(tx.amount)||0;
+    const amount=normalizeStoredCurrencyAmount(tx.amount,account.currency_code||'JPY');
     if(tx.transaction_type==='entry'&&String(tx.financial_account_id)===String(accountId))balance+=amount;
     else if((tx.transaction_type==='expense'||tx.transaction_type==='transfer')&&String(tx.financial_account_id)===String(accountId))balance-=amount;
     else if(tx.transaction_type==='transfer'&&String(tx.transfer_target_account_id)===String(accountId))balance+=amount;
@@ -1066,7 +1143,9 @@ async function saveFinance(ev){
   try{
     const unitId=document.getElementById('fUnit').value,type=document.getElementById('fType').value,isTransfer=type==='transfer';
     const source=document.getElementById('fAccount'),target=document.getElementById('fTargetAccount'),chart=document.getElementById('fChart');
-    const amount=Number(document.getElementById('fAmount').value),description=document.getElementById('fDescription').value.trim();
+    const sourceAccount=financeAccountsForUnit.find(x=>String(x.id)===String(source.value));
+    const currency=String(sourceAccount?.currency_code||'JPY').toUpperCase();
+    const amount=parseCurrencyAmount(document.getElementById('fAmount').value,currency),description=document.getElementById('fDescription').value.trim();
     const payload={
       unit_id:unitId,
       financial_account_id:source.value,
@@ -1080,8 +1159,11 @@ async function saveFinance(ev){
       transfer_target_account_id:isTransfer?(target.value||null):null
     };
     if(!['entry','expense','transfer'].includes(type))throw new Error('Selecione um tipo de lançamento válido. / 有効な取引の種類を選択してください。');
-    if(!unitId||!payload.financial_account_id||!payload.transaction_date||!Number.isFinite(amount)||amount<=0||!description)throw new Error('Preencha todos os campos obrigatórios. / 必須項目を入力してください。');
-    const sourceAccount=financeAccountsForUnit.find(x=>String(x.id)===String(payload.financial_account_id));
+    if(!unitId||!payload.financial_account_id||!payload.transaction_date||!Number.isFinite(amount)||amount<=0||!description){
+      if(currencyFractionDigits(currency)===0&&!Number.isFinite(amount))throw new Error('Informe um valor inteiro na moeda selecionada, sem casas decimais. / 選択した通貨の整数で入力してください。');
+      throw new Error('Preencha todos os campos obrigatórios. / 必須項目を入力してください。');
+    }
+    if(currencyFractionDigits(currency)===0&&!Number.isSafeInteger(amount))throw new Error('JPY deve ser lançado em ienes inteiros, sem casas decimais. / JPYは小数なしの整数で入力してください。');
     if(!sourceAccount||String(sourceAccount.unit_id)!==String(unitId))throw new Error('A conta de origem não pertence à unidade selecionada. / 取引元口座は選択した拠点に属していません。');
     if(type==='expense'||isTransfer){
       const availableBalance=await getFinanceAccountAvailableBalance(
@@ -1089,9 +1171,8 @@ async function saveFinance(ev){
       );
       if(availableBalance<amount){
         const accountLabel=sourceAccount.name||'conta de origem';
-        const currency=sourceAccount.currency_code||'JPY';
-        const formatAvailable=new Intl.NumberFormat('ja-JP',{style:'currency',currency,maximumFractionDigits:0}).format(availableBalance);
-        const formatRequested=new Intl.NumberFormat('ja-JP',{style:'currency',currency,maximumFractionDigits:0}).format(amount);
+        const formatAvailable=formatCurrencyValue(availableBalance,currency,'ja-JP');
+        const formatRequested=formatCurrencyValue(amount,currency,'ja-JP');
         throw new Error('Lançamento bloqueado: saldo insuficiente em '+accountLabel+'. Saldo disponível: '+formatAvailable+'; valor solicitado: '+formatRequested+'. / 残高不足のため保存できません。');
       }
     }
@@ -1149,19 +1230,20 @@ async function renderFinance(forceRefresh=false){
   try{
     if(forceRefresh||!financeDataCache){
       const [accountResult,transactions]=await Promise.all([
-        authClient.from('siga_financial_accounts').select('id,initial_balance').eq('is_active',true),
+        authClient.from('siga_financial_accounts').select('id,initial_balance,currency_code').eq('is_active',true),
         fetchFinanceTransactions()
       ]);
       if(accountResult.error)throw accountResult.error;
       financeDataCache={accounts:accountResult.data||[],transactions:transactions||[]};
     }
     const {accounts,transactions}=financeDataCache;
+    const currencyByAccount=new Map((accounts||[]).map(account=>[String(account.id),String(account.currency_code||'JPY').toUpperCase()]));
     const q=(document.getElementById('financeSearch')?.value||'').toLowerCase();
     const now=new Date();
     const monthKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
     let monthEntries=0,monthExpenses=0,allEntries=0,allExpenses=0;
     transactions.forEach(x=>{
-      const amount=Number(x.amount)||0;
+      const amount=normalizeStoredCurrencyAmount(x.amount,currencyByAccount.get(String(x.financial_account_id))||'JPY');
       const month=String(x.transaction_date||'').slice(0,7);
       if(x.transaction_type==='entry'){
         allEntries+=amount;
@@ -1172,7 +1254,7 @@ async function renderFinance(forceRefresh=false){
       }
       // Transferências internas não alteram o saldo total.
     });
-    const opening=(accounts||[]).reduce((sum,x)=>sum+Number(x.initial_balance||0),0);
+    const opening=(accounts||[]).reduce((sum,x)=>sum+normalizeStoredCurrencyAmount(x.initial_balance,x.currency_code||'JPY'),0);
     const balance=opening+allEntries-allExpenses;
     const result=monthEntries-monthExpenses;
     const entriesEl=document.getElementById('finEntries');
@@ -1307,6 +1389,7 @@ function renderTrialBalance(){
   const body=document.getElementById('trialBalanceBody');
   if(!body)return;
   const source=financeDataCache?.transactions||[];
+  const currencyByAccount=new Map((financeDataCache?.accounts||[]).map(account=>[String(account.id),String(account.currency_code||'JPY').toUpperCase()]));
   const unitId=document.getElementById('trialBalanceUnit')?.value||'';
   const from=document.getElementById('trialBalanceFrom')?.value||'';
   const to=document.getElementById('trialBalanceTo')?.value||'';
@@ -1324,7 +1407,7 @@ function renderTrialBalance(){
     const key=String(transaction.unit_id)+'|'+String(transaction.chart_account_id);
     let item=grouped.get(key);
     if(!item){item={unit,account,entries:0,expenses:0};grouped.set(key,item);}
-    const amount=Number(transaction.amount)||0;
+    const amount=normalizeStoredCurrencyAmount(transaction.amount,currencyByAccount.get(String(transaction.financial_account_id))||'JPY');
     if(transaction.transaction_type==='entry')item.entries+=amount;
     else item.expenses+=amount;
   });
@@ -1394,7 +1477,7 @@ function printGeneralLedger(){
   window.print();
 }
 
-function money(v){return new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(Number(v)||0)}
+function money(v){return formatCurrencyValue(normalizeStoredCurrencyAmount(v,'JPY'),'JPY','ja-JP')}
 function exportFinanceCsv(){const rows=[['Data / 日付','Unidade / 拠点','Descrição / 摘要','Tipo / 種類','Valor / 金額'],...Array.from(document.querySelectorAll('#financeTable tr')).map(tr=>Array.from(tr.cells).map(td=>td.innerText))];const csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='SIGA_Livro_Caixa.csv';a.click();}
 function printFinance(){const meta=document.getElementById('financePrintMeta');if(meta){const now=new Date();meta.textContent='Impresso em '+now.toLocaleString('pt-BR')+' / 印刷日時：'+now.toLocaleString('ja-JP');}window.print();}
 </script>
@@ -1402,10 +1485,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
 <script id="siga-dashboard-live-patch">
 (function(){
   let dashboardRequestId=0;
-  function money(v){
-    const n=Number(v)||0;
-    return new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(n);
-  }
+  function money(v){return formatCurrencyValue(normalizeStoredCurrencyAmount(v,'JPY'),'JPY','ja-JP')}
   function fmtDate(v){
     if(!v)return '';
     const p=String(v).slice(0,10).split('-');
@@ -1421,7 +1501,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
     while(true){
       const {data,error}=await authClient
         .from('siga_financial_transactions')
-        .select('transaction_date,transaction_type,amount,description,counterparty,created_at,chart_account_id')
+        .select('transaction_date,transaction_type,amount,financial_account_id,description,counterparty,created_at,chart_account_id')
         .order('transaction_date',{ascending:false})
         .order('created_at',{ascending:false})
         .range(offset,offset+pageSize-1);
@@ -1439,19 +1519,20 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
       if(typeof authClient==='undefined'||!authClient)return;
       const [rows,accountsResult,chartResult]=await Promise.all([
         fetchAllDashboardTransactions(),
-        authClient.from('siga_financial_accounts').select('id,initial_balance').eq('is_active',true),
+        authClient.from('siga_financial_accounts').select('id,initial_balance,currency_code').eq('is_active',true),
         authClient.from('siga_chart_of_accounts').select('id,name_pt,name_ja').order('code')
       ]);
       if(requestId!==dashboardRequestId)return;
       if(accountsResult.error)throw accountsResult.error;
       if(chartResult.error)throw chartResult.error;
       const chartById=new Map((chartResult.data||[]).map(account=>[String(account.id),account]));
-      const opening=(accountsResult.data||[]).reduce((sum,account)=>sum+Number(account.initial_balance||0),0);
+      const currencyByAccount=new Map((accountsResult.data||[]).map(account=>[String(account.id),String(account.currency_code||'JPY').toUpperCase()]));
+      const opening=(accountsResult.data||[]).reduce((sum,account)=>sum+normalizeStoredCurrencyAmount(account.initial_balance,account.currency_code||'JPY'),0);
       let entriesAll=0,expensesAll=0,entries=0,expenses=0;
       const now=new Date();
       const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
       rows.forEach(r=>{
-        const a=Number(r.amount)||0;
+        const a=normalizeStoredCurrencyAmount(r.amount,currencyByAccount.get(String(r.financial_account_id))||'JPY');
         if(r.transaction_type==='entry'){
           entriesAll+=a;
           if(String(r.transaction_date).slice(0,7)===ym)entries+=a;
@@ -1748,7 +1829,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
 <script id="siga-bank-transfer-ledger-v1">
 (function(){
   const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  const money=v=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(Number(v)||0);
+  const money=v=>formatCurrencyValue(normalizeStoredCurrencyAmount(v,'JPY'),'JPY','ja-JP');
   let accounts=[];
   function ensurePanel(){
     const bank=document.getElementById('bank');
@@ -1879,22 +1960,23 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
         authClient.from('siga_financial_transactions').select('financial_account_id,transfer_target_account_id,transaction_type,amount').limit(10000)
       ]);
       if(ae)throw ae;if(te)throw te;
+      const accountById=new Map((accounts||[]).map(a=>[a.id,a]));
       const txByAccount=new Map();
       (transactions||[]).forEach(t=>{
-        const amount=Number(t.amount)||0;
+        const currency=accountById.get(t.financial_account_id)?.currency_code||accountById.get(t.transfer_target_account_id)?.currency_code||'JPY';
+        const amount=normalizeStoredCurrencyAmount(t.amount,currency);
         if(t.transaction_type==='transfer'){
           if(t.financial_account_id){const x=txByAccount.get(t.financial_account_id)||0;txByAccount.set(t.financial_account_id,x-amount);}
           if(t.transfer_target_account_id){const x=txByAccount.get(t.transfer_target_account_id)||0;txByAccount.set(t.transfer_target_account_id,x+amount);}
         }else if(t.financial_account_id){const x=txByAccount.get(t.financial_account_id)||0;txByAccount.set(t.financial_account_id,x+(t.transaction_type==='expense'?-amount:amount));}
       });
-      const byId=new Map((accounts||[]).map(a=>[a.id,a]));
+      const byId=accountById;
       items.forEach(el=>{
         const a=byId.get(el.dataset.accountId);const b=el.querySelector('.bank-balance');if(!b)return;
         if(!a){b.querySelector('b').textContent='Indisponível';return;}
-        const balance=Number(a.initial_balance||0)+(txByAccount.get(a.id)||0);
         const currency=(a.currency_code||'JPY').toUpperCase();
-        let formatted;
-        try{formatted=new Intl.NumberFormat('ja-JP',{style:'currency',currency,maximumFractionDigits:2}).format(balance);}catch(_){formatted=currency+' '+balance.toLocaleString('ja-JP');}
+        const balance=normalizeStoredCurrencyAmount(a.initial_balance,currency)+(txByAccount.get(a.id)||0);
+        const formatted=formatCurrencyValue(balance,currency,'ja-JP');
         b.querySelector('b').textContent=formatted;
         b.dataset.balance=String(balance);
       });
@@ -1978,8 +2060,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
 (function(){
   const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   function formatAmount(amount,currency){
-    try{return new Intl.NumberFormat('pt-BR',{style:'currency',currency:currency,maximumFractionDigits:2}).format(amount);}
-    catch(_){return currency+' '+Number(amount).toLocaleString('pt-BR',{maximumFractionDigits:2});}
+    return formatCurrencyValue(amount,currency,'pt-BR');
   }
   window.openingBalanceAccounts=[];
   window.loadOpeningBalances=async function(){
@@ -2021,7 +2102,10 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
         const typeLabel=account.account_type==='cash'?'Caixa / 現金':'Banco / 銀行';
         const currency=String(account.currency_code||'JPY').toUpperCase();
         const initialBalance=Number(account.initial_balance??0);
-        return '<tr><td>'+escapeHtml(unitLabel)+'</td><td>'+escapeHtml(accountName)+'</td><td>'+typeLabel+'</td><td>'+escapeHtml(currency)+'</td><td><input class="opening-balance-input" type="number" step="any" inputmode="decimal" value="'+escapeHtml(Number.isFinite(initialBalance)?initialBalance:0)+'" aria-label="Saldo inicial de '+escapeHtml(accountName)+'"></td><td><button type="button" class="btn secondary opening-balance-save" data-opening-save="'+escapeHtml(account.id)+'">Salvar / 保存</button> <span class="small-note opening-balance-row-status" role="status" aria-live="polite"></span></td></tr>';
+        const hasLegacyFraction=currencyFractionDigits(currency)===0&&Number.isFinite(initialBalance)&&!Number.isSafeInteger(initialBalance);
+        const recoveredLegacy=currency==='JPY'&&legacyGroupedYen(account.initial_balance)!==null;
+        const statusText=hasLegacyFraction?(recoveredLegacy?'Valor antigo recuperado para ienes inteiros; salve para corrigir. / 旧データを整数円に復元しました。保存して修正してください。':'Saldo salvo com fração; revise e salve como inteiro. / 小数を含む残高です。整数で修正して保存してください。'):'';
+        return '<tr><td>'+escapeHtml(unitLabel)+'</td><td>'+escapeHtml(accountName)+'</td><td>'+typeLabel+'</td><td>'+escapeHtml(currency)+'</td><td><input class="opening-balance-input" type="text" inputmode="'+(currencyFractionDigits(currency)===0?'numeric':'decimal')+'" autocomplete="off" value="'+escapeHtml(formatCurrencyInputValue(account.initial_balance,currency))+'" aria-label="Saldo inicial de '+escapeHtml(accountName)+'"></td><td><button type="button" class="btn secondary opening-balance-save" data-opening-save="'+escapeHtml(account.id)+'">Salvar / 保存</button> <span class="small-note opening-balance-row-status" role="status" aria-live="polite">'+statusText+'</span></td></tr>';
       }).join('');
       if(message)message.textContent=rows.length+' conta(s) ativa(s) de Caixa e Banco / 現金・銀行口座 '+rows.length+'件';
     }catch(error){
@@ -2043,9 +2127,12 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
     const rowStatus=row?.querySelector('.opening-balance-row-status');
     if(!account||!input){if(rowStatus)rowStatus.textContent='Atualize a lista e tente novamente / 一覧を更新して再試行してください。';return;}
     if(input.value.trim()===''){if(rowStatus)rowStatus.textContent='Informe um valor / 金額を入力してください。';return;}
-    const amount=Number(input.value);
-    if(!Number.isFinite(amount)){if(rowStatus)rowStatus.textContent='Valor inválido / 無効な金額です。';return;}
     const currency=String(account.currency_code||'JPY').toUpperCase();
+    const amount=parseCurrencyAmount(input.value,currency);
+    if(!Number.isFinite(amount)||(currencyFractionDigits(currency)===0&&!Number.isSafeInteger(amount))){
+      if(rowStatus)rowStatus.textContent=currencyFractionDigits(currency)===0?'Informe um valor inteiro, sem casas decimais. / 小数なしの整数で入力してください。':'Valor inválido / 無効な金額です。';
+      return;
+    }
     const amountLabel=formatAmount(amount,currency);
     const accountName=account.account_type==='bank'?(account.bank_name||account.name||'Conta bancária'):account.name||'Caixa';
     if(Number(account.initial_balance??0)===amount){if(rowStatus)rowStatus.textContent='Sem alterações / 変更はありません。';return;}
@@ -2056,6 +2143,8 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
       const {data,error}=await authClient.from('siga_financial_accounts').update({initial_balance:amount}).eq('id',account.id).select('id,initial_balance').maybeSingle();
       if(error)throw error;
       if(!data)throw new Error('Nenhuma conta foi atualizada. Verifique a sessão e as permissões.');
+      account.initial_balance=Number(data.initial_balance);
+      if(rowStatus)rowStatus.textContent='Salvo / 保存しました。';
       if(typeof window.loadBankAccounts==='function')await window.loadBankAccounts();
       if(typeof window.loadFinance==='function')await window.loadFinance();
       if(message)message.textContent='Saldo inicial salvo para '+accountName+' / '+accountName+' の初期残高を保存しました。';
@@ -2271,12 +2360,12 @@ function printMemberQRCards(){
   }catch(e){console.error('SIGA patrimônio:',e);if(body)body.innerHTML='<tr><td colspan="7">Não foi possível carregar. Verifique a permissão da unidade. / 読み込み・権限エラー</td></tr>';message('Erro: '+(e.message||e),true);}
  };
  window.renderFixedAssets=function(){const body=el('fixedAssetsTable');if(!body)return;const q=(el('assetSearch').value||'').trim().toLowerCase(),st=el('assetStatusFilter').value||'',map=new Map(units.map(x=>[String(x.id),x]));const rows=assets.filter(a=>(!st||a.asset_status===st)&&(!q||[a.asset_code,a.name_pt,a.name_ja,a.supplier,a.location].filter(Boolean).join(' ').toLowerCase().includes(q)));
-  body.innerHTML=rows.map(a=>{const u=map.get(String(a.unit_id))||{},name=[a.name_pt,a.name_ja].filter(Boolean).join(' / '),amount=a.acquisition_cost==null?'—':new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:2}).format(Number(a.acquisition_cost));return '<tr><td>'+esc(a.asset_code)+'</td><td><b>'+esc(name)+'</b><div class="small-note">'+esc(a.supplier||'')+'</div></td><td>'+esc([u.code,u.name||u.japanese_name].filter(Boolean).join(' — ')||'—')+'</td><td>'+esc(a.acquisition_date||'—')+'</td><td>'+esc(amount)+'</td><td>'+esc(labels[a.asset_status]||a.asset_status)+'</td><td>'+(canWrite(a.unit_id)?'<button type="button" class="btnsm" data-asset-edit="'+esc(a.id)+'">Editar / 編集</button>':'—')+'</td></tr>';}).join('')||'<tr><td colspan="7">Nenhum patrimônio encontrado / 資産がありません。</td></tr>';
+  body.innerHTML=rows.map(a=>{const u=map.get(String(a.unit_id))||{},name=[a.name_pt,a.name_ja].filter(Boolean).join(' / '),amount=a.acquisition_cost==null?'—':formatCurrencyValue(normalizeStoredCurrencyAmount(a.acquisition_cost,'JPY'),'JPY','ja-JP');return '<tr><td>'+esc(a.asset_code)+'</td><td><b>'+esc(name)+'</b><div class="small-note">'+esc(a.supplier||'')+'</div></td><td>'+esc([u.code,u.name||u.japanese_name].filter(Boolean).join(' — ')||'—')+'</td><td>'+esc(a.acquisition_date||'—')+'</td><td>'+esc(amount)+'</td><td>'+esc(labels[a.asset_status]||a.asset_status)+'</td><td>'+(canWrite(a.unit_id)?'<button type="button" class="btnsm" data-asset-edit="'+esc(a.id)+'">Editar / 編集</button>':'—')+'</td></tr>';}).join('')||'<tr><td colspan="7">Nenhum patrimônio encontrado / 資産がありません。</td></tr>';
   const form=el('fixedAssetForm');if(form)form.classList.toggle('hidden',!admin()&&!writeUnits.size);if(form&&!admin()&&!writeUnits.size)el('assetFormMessage').textContent='Consulta permitida; cadastro/edição depende da permissão assets.write.';
  };
  window.clearFixedAssetForm=function(){el('fixedAssetForm').reset();el('assetId').value='';el('assetStatus').value='active';el('assetFormTitle').textContent='Cadastrar patrimônio / 資産登録';el('assetSaveButton').textContent='Salvar / 保存';el('assetFormMessage').textContent='';};
- window.saveFixedAsset=async function(e){e.preventDefault();const msg=el('assetFormMessage'),btn=el('assetSaveButton');try{if(!sigaSession)throw Error('Sessão encerrada. Entre novamente.');const id=el('assetId').value||null,unitId=el('assetUnit').value;if(!unitId)throw Error('Selecione a unidade.');if(!canWrite(unitId))throw Error('Sem permissão assets.write para esta unidade.');const raw=el('assetCost').value,cost=raw===''?null:Number(raw);if(cost!==null&&(!Number.isFinite(cost)||cost<0))throw Error('Valor inválido.');const p={unit_id:unitId,asset_code:el('assetCode').value.trim(),name_pt:el('assetNamePt').value.trim(),name_ja:el('assetNameJa').value.trim()||null,acquisition_date:el('assetDate').value||null,acquisition_cost:cost,currency_code:'JPY',supplier:el('assetSupplier').value.trim()||null,location:el('assetLocation').value.trim()||null,asset_status:el('assetStatus').value,document_reference:el('assetDocument').value.trim()||null,notes:el('assetNotes').value.trim()||null,updated_by:sigaSession.user.id};if(!p.asset_code||!p.name_pt)throw Error('Informe código e descrição.');btn.disabled=true;msg.textContent='Salvando / 保存中...';const r=id?await authClient.from('siga_fixed_assets').update(p).eq('id',id).select('id').maybeSingle():await authClient.from('siga_fixed_assets').insert({...p,created_by:sigaSession.user.id}).select('id').maybeSingle();if(r.error)throw r.error;if(!r.data)throw Error('Nenhum registro salvo; verifique as permissões.');msg.textContent='Patrimônio salvo / 資産を保存しました。';clearFixedAssetForm();await loadFixedAssets();}catch(e){console.error(e);msg.textContent='Falha ao salvar: '+(e.message||e);}finally{btn.disabled=false;}};
- window.editFixedAsset=function(id){const a=assets.find(x=>String(x.id)===String(id));if(!a||!canWrite(a.unit_id))return;el('assetId').value=a.id;el('assetUnit').value=a.unit_id;el('assetCode').value=a.asset_code||'';el('assetNamePt').value=a.name_pt||'';el('assetNameJa').value=a.name_ja||'';el('assetDate').value=a.acquisition_date||'';el('assetCost').value=a.acquisition_cost??'';el('assetSupplier').value=a.supplier||'';el('assetLocation').value=a.location||'';el('assetStatus').value=a.asset_status||'active';el('assetDocument').value=a.document_reference||'';el('assetNotes').value=a.notes||'';el('assetFormTitle').textContent='Editar patrimônio / 資産編集';el('assetSaveButton').textContent='Salvar alterações / 変更を保存';el('assetFormMessage').textContent='';el('fixedAssetForm').scrollIntoView({behavior:'smooth',block:'start'});};
+ window.saveFixedAsset=async function(e){e.preventDefault();const msg=el('assetFormMessage'),btn=el('assetSaveButton');try{if(!sigaSession)throw Error('Sessão encerrada. Entre novamente.');const id=el('assetId').value||null,unitId=el('assetUnit').value;if(!unitId)throw Error('Selecione a unidade.');if(!canWrite(unitId))throw Error('Sem permissão assets.write para esta unidade.');const raw=el('assetCost').value,cost=raw===''?null:parseCurrencyAmount(raw,'JPY');if(cost!==null&&(!Number.isSafeInteger(cost)||cost<0))throw Error('Informe um valor inteiro em ienes, sem casas decimais.');const p={unit_id:unitId,asset_code:el('assetCode').value.trim(),name_pt:el('assetNamePt').value.trim(),name_ja:el('assetNameJa').value.trim()||null,acquisition_date:el('assetDate').value||null,acquisition_cost:cost,currency_code:'JPY',supplier:el('assetSupplier').value.trim()||null,location:el('assetLocation').value.trim()||null,asset_status:el('assetStatus').value,document_reference:el('assetDocument').value.trim()||null,notes:el('assetNotes').value.trim()||null,updated_by:sigaSession.user.id};if(!p.asset_code||!p.name_pt)throw Error('Informe código e descrição.');btn.disabled=true;msg.textContent='Salvando / 保存中...';const r=id?await authClient.from('siga_fixed_assets').update(p).eq('id',id).select('id').maybeSingle():await authClient.from('siga_fixed_assets').insert({...p,created_by:sigaSession.user.id}).select('id').maybeSingle();if(r.error)throw r.error;if(!r.data)throw Error('Nenhum registro salvo; verifique as permissões.');msg.textContent='Patrimônio salvo / 資産を保存しました。';clearFixedAssetForm();await loadFixedAssets();}catch(e){console.error(e);msg.textContent='Falha ao salvar: '+(e.message||e);}finally{btn.disabled=false;}};
+ window.editFixedAsset=function(id){const a=assets.find(x=>String(x.id)===String(id));if(!a||!canWrite(a.unit_id))return;el('assetId').value=a.id;el('assetUnit').value=a.unit_id;el('assetCode').value=a.asset_code||'';el('assetNamePt').value=a.name_pt||'';el('assetNameJa').value=a.name_ja||'';el('assetDate').value=a.acquisition_date||'';el('assetCost').value=a.acquisition_cost==null?'':formatCurrencyInputValue(a.acquisition_cost,'JPY');el('assetSupplier').value=a.supplier||'';el('assetLocation').value=a.location||'';el('assetStatus').value=a.asset_status||'active';el('assetDocument').value=a.document_reference||'';el('assetNotes').value=a.notes||'';el('assetFormTitle').textContent='Editar patrimônio / 資産編集';el('assetSaveButton').textContent='Salvar alterações / 変更を保存';el('assetFormMessage').textContent='';el('fixedAssetForm').scrollIntoView({behavior:'smooth',block:'start'});};
  document.addEventListener('click',e=>{const b=e.target?.closest?.('[data-asset-edit]');if(b){e.preventDefault();editFixedAsset(b.dataset.assetEdit);}});
 })();
 </script>
