@@ -2010,38 +2010,70 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
 
 <script id="siga-chart-code-autofill-v1">
 (function(){
-  function getSelectedAccount(){
+  function getChartAccount(){
     const select=document.getElementById('fChart');
     const rows=Array.isArray(financeChartAccounts)?financeChartAccounts:[];
     if(!select||!select.value)return null;
     return rows.find(account=>String(account.id)===String(select.value))||null;
   }
-  function fillDescription(){
-    const select=document.getElementById('fChart');
-    const description=document.getElementById('fDescription');
-    const account=getSelectedAccount();
-    if(!select||!description||!account)return;
-    const bilingual=[account.name_ja,account.name_pt].filter(Boolean).join(' / ');
-    if(!bilingual)return;
-    const previous=select.dataset.lastAutoDescription||'';
+  function getDescription(){
+    return document.getElementById('fDescription');
+  }
+  function canReplaceAutoDescription(){
+    const description=getDescription();
+    const chart=document.getElementById('fChart');
+    if(!description)return false;
     const current=description.value.trim();
-    if(!current||current===previous){
-      description.value=bilingual;
-      select.dataset.lastAutoDescription=bilingual;
-      description.dispatchEvent(new Event('input',{bubbles:true}));
+    const previous=description.dataset.sigaAutoDescription||chart?.dataset.lastAutoDescription||'';
+    return !current||current===previous;
+  }
+  function writeAutoDescription(value){
+    const description=getDescription();
+    const chart=document.getElementById('fChart');
+    if(!description)return;
+    description.value=value||'';
+    description.dataset.sigaAutoDescription=value||'';
+    if(chart)chart.dataset.lastAutoDescription=value||'';
+    description.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+  function fillChartDescription(){
+    const account=getChartAccount();
+    if(!account)return;
+    const bilingual=[account.name_ja,account.name_pt].filter(Boolean).join(' / ');
+    if(bilingual&&canReplaceAutoDescription())writeAutoDescription(bilingual);
+  }
+  function fillTransferDescription(){
+    const type=document.getElementById('fType')?.value;
+    if(type!=='transfer')return;
+    const description=getDescription();
+    const chart=document.getElementById('fChart');
+    const sourceId=document.getElementById('fAccount')?.value||'';
+    const targetId=document.getElementById('fTargetAccount')?.value||'';
+    const accounts=Array.isArray(financeAccountsForUnit)?financeAccountsForUnit:[];
+    const source=accounts.find(account=>String(account.id)===String(sourceId));
+    const target=accounts.find(account=>String(account.id)===String(targetId));
+    if(!source||!target){
+      if(description&&canReplaceAutoDescription())writeAutoDescription('');
+      return;
     }
+    const sourceName=String(source.name||'Conta de origem').trim();
+    const targetName=String(target.name||'Conta de destino').trim();
+    const generated='Transferência / 振替: '+sourceName+' → '+targetName;
+    if(canReplaceAutoDescription())writeAutoDescription(generated);
   }
   function applyChartCodeMode(){
     const select=document.getElementById('fChart');
-    if(!select)return;
-    const rows=Array.isArray(financeChartAccounts)?financeChartAccounts:[];
-    const byId=new Map(rows.map(account=>[String(account.id),account]));
-    Array.from(select.options).forEach(option=>{
-      if(!option.value)return;
-      const account=byId.get(String(option.value));
-      if(account)option.dataset.accountCode=String(account.code||'');
-    });
-    fillDescription();
+    if(select){
+      const rows=Array.isArray(financeChartAccounts)?financeChartAccounts:[];
+      const byId=new Map(rows.map(account=>[String(account.id),account]));
+      Array.from(select.options).forEach(option=>{
+        if(!option.value)return;
+        const account=byId.get(String(option.value));
+        if(account)option.dataset.accountCode=String(account.code||'');
+      });
+    }
+    if(document.getElementById('fType')?.value==='transfer')fillTransferDescription();
+    else fillChartDescription();
   }
   const original=window.loadFinance;
   if(typeof original==='function'){
@@ -2052,13 +2084,17 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
     };
   }
   document.addEventListener('change',event=>{
-    if(event.target&&event.target.id==='fChart')fillDescription();
+    const id=event.target?.id;
+    if(id==='fChart')fillChartDescription();
+    if(id==='fType'||id==='fAccount'||id==='fTargetAccount')setTimeout(applyChartCodeMode,0);
   },true);
   const form=document.getElementById('financeForm');
   if(form)form.addEventListener('reset',()=>setTimeout(applyChartCodeMode,0));
   document.addEventListener('DOMContentLoaded',()=>setTimeout(applyChartCodeMode,700));
-  const select=document.getElementById('fChart');
-  if(select)new MutationObserver(applyChartCodeMode).observe(select,{childList:true});
+  ['fChart','fAccount','fTargetAccount'].forEach(id=>{
+    const select=document.getElementById(id);
+    if(select)new MutationObserver(applyChartCodeMode).observe(select,{childList:true});
+  });
   window.sigaApplyChartCodeMode=applyChartCodeMode;
 })();
 </script>
