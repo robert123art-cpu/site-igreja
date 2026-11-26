@@ -165,13 +165,13 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div class="title"><div><h1>Painel Administrativo / 管理ダッシュボード</h1><p>Visão geral da organização / 組織の概要</p></div><div class="currency">🇯🇵 ¥ JPY — Japão / 日本</div></div>
 <div class="cards">
 <div class="card"><div class="label">Saldo atual / 現在残高</div><div class="value ok">¥ 1.250.000</div><div class="sub">Caixa + bancos / 現金＋銀行</div></div>
-<div class="card"><div class="label">Receitas do mês / 今月の収入</div><div class="value ok">¥ 480.000</div><div class="sub">Entradas registradas / 登録済み入金</div></div>
+<div class="card"><div class="label">Entradas do mês / 今月の入金</div><div class="value ok">¥ 480.000</div><div class="sub">Entradas registradas / 登録済み入金</div></div>
 <div class="card"><div class="label">Despesas do mês / 今月の支出</div><div class="value bad">¥ 315.000</div><div class="sub">Saídas registradas / 登録済み出金</div></div>
-<div class="card"><div class="label">Resultado do mês / 今月の収支</div><div class="value ok">¥ 165.000</div><div class="sub">Receitas − despesas / 収入 − 支出</div></div>
+<div class="card"><div class="label">Resultado do mês / 今月の収支</div><div class="value ok">¥ 165.000</div><div class="sub">Entradas − saídas / 入金 − 出金</div></div>
 </div>
 <div class="grid">
 <div class="panel"><h2>Acessos rápidos / クイックアクセス</h2><div class="quick">
-<button onclick="go('finance')">💰<b>Nova movimentação / 新規取引</b><small>Receita ou despesa / 収入または支出</small></button>
+<button onclick="go('finance')">💰<b>Nova movimentação / 新規取引</b><small>Entrada ou saída / 入金または出金</small></button>
 <button onclick="go('attendance')">📝<b>Nova reunião / 新しい会議</b><small>Registrar presença / 出席を登録</small></button>
 <button onclick="go('members')">👥<b>Novo membro / 新しい会員</b><small>Adicionar cadastro / 会員を追加</small></button>
 <button onclick="go('assets')">🏛️<b>Novo patrimônio / 新規資産</b><small>Cadastrar bem / 資産を登録</small></button>
@@ -186,7 +186,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 </div></div>
 <div class="panel" style="margin-top:17px"><h2>Últimas movimentações / 最近の取引</h2>
 <table><tr><th>Data / 日付</th><th>Descrição / 摘要</th><th>Categoria / 区分</th><th>Tipo / 種類</th><th>Valor / 金額</th></tr>
-<tr><td>14/10/2026</td><td>Contribuição / 献金</td><td>Receitas / 収入</td><td class="ok">Entrada / 入金</td><td class="ok">¥ 50.000</td></tr>
+<tr><td>14/10/2026</td><td>Contribuição / 献金</td><td>Entradas / 入金</td><td class="ok">Entrada / 入金</td><td class="ok">¥ 50.000</td></tr>
 <tr><td>13/10/2026</td><td>Energia elétrica / 電気料金</td><td>Despesas / 支出</td><td class="bad">Saída / 出金</td><td class="bad">¥ 18.500</td></tr>
 <tr><td>12/10/2026</td><td>Material administrativo / 事務用品</td><td>Despesas / 支出</td><td class="bad">Saída / 出金</td><td class="bad">¥ 7.800</td></tr></table></div>
 </div>
@@ -210,14 +210,14 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 7px;
 <div id="attendance" class="module hidden"><div class="title"><div><h1>📝 Reuniões / Presença</h1><p>Registro de reuniões, frequência e ausência</p></div></div><div class="panel"><h2>Controle de presença / 出席管理</h2><div class="formgrid"><label>Tipo de reunião<select><option>Reunião administrativa</option><option>Culto</option><option>Assembleia</option><option>Reunião de liderança</option></select></label><label>Data<input type="date"></label><label>Horário de início da portaria<input type="time"></label><label>Horário de início da reunião<input type="time"></label></div><div class="small-note" style="margin-top:14px">Nesta etapa a estrutura da lista está preparada. A próxima fase ligará a presença ao cadastro de membros e aos relatórios.</div></div></div>
 <div id="finance" class="module hidden">
 <div class="title"><div><h1>💰 Financeiro / 財務</h1><p>Livro Caixa, lançamentos e saldo automático / 現金出納帳・取引・自動残高</p></div><div class="finance-refresh-controls"><button class="btn secondary" type="button" onclick="document.getElementById('generalLedgerPanel').scrollIntoView({behavior:'smooth'})">Razão Geral / 総勘定元帳</button><button id="financeRefreshButton" class="btn primary" type="button" onclick="loadFinance()" aria-describedby="financeRefreshStatus">↻ Atualizar / 更新</button><span id="financeRefreshStatus" role="status" aria-live="polite"></span></div></div>
-<div id="financePrintMeta" class="finance-print-meta"></div><div class="cards" id="financeCards"><div class="card"><div class="label">Saldo atual / 現在残高</div><div class="value" id="finBalance">¥ 0</div><div class="sub">Saldo das contas financeiras / 金融口座残高</div></div><div class="card"><div class="label">Entradas do mês / 今月の入金</div><div class="value ok" id="finEntries">¥ 0</div><div class="sub">Receitas / 収入</div></div><div class="card"><div class="label">Saídas do mês / 今月の出金</div><div class="value bad" id="finExpenses">¥ 0</div><div class="sub">Despesas / 支出</div></div><div class="card"><div class="label">Resultado / 収支</div><div class="value" id="finResult">¥ 0</div><div class="sub">Entradas − saídas / 入金 − 出金</div></div></div>
+<div id="financePrintMeta" class="finance-print-meta"></div><div class="cards" id="financeCards"><div class="card"><div class="label">Saldo atual / 現在残高</div><div class="value" id="finBalance">¥ 0</div><div class="sub">Saldo das contas financeiras / 金融口座残高</div></div><div class="card"><div class="label">Entradas do mês / 今月の入金</div><div class="value ok" id="finEntries">¥ 0</div><div class="sub">Entradas / 入金</div></div><div class="card"><div class="label">Saídas do mês / 今月の出金</div><div class="value bad" id="finExpenses">¥ 0</div><div class="sub">Despesas / 支出</div></div><div class="card"><div class="label">Resultado / 収支</div><div class="value" id="finResult">¥ 0</div><div class="sub">Entradas − saídas / 入金 − 出金</div></div></div>
 <div class="grid2">
   <div class="panel"><h2>Novo lançamento / 新規取引</h2><form id="financeForm" onsubmit="saveFinance(event)">
     <div class="formgrid">
       <label>Unidade / 拠点<select id="fUnit" required></select></label>
       <label>Conta financeira / 金融口座<select id="fAccount" required></select></label>
       <label id="fChartField">Conta do Plano / 勘定科目<select id="fChart" required></select></label>
-      <label>Tipo / 種類<select id="fType" required><option value="entry">Entrada / 収入</option><option value="expense">Saída / 支出</option><option value="transfer">Transferência / 振替</option></select></label>
+      <label>Tipo / 種類<select id="fType" required><option value="entry">Entrada / 入金</option><option value="expense">Saída / 支出</option><option value="transfer">Transferência / 振替</option></select></label>
       <label id="fTransferField" class="hidden">Conta de destino / 振替先<select id="fTargetAccount"></select><small id="fTransferHint" class="small-note">Escolha uma unidade para carregar as contas de destino / 振替先口座を読み込む拠点を選択してください。</small></label>
       <label>Data / 日付<input id="fDate" type="date" required></label>
       <label>Valor / 金額<input id="fAmount" type="text" inputmode="numeric" autocomplete="off" required><small id="fAmountHint" class="small-note">JPY: informe ienes inteiros, sem casas decimais. Separadores de milhar são aceitos. / JPY：小数なしの整数で入力してください。桁区切りを使用できます。</small></label>
@@ -1657,7 +1657,7 @@ function printFinance(){const meta=document.getElementById('financePrintMeta');i
           const isTransfer=r.transaction_type==='transfer';
           const cls=isExpense?'bad':(isTransfer?'':'ok');
           const label=isExpense?'Saída / 出金':(isTransfer?'Transferência / 振替':'Entrada / 入金');
-          const cat=isExpense?'Despesas / 支出':(isTransfer?'Transferências / 振替':'Receitas / 収入');
+          const cat=isExpense?'Despesas / 支出':(isTransfer?'Transferências / 振替':'Entradas / 入金');
           const account=chartById.get(String(r.chart_account_id||''));
           const nameJa=String(account?.name_ja||'').trim();
           const namePt=String(account?.name_pt||'').trim();
